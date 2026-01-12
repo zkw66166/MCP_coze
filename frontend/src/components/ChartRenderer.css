@@ -1,0 +1,40 @@
+.chart-renderer {
+    margin: 15px 0;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+.chart-wrapper {
+    height: 280px;
+    width: 100%;
+}
+
+.growth-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.growth-badge.up {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.growth-badge.down {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.growth-badge.stable {
+    color: #6b7280;
+    background: rgba(107, 114, 128, 0.1);
+}

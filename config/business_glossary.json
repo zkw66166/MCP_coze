@@ -1,0 +1,36 @@
+{
+    "_description": "业务术语手动补充 - 仅存放无法自动推断的语义映射",
+    "_note": "大部分术语从metrics_config.json自动生成,此处仅补充特殊语义",
+    "semantic_mappings": {
+        "采购": "invoice_type = 'INPUT'",
+        "销售": "invoice_type = 'OUTPUT'",
+        "进项": "invoice_type = 'INPUT'",
+        "销项": "invoice_type = 'OUTPUT'",
+        "购入": "invoice_type = 'INPUT'",
+        "售出": "invoice_type = 'OUTPUT'",
+        "买入": "invoice_type = 'INPUT'",
+        "卖出": "invoice_type = 'OUTPUT'"
+    },
+    "table_descriptions": {
+        "income_statements": "利润表/损益表数据,包含营业收入、成本、费用、利润等",
+        "balance_sheets": "资产负债表数据,包含资产、负债、所有者权益等",
+        "cash_flow_statements": "现金流量表数据,包含经营/投资/筹资活动现金流",
+        "financial_metrics": "预计算的财务指标,包含各类比率和周转率",
+        "invoices": "发票数据,invoice_type='INPUT'为采购/进项发票,'OUTPUT'为销售/销项发票",
+        "tax_returns_income": "企业所得税年度申报数据",
+        "tax_return_income_items": "企业所得税申报明细项目(如应纳税所得额)",
+        "vat_returns": "增值税月度申报数据",
+        "vat_return_items": "增值税申报明细项目(如销项税额、进项税额)",
+        "tax_returns_stamp": "印花税申报数据",
+        "tax_return_stamp_items": "印花税明细项目",
+        "tax_reports": "纳税申报汇总",
+        "payroll_summaries": "薪酬汇总数据",
+        "account_balances": "科目余额数据"
+    },
+    "field_hints": {
+        "period_year": "年份,如2023",
+        "period_quarter": "季度,1-4",
+        "period_month": "月份,1-12",
+        "company_id": "企业ID,用于关联企业"
+    }
+}

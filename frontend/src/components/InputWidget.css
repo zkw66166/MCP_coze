@@ -1,0 +1,190 @@
+.input-widget {
+    width: 320px;
+    min-width: 280px;
+    padding: 16px;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+.company-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.company-selector label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.company-selector select {
+    padding: 10px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.company-selector select:hover,
+.company-selector select:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+.separator {
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-area label {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.input-area textarea {
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+}
+
+.input-area textarea:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+.input-area textarea:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+}
+
+.button-row {
+    display: flex;
+    gap: 8px;
+}
+
+.send-btn {
+    flex: 1;
+    padding: 10px 16px;
+    background: #60a5fa;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.send-btn:hover:not(:disabled) {
+    background: #3b82f6;
+}
+
+.send-btn:active:not(:disabled) {
+    background: #2563eb;
+}
+
+.send-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.history-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.history-header span {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.history-list {
+    flex: 1;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    overflow-y: auto;
+}
+
+.history-list li {
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-list li:last-child {
+    border-bottom: none;
+}
+
+.history-list li:hover {
+    background: #f1f5f9;
+}
+
+.history-list li.empty-history {
+    color: #9ca3af;
+    cursor: default;
+    text-align: center;
+    padding: 16px;
+}
+
+.history-list li.empty-history:hover {
+    background: transparent;
+}
+
+/* 清除历史按钮 */
+.clear-history-btn {
+    background: transparent;
+    color: #6b7280;
+    border: none;
+    font-size: 11px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clear-history-btn:hover:not(:disabled) {
+    color: #374151;
+    background: #f3f4f6;
+}
+
+.clear-history-btn:disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+}

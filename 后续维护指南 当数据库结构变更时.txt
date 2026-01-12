@@ -1,0 +1,5 @@
+后续维护指南: 当数据库结构变更时,只需:
+
+运行 python modules/metrics_loader.py 检查未配置字段
+编辑 config/metrics_config.json 添加新字段的中文别名
+无需修改任何Python代码

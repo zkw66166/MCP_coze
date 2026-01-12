@@ -1,0 +1,1827 @@
+{
+    "$schema": "metrics_config_schema.json",
+    "version": "2.0.0",
+    "description": "财务指标配置文件 - 覆盖financial.db所有业务表",
+    "last_updated": "2026-01-12",
+    "excluded_tables": [
+        "sqlite_sequence",
+        "users",
+        "companies",
+        "company_aliases"
+    ],
+    "excluded_fields": [
+        "id",
+        "company_id",
+        "created_at",
+        "updated_at",
+        "return_id"
+    ],
+    "period_fields": [
+        "period_year",
+        "period_month",
+        "period_quarter",
+        "period",
+        "period_end_date",
+        "report_date",
+        "filing_date",
+        "issue_date"
+    ],
+    "tables": {
+        "income_statements": {
+            "description": "利润表",
+            "fields": {
+                "total_revenue": {
+                    "aliases": [
+                        "销售额",
+                        "营业收入",
+                        "收入",
+                        "营收",
+                        "总收入",
+                        "主营业务收入"
+                    ],
+                    "unit": "元",
+                    "category": "收入"
+                },
+                "cost_of_sales": {
+                    "aliases": [
+                        "营业成本",
+                        "成本",
+                        "销售成本",
+                        "主营业务成本"
+                    ],
+                    "unit": "元",
+                    "category": "成本"
+                },
+                "gross_profit": {
+                    "aliases": [
+                        "毛利",
+                        "毛利润"
+                    ],
+                    "unit": "元",
+                    "category": "利润"
+                },
+                "operating_revenue": {
+                    "aliases": [
+                        "营业收入额",
+                        "经营收入"
+                    ],
+                    "unit": "元",
+                    "category": "收入"
+                },
+                "operating_costs": {
+                    "aliases": [
+                        "营业成本额",
+                        "经营成本"
+                    ],
+                    "unit": "元",
+                    "category": "成本"
+                },
+                "taxes_and_surcharges": {
+                    "aliases": [
+                        "税金及附加",
+                        "附加税",
+                        "税金"
+                    ],
+                    "unit": "元",
+                    "category": "税费"
+                },
+                "selling_expenses": {
+                    "aliases": [
+                        "销售费用",
+                        "销售支出"
+                    ],
+                    "unit": "元",
+                    "category": "费用"
+                },
+                "administrative_expenses": {
+                    "aliases": [
+                        "管理费用",
+                        "行政费用",
+                        "管理支出"
+                    ],
+                    "unit": "元",
+                    "category": "费用"
+                },
+                "financial_expenses": {
+                    "aliases": [
+                        "财务费用",
+                        "利息费用",
+                        "财务支出"
+                    ],
+                    "unit": "元",
+                    "category": "费用"
+                },
+                "operating_profit": {
+                    "aliases": [
+                        "营业利润",
+                        "经营利润"
+                    ],
+                    "unit": "元",
+                    "category": "利润"
+                },
+                "non_operating_income": {
+                    "aliases": [
+                        "营业外收入",
+                        "其他收入"
+                    ],
+                    "unit": "元",
+                    "category": "收入"
+                },
+                "non_operating_expenses": {
+                    "aliases": [
+                        "营业外支出",
+                        "其他支出"
+                    ],
+                    "unit": "元",
+                    "category": "费用"
+                },
+                "total_profit": {
+                    "aliases": [
+                        "利润总额",
+                        "税前利润"
+                    ],
+                    "unit": "元",
+                    "category": "利润"
+                },
+                "income_tax_expense": {
+                    "aliases": [
+                        "所得税费用",
+                        "所得税",
+                        "企业所得税"
+                    ],
+                    "unit": "元",
+                    "category": "税费"
+                },
+                "net_profit": {
+                    "aliases": [
+                        "净利润",
+                        "利润",
+                        "税后利润"
+                    ],
+                    "unit": "元",
+                    "category": "利润"
+                }
+            }
+        },
+        "balance_sheets": {
+            "description": "资产负债表",
+            "fields": {
+                "cash_and_equivalents": {
+                    "aliases": [
+                        "货币资金",
+                        "现金",
+                        "银行存款",
+                        "现金及等价物"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "trading_financial_assets": {
+                    "aliases": [
+                        "交易性金融资产",
+                        "金融资产"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "notes_receivable": {
+                    "aliases": [
+                        "应收票据",
+                        "票据"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "accounts_receivable": {
+                    "aliases": [
+                        "应收账款",
+                        "应收款"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "prepayments": {
+                    "aliases": [
+                        "预付款项",
+                        "预付账款",
+                        "预付款"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "other_receivables": {
+                    "aliases": [
+                        "其他应收款",
+                        "其他应收"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "inventory": {
+                    "aliases": [
+                        "存货",
+                        "库存",
+                        "库存商品"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "contract_assets": {
+                    "aliases": [
+                        "合同资产"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "current_assets_total": {
+                    "aliases": [
+                        "流动资产合计",
+                        "流动资产"
+                    ],
+                    "unit": "元",
+                    "category": "流动资产"
+                },
+                "long_term_equity_investment": {
+                    "aliases": [
+                        "长期股权投资",
+                        "股权投资"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "fixed_assets": {
+                    "aliases": [
+                        "固定资产",
+                        "固定资产原值"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "accumulated_depreciation": {
+                    "aliases": [
+                        "累计折旧",
+                        "折旧"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "right_of_use_assets": {
+                    "aliases": [
+                        "使用权资产"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "construction_in_progress": {
+                    "aliases": [
+                        "在建工程"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "intangible_assets": {
+                    "aliases": [
+                        "无形资产"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "accumulated_amortization": {
+                    "aliases": [
+                        "累计摊销",
+                        "摊销"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "development_expenditure": {
+                    "aliases": [
+                        "开发支出",
+                        "研发支出"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "long_term_deferred_expenses": {
+                    "aliases": [
+                        "长期待摊费用"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "goodwill": {
+                    "aliases": [
+                        "商誉"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "deferred_tax_assets": {
+                    "aliases": [
+                        "递延所得税资产",
+                        "递延税项资产"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "other_non_current_assets": {
+                    "aliases": [
+                        "其他非流动资产"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "non_current_assets_total": {
+                    "aliases": [
+                        "非流动资产合计",
+                        "非流动资产",
+                        "长期资产"
+                    ],
+                    "unit": "元",
+                    "category": "非流动资产"
+                },
+                "total_assets": {
+                    "aliases": [
+                        "资产总计",
+                        "总资产",
+                        "资产",
+                        "资产总额"
+                    ],
+                    "unit": "元",
+                    "category": "资产合计"
+                },
+                "short_term_loans": {
+                    "aliases": [
+                        "短期借款",
+                        "短期贷款"
+                    ],
+                    "unit": "元",
+                    "category": "流动负债"
+                },
+                "notes_payable": {
+                    "aliases": [
+                        "应付票据"
+                    ],
+                    "unit": "元",
+                    "category": "流动负债"
+                },
+                "accounts_payable": {
+                    "aliases": [
+                        "应付账款",
+                        "应付款"
+                    ],
+                    "unit": "元",
+                    "category": "流动负债"
+                },
+                "contract_liabilities": {
+                    "aliases": [
+                        "合同负债"
+                    ],
+                    "unit": "元",
+                    "category": "流动负债"
+                },
+                "employee_benefits_payable": {
+                    "aliases": [
+                        "应付职工薪酬",
+                        "职工薪酬",
+                        "工资应付"
+                    ],
+                    "unit": "元",
+                    "category": "流动负债"
+                },
+                "taxes_payable": {
+                    "aliases": [
+                        "应交税费",
+                        "应交税金",
+                        "税费"
+                    ],
+                    "unit": "元",
+                    "category": "流动负债"
+                },
+                "current_liabilities_total": {
+                    "aliases": [
+                        "流动负债合计",
+                        "流动负债"
+                    ],
+                    "unit": "元",
+                    "category": "流动负债"
+                },
+                "long_term_loans": {
+                    "aliases": [
+                        "长期借款",
+                        "长期贷款"
+                    ],
+                    "unit": "元",
+                    "category": "非流动负债"
+                },
+                "lease_liabilities": {
+                    "aliases": [
+                        "租赁负债"
+                    ],
+                    "unit": "元",
+                    "category": "非流动负债"
+                },
+                "long_term_payables": {
+                    "aliases": [
+                        "长期应付款"
+                    ],
+                    "unit": "元",
+                    "category": "非流动负债"
+                },
+                "deferred_revenue": {
+                    "aliases": [
+                        "递延收益"
+                    ],
+                    "unit": "元",
+                    "category": "非流动负债"
+                },
+                "deferred_tax_liabilities": {
+                    "aliases": [
+                        "递延所得税负债",
+                        "递延税项负债"
+                    ],
+                    "unit": "元",
+                    "category": "非流动负债"
+                },
+                "estimated_liabilities": {
+                    "aliases": [
+                        "预计负债"
+                    ],
+                    "unit": "元",
+                    "category": "非流动负债"
+                },
+                "non_current_liabilities_total": {
+                    "aliases": [
+                        "非流动负债合计",
+                        "非流动负债",
+                        "长期负债"
+                    ],
+                    "unit": "元",
+                    "category": "非流动负债"
+                },
+                "total_liabilities": {
+                    "aliases": [
+                        "负债合计",
+                        "总负债",
+                        "负债",
+                        "负债总额"
+                    ],
+                    "unit": "元",
+                    "category": "负债合计"
+                },
+                "paid_in_capital": {
+                    "aliases": [
+                        "实收资本",
+                        "注册资本",
+                        "股本"
+                    ],
+                    "unit": "元",
+                    "category": "所有者权益"
+                },
+                "capital_surplus": {
+                    "aliases": [
+                        "资本公积"
+                    ],
+                    "unit": "元",
+                    "category": "所有者权益"
+                },
+                "surplus_reserves": {
+                    "aliases": [
+                        "盈余公积",
+                        "公积金"
+                    ],
+                    "unit": "元",
+                    "category": "所有者权益"
+                },
+                "retained_earnings": {
+                    "aliases": [
+                        "未分配利润",
+                        "留存收益"
+                    ],
+                    "unit": "元",
+                    "category": "所有者权益"
+                },
+                "total_equity": {
+                    "aliases": [
+                        "所有者权益合计",
+                        "净资产",
+                        "股东权益",
+                        "权益总额",
+                        "所有者权益"
+                    ],
+                    "unit": "元",
+                    "category": "所有者权益"
+                }
+            }
+        },
+        "cash_flow_statements": {
+            "description": "现金流量表",
+            "fields": {
+                "cash_received_goods_services": {
+                    "aliases": [
+                        "销售商品收到的现金",
+                        "销售产成品收到的现金",
+                        "销售成品收到的现金",
+                        "提供劳务收到的现金",
+                        "销售商品提供劳务收到的现金",
+                        "销售收现"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "cash_received_tax_refunds": {
+                    "aliases": [
+                        "收到的税费返还",
+                        "税费返还"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "cash_received_other_operating": {
+                    "aliases": [
+                        "收到其他与经营活动有关的现金",
+                        "其他经营收现"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "subtotal_operate_inflow": {
+                    "aliases": [
+                        "经营活动现金流入小计",
+                        "经营现金流入"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "cash_paid_goods_services": {
+                    "aliases": [
+                        "购买商品支付的现金",
+                        "采购付现"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "cash_paid_employees": {
+                    "aliases": [
+                        "支付给职工的现金",
+                        "支付职工薪酬",
+                        "工资支出"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "cash_paid_taxes": {
+                    "aliases": [
+                        "支付的各项税费",
+                        "税费支出"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "cash_paid_other_operating": {
+                    "aliases": [
+                        "支付其他与经营活动有关的现金",
+                        "其他经营付现"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "subtotal_operate_outflow": {
+                    "aliases": [
+                        "经营活动现金流出小计",
+                        "经营现金流出"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "net_cash_operating": {
+                    "aliases": [
+                        "经营活动现金流量净额",
+                        "经营净现金流",
+                        "经营活动净现金"
+                    ],
+                    "unit": "元",
+                    "category": "经营活动"
+                },
+                "cash_received_investment_disposal": {
+                    "aliases": [
+                        "收回投资收到的现金",
+                        "收回投资"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "cash_received_investment_return": {
+                    "aliases": [
+                        "取得投资收益收到的现金",
+                        "投资收益收现"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "cash_received_asset_disposal": {
+                    "aliases": [
+                        "处置固定资产收到的现金",
+                        "处置资产收现"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "subtotal_invest_inflow": {
+                    "aliases": [
+                        "投资活动现金流入小计",
+                        "投资现金流入"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "cash_paid_asset_acquisition": {
+                    "aliases": [
+                        "购建固定资产支付的现金",
+                        "购置资产付现"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "cash_paid_investments": {
+                    "aliases": [
+                        "投资支付的现金",
+                        "投资付现"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "subtotal_invest_outflow": {
+                    "aliases": [
+                        "投资活动现金流出小计",
+                        "投资现金流出"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "net_cash_investing": {
+                    "aliases": [
+                        "投资活动现金流量净额",
+                        "投资净现金流",
+                        "投资活动净现金"
+                    ],
+                    "unit": "元",
+                    "category": "投资活动"
+                },
+                "cash_received_borrowings": {
+                    "aliases": [
+                        "取得借款收到的现金",
+                        "借款收现"
+                    ],
+                    "unit": "元",
+                    "category": "筹资活动"
+                },
+                "cash_received_capital_contribution": {
+                    "aliases": [
+                        "吸收投资收到的现金",
+                        "收到投资"
+                    ],
+                    "unit": "元",
+                    "category": "筹资活动"
+                },
+                "subtotal_finance_inflow": {
+                    "aliases": [
+                        "筹资活动现金流入小计",
+                        "筹资现金流入"
+                    ],
+                    "unit": "元",
+                    "category": "筹资活动"
+                },
+                "cash_paid_debt_repayment": {
+                    "aliases": [
+                        "偿还债务支付的现金",
+                        "偿债付现"
+                    ],
+                    "unit": "元",
+                    "category": "筹资活动"
+                },
+                "cash_paid_interest_dividends": {
+                    "aliases": [
+                        "分配股利利息支付的现金",
+                        "股利利息支出"
+                    ],
+                    "unit": "元",
+                    "category": "筹资活动"
+                },
+                "subtotal_finance_outflow": {
+                    "aliases": [
+                        "筹资活动现金流出小计",
+                        "筹资现金流出"
+                    ],
+                    "unit": "元",
+                    "category": "筹资活动"
+                },
+                "net_cash_financing": {
+                    "aliases": [
+                        "筹资活动现金流量净额",
+                        "筹资净现金流",
+                        "筹资活动净现金"
+                    ],
+                    "unit": "元",
+                    "category": "筹资活动"
+                },
+                "exchange_rate_effect": {
+                    "aliases": [
+                        "汇率变动对现金的影响",
+                        "汇率影响"
+                    ],
+                    "unit": "元",
+                    "category": "汇总"
+                },
+                "net_increase_cash": {
+                    "aliases": [
+                        "现金净增加额",
+                        "现金增加额"
+                    ],
+                    "unit": "元",
+                    "category": "汇总"
+                },
+                "cash_beginning": {
+                    "aliases": [
+                        "期初现金余额",
+                        "现金期初余额"
+                    ],
+                    "unit": "元",
+                    "category": "汇总"
+                },
+                "cash_ending": {
+                    "aliases": [
+                        "期末现金余额",
+                        "现金期末余额"
+                    ],
+                    "unit": "元",
+                    "category": "汇总"
+                }
+            }
+        },
+        "financial_metrics": {
+            "description": "财务指标",
+            "fields": {
+                "gross_profit_margin": {
+                    "aliases": [
+                        "毛利率",
+                        "销售毛利率"
+                    ],
+                    "unit": "%",
+                    "category": "盈利能力"
+                },
+                "net_profit_margin": {
+                    "aliases": [
+                        "净利率",
+                        "净利润率",
+                        "销售净利率",
+                        "利润率"
+                    ],
+                    "unit": "%",
+                    "category": "盈利能力"
+                },
+                "operating_profit_margin": {
+                    "aliases": [
+                        "营业利润率"
+                    ],
+                    "unit": "%",
+                    "category": "盈利能力"
+                },
+                "roa": {
+                    "aliases": [
+                        "ROA",
+                        "roa",
+                        "总资产收益率",
+                        "资产收益率",
+                        "总资产报酬率"
+                    ],
+                    "unit": "%",
+                    "category": "盈利能力"
+                },
+                "roe": {
+                    "aliases": [
+                        "ROE",
+                        "roe",
+                        "净资产收益率",
+                        "权益收益率",
+                        "股东权益报酬率"
+                    ],
+                    "unit": "%",
+                    "category": "盈利能力"
+                },
+                "asset_liability_ratio": {
+                    "aliases": [
+                        "资产负债率",
+                        "负债率"
+                    ],
+                    "unit": "%",
+                    "category": "偿债能力"
+                },
+                "current_ratio": {
+                    "aliases": [
+                        "流动比率"
+                    ],
+                    "unit": "倍",
+                    "category": "偿债能力"
+                },
+                "quick_ratio": {
+                    "aliases": [
+                        "速动比率"
+                    ],
+                    "unit": "倍",
+                    "category": "偿债能力"
+                },
+                "interest_coverage_ratio": {
+                    "aliases": [
+                        "利息保障倍数",
+                        "已获利息倍数"
+                    ],
+                    "unit": "倍",
+                    "category": "偿债能力"
+                },
+                "total_asset_turnover": {
+                    "aliases": [
+                        "总资产周转率",
+                        "资产周转率"
+                    ],
+                    "unit": "次/年",
+                    "category": "营运能力"
+                },
+                "inventory_turnover": {
+                    "aliases": [
+                        "存货周转率",
+                        "存货周转次数"
+                    ],
+                    "unit": "次/年",
+                    "category": "营运能力"
+                },
+                "inventory_turnover_days": {
+                    "aliases": [
+                        "存货周转天数"
+                    ],
+                    "unit": "天",
+                    "category": "营运能力"
+                },
+                "receivable_turnover": {
+                    "aliases": [
+                        "应收账款周转率",
+                        "应收周转率"
+                    ],
+                    "unit": "次/年",
+                    "category": "营运能力"
+                },
+                "receivable_turnover_days": {
+                    "aliases": [
+                        "应收账款周转天数",
+                        "应收周转天数"
+                    ],
+                    "unit": "天",
+                    "category": "营运能力"
+                },
+                "payable_turnover": {
+                    "aliases": [
+                        "应付账款周转率",
+                        "应付周转率"
+                    ],
+                    "unit": "次/年",
+                    "category": "营运能力"
+                },
+                "payable_turnover_days": {
+                    "aliases": [
+                        "应付账款周转天数",
+                        "应付周转天数"
+                    ],
+                    "unit": "天",
+                    "category": "营运能力"
+                },
+                "cash_cycle": {
+                    "aliases": [
+                        "现金周转周期",
+                        "现金循环周期"
+                    ],
+                    "unit": "天",
+                    "category": "营运能力"
+                },
+                "revenue_growth_rate": {
+                    "aliases": [
+                        "营收增长率",
+                        "收入增长率",
+                        "营业收入增长率"
+                    ],
+                    "unit": "%",
+                    "category": "成长能力"
+                },
+                "profit_growth_rate": {
+                    "aliases": [
+                        "利润增长率",
+                        "净利润增长率"
+                    ],
+                    "unit": "%",
+                    "category": "成长能力"
+                },
+                "asset_growth_rate": {
+                    "aliases": [
+                        "资产增长率",
+                        "总资产增长率"
+                    ],
+                    "unit": "%",
+                    "category": "成长能力"
+                },
+                "selling_expense_ratio": {
+                    "aliases": [
+                        "销售费用率"
+                    ],
+                    "unit": "%",
+                    "category": "费用控制"
+                },
+                "admin_expense_ratio": {
+                    "aliases": [
+                        "管理费用率",
+                        "行政费用率"
+                    ],
+                    "unit": "%",
+                    "category": "费用控制"
+                },
+                "period_expense_ratio": {
+                    "aliases": [
+                        "期间费用率",
+                        "三项费用率"
+                    ],
+                    "unit": "%",
+                    "category": "费用控制"
+                },
+                "vat_burden_rate": {
+                    "aliases": [
+                        "增值税税负率",
+                        "增值税税负"
+                    ],
+                    "unit": "%",
+                    "category": "税负分析"
+                },
+                "income_tax_burden_rate": {
+                    "aliases": [
+                        "所得税税负率",
+                        "所得税税负"
+                    ],
+                    "unit": "%",
+                    "category": "税负分析"
+                },
+                "total_tax_burden_rate": {
+                    "aliases": [
+                        "综合税负率",
+                        "总税负率",
+                        "税负率"
+                    ],
+                    "unit": "%",
+                    "category": "税负分析"
+                }
+            }
+        },
+        "tax_reports": {
+            "description": "纳税申报汇总",
+            "fields": {
+                "tax_type": {
+                    "aliases": [
+                        "税种"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "taxable_amount": {
+                    "aliases": [
+                        "应纳税额",
+                        "应缴税额",
+                        "应交税额"
+                    ],
+                    "unit": "元",
+                    "category": "税额"
+                },
+                "paid_amount": {
+                    "aliases": [
+                        "已缴税额",
+                        "实缴税额",
+                        "缴纳税额"
+                    ],
+                    "unit": "元",
+                    "category": "税额"
+                },
+                "refund_amount": {
+                    "aliases": [
+                        "退税金额",
+                        "退税额"
+                    ],
+                    "unit": "元",
+                    "category": "税额"
+                },
+                "tax_rate": {
+                    "aliases": [
+                        "税率",
+                        "适用税率"
+                    ],
+                    "unit": "%",
+                    "category": "基础信息"
+                },
+                "vat_payable": {
+                    "aliases": [
+                        "增值税应纳税额",
+                        "增值税额"
+                    ],
+                    "unit": "元",
+                    "category": "税额"
+                },
+                "income_tax_payable": {
+                    "aliases": [
+                        "所得税应纳税额",
+                        "所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "税额"
+                }
+            }
+        },
+        "vat_returns": {
+            "description": "增值税申报表",
+            "fields": {
+                "filing_date": {
+                    "aliases": [
+                        "增值税申报日期",
+                        "增值税填报日期"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                }
+            }
+        },
+        "vat_return_items": {
+            "description": "增值税申报明细",
+            "fields": {
+                "line_no": {
+                    "aliases": [
+                        "行号"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "item_name": {
+                    "aliases": [
+                        "增值税项目名称",
+                        "增值税明细项目"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "amount_current": {
+                    "aliases": [
+                        "本期金额",
+                        "本期发生额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "amount_ytd": {
+                    "aliases": [
+                        "本年累计金额",
+                        "年初累计"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "refund_current": {
+                    "aliases": [
+                        "本期退税",
+                        "即征即退税额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "refund_ytd": {
+                    "aliases": [
+                        "累计退税"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                }
+            }
+        },
+        "tax_returns_income": {
+            "description": "企业所得税年度申报表",
+            "fields": {
+                "filing_date": {
+                    "aliases": [
+                        "所得税申报日期",
+                        "年报申报日期"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                }
+            }
+        },
+        "tax_return_income_items": {
+            "description": "所得税申报明细",
+            "fields": {
+                "line_no": {
+                    "aliases": [
+                        "所得税行号"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "item_name": {
+                    "aliases": [
+                        "所得税项目名称",
+                        "所得税明细项目"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "amount": {
+                    "aliases": [
+                        "所得税申报金额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                }
+            }
+        },
+        "tax_returns_stamp": {
+            "description": "印花税申报表",
+            "fields": {
+                "filing_date": {
+                    "aliases": [
+                        "印花税申报日期"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                }
+            }
+        },
+        "tax_return_stamp_items": {
+            "description": "印花税申报明细",
+            "fields": {
+                "tax_category": {
+                    "aliases": [
+                        "印花税税目",
+                        "税目"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "tax_item": {
+                    "aliases": [
+                        "印花税项目",
+                        "印花税子目"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "tax_base": {
+                    "aliases": [
+                        "印花税计税依据",
+                        "计税金额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "tax_rate": {
+                    "aliases": [
+                        "印花税税率"
+                    ],
+                    "unit": "%",
+                    "category": "基础信息"
+                },
+                "tax_payable": {
+                    "aliases": [
+                        "印花税应纳税额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "tax_reduction": {
+                    "aliases": [
+                        "印花税减免",
+                        "印花税减免额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "tax_amount": {
+                    "aliases": [
+                        "印花税实缴",
+                        "印花税额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                }
+            }
+        },
+        "invoices": {
+            "description": "发票数据",
+            "fields": {
+                "invoice_type": {
+                    "aliases": [
+                        "发票类型"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "invoice_code": {
+                    "aliases": [
+                        "发票代码"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "invoice_number": {
+                    "aliases": [
+                        "发票号码",
+                        "发票号"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "digital_number": {
+                    "aliases": [
+                        "数电票号码",
+                        "数电发票号"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "seller_name": {
+                    "aliases": [
+                        "销售方",
+                        "销方名称",
+                        "开票方"
+                    ],
+                    "unit": "",
+                    "category": "交易方"
+                },
+                "seller_tax_id": {
+                    "aliases": [
+                        "销售方税号",
+                        "销方税号"
+                    ],
+                    "unit": "",
+                    "category": "交易方"
+                },
+                "buyer_name": {
+                    "aliases": [
+                        "购买方",
+                        "购方名称",
+                        "受票方"
+                    ],
+                    "unit": "",
+                    "category": "交易方"
+                },
+                "buyer_tax_id": {
+                    "aliases": [
+                        "购买方税号",
+                        "购方税号"
+                    ],
+                    "unit": "",
+                    "category": "交易方"
+                },
+                "amount_excluding_tax": {
+                    "aliases": [
+                        "不含税金额",
+                        "发票金额",
+                        "开票金额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "tax_rate": {
+                    "aliases": [
+                        "发票税率"
+                    ],
+                    "unit": "%",
+                    "category": "基础信息"
+                },
+                "tax_amount": {
+                    "aliases": [
+                        "发票税额",
+                        "开票税额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "total_amount": {
+                    "aliases": [
+                        "价税合计",
+                        "发票总额"
+                    ],
+                    "unit": "元",
+                    "category": "金额"
+                },
+                "item_name": {
+                    "aliases": [
+                        "发票商品名称",
+                        "商品名称",
+                        "货物名称"
+                    ],
+                    "unit": "",
+                    "category": "商品信息"
+                },
+                "quantity": {
+                    "aliases": [
+                        "发票数量",
+                        "商品数量"
+                    ],
+                    "unit": "",
+                    "category": "商品信息"
+                },
+                "unit_price": {
+                    "aliases": [
+                        "发票单价",
+                        "商品单价"
+                    ],
+                    "unit": "元",
+                    "category": "商品信息"
+                },
+                "spec": {
+                    "aliases": [
+                        "规格型号",
+                        "规格"
+                    ],
+                    "unit": "",
+                    "category": "商品信息"
+                },
+                "unit": {
+                    "aliases": [
+                        "计量单位",
+                        "单位"
+                    ],
+                    "unit": "",
+                    "category": "商品信息"
+                },
+                "invoice_category": {
+                    "aliases": [
+                        "发票分类",
+                        "发票类别"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                }
+            }
+        },
+        "account_balances": {
+            "description": "科目余额表",
+            "fields": {
+                "account_code": {
+                    "aliases": [
+                        "科目代码",
+                        "会计科目代码"
+                    ],
+                    "unit": "",
+                    "category": "科目信息"
+                },
+                "account_name": {
+                    "aliases": [
+                        "科目名称",
+                        "会计科目"
+                    ],
+                    "unit": "",
+                    "category": "科目信息"
+                },
+                "opening_balance": {
+                    "aliases": [
+                        "期初余额",
+                        "期初金额"
+                    ],
+                    "unit": "元",
+                    "category": "余额"
+                },
+                "debit_amount": {
+                    "aliases": [
+                        "借方发生额",
+                        "借方金额"
+                    ],
+                    "unit": "元",
+                    "category": "发生额"
+                },
+                "credit_amount": {
+                    "aliases": [
+                        "贷方发生额",
+                        "贷方金额"
+                    ],
+                    "unit": "元",
+                    "category": "发生额"
+                },
+                "ending_balance": {
+                    "aliases": [
+                        "期末余额",
+                        "期末金额"
+                    ],
+                    "unit": "元",
+                    "category": "余额"
+                }
+            }
+        },
+        "hr_salary_data": {
+            "description": "薪酬数据",
+            "fields": {
+                "department": {
+                    "aliases": [
+                        "部门",
+                        "部门名称"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "employee_count": {
+                    "aliases": [
+                        "员工人数",
+                        "人员数量",
+                        "人数"
+                    ],
+                    "unit": "人",
+                    "category": "人员"
+                },
+                "average_salary": {
+                    "aliases": [
+                        "平均工资",
+                        "平均薪资",
+                        "人均工资",
+                        "工资"
+                    ],
+                    "unit": "元",
+                    "category": "薪酬"
+                },
+                "social_insurance_base": {
+                    "aliases": [
+                        "社保基数",
+                        "社会保险基数"
+                    ],
+                    "unit": "元",
+                    "category": "社保公积金"
+                },
+                "housing_fund_base": {
+                    "aliases": [
+                        "公积金基数",
+                        "住房公积金基数"
+                    ],
+                    "unit": "元",
+                    "category": "社保公积金"
+                }
+            }
+        }
+    },
+    "formulas": {
+        "利润率": {
+            "expression": "net_profit * 100.0 / NULLIF(total_revenue, 0)",
+            "source_table": "income_statements",
+            "result_field": "net_profit_margin",
+            "unit": "%",
+            "description": "净利润/营业收入"
+        },
+        "成本利润率": {
+            "expression": "net_profit * 100.0 / NULLIF(cost_of_sales, 0)",
+            "source_table": "income_statements",
+            "unit": "%",
+            "description": "净利润/营业成本"
+        },
+        "收入成本率": {
+            "expression": "cost_of_sales * 100.0 / NULLIF(total_revenue, 0)",
+            "source_table": "income_statements",
+            "unit": "%",
+            "description": "营业成本/营业收入"
+        },
+        "费用收入比": {
+            "expression": "(selling_expenses + administrative_expenses + financial_expenses) * 100.0 / NULLIF(total_revenue, 0)",
+            "source_table": "income_statements",
+            "unit": "%",
+            "description": "三项费用/营业收入"
+        },
+        "现金比率": {
+            "expression": "cash_and_equivalents * 100.0 / NULLIF(current_liabilities_total, 0)",
+            "source_table": "balance_sheets",
+            "unit": "%",
+            "description": "货币资金/流动负债"
+        },
+        "产权比率": {
+            "expression": "total_liabilities * 100.0 / NULLIF(total_equity, 0)",
+            "source_table": "balance_sheets",
+            "unit": "%",
+            "description": "负债总额/所有者权益"
+        }
+    },
+    "common_query_keywords": [
+        "多少",
+        "是多少",
+        "数据",
+        "金额",
+        "查询",
+        "显示",
+        "告诉我",
+        "计算",
+        "输出",
+        "列出",
+        "查一下"
+    ],
+    "item_queries": {
+        "_description": "特殊处理:针对item_name/amount结构的表进行查询",
+        "应纳税所得额": {
+            "table": "tax_return_income_items",
+            "join_table": "tax_returns_income",
+            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
+            "item_name_field": "item_name",
+            "item_name_value": "应纳税所得额",
+            "value_field": "amount",
+            "company_field": "tax_returns_income.company_id",
+            "year_field": "tax_returns_income.period_year",
+            "unit": "元",
+            "aliases": [
+                "应纳税所得额",
+                "纳税所得额",
+                "应税所得额",
+                "应税所得",
+                "所得额"
+            ]
+        },
+        "应纳所得税额": {
+            "table": "tax_return_income_items",
+            "join_table": "tax_returns_income",
+            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
+            "item_name_field": "item_name",
+            "item_name_value": "应纳所得税额",
+            "value_field": "amount",
+            "company_field": "tax_returns_income.company_id",
+            "year_field": "tax_returns_income.period_year",
+            "unit": "元",
+            "aliases": [
+                "应纳所得税额",
+                "企业所得税应纳税额",
+                "所得税应纳额"
+            ]
+        },
+        "企业所得税利润总额": {
+            "table": "tax_return_income_items",
+            "join_table": "tax_returns_income",
+            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
+            "item_name_field": "item_name",
+            "item_name_value": "利润总额",
+            "value_field": "amount",
+            "company_field": "tax_returns_income.company_id",
+            "year_field": "tax_returns_income.period_year",
+            "unit": "元",
+            "aliases": [
+                "企业所得税利润总额",
+                "所得税申报利润"
+            ]
+        },
+        "企业所得税营业收入": {
+            "table": "tax_return_income_items",
+            "join_table": "tax_returns_income",
+            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
+            "item_name_field": "item_name",
+            "item_name_value": "营业收入",
+            "value_field": "amount",
+            "company_field": "tax_returns_income.company_id",
+            "year_field": "tax_returns_income.period_year",
+            "unit": "元",
+            "aliases": [
+                "企业所得税营业收入",
+                "所得税申报收入"
+            ]
+        },
+        "企业所得税营业成本": {
+            "table": "tax_return_income_items",
+            "join_table": "tax_returns_income",
+            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
+            "item_name_field": "item_name",
+            "item_name_value": "营业成本",
+            "value_field": "amount",
+            "company_field": "tax_returns_income.company_id",
+            "year_field": "tax_returns_income.period_year",
+            "unit": "元",
+            "aliases": [
+                "企业所得税营业成本",
+                "所得税申报成本"
+            ]
+        },
+        "印花税": {
+            "table": "tax_return_stamp_items",
+            "join_table": "tax_returns_stamp",
+            "join_condition": "tax_return_stamp_items.return_id = tax_returns_stamp.id",
+            "item_name_field": null,
+            "value_field": "tax_amount",
+            "company_field": "tax_returns_stamp.company_id",
+            "year_field": "tax_returns_stamp.period_year",
+            "quarter_field": "tax_returns_stamp.period_quarter",
+            "unit": "元",
+            "aliases": [
+                "印花税",
+                "印花税额",
+                "印花税金额"
+            ]
+        },
+        "增值税销项税额": {
+            "table": "vat_return_items",
+            "join_table": "vat_returns",
+            "join_condition": "vat_return_items.return_id = vat_returns.id",
+            "item_name_field": "item_name",
+            "item_name_value": "销项税额",
+            "value_field": "amount_current",
+            "company_field": "vat_returns.company_id",
+            "year_field": "vat_returns.period_year",
+            "month_field": "vat_returns.period_month",
+            "unit": "元",
+            "aliases": [
+                "增值税销项税额",
+                "销项税额",
+                "销项税"
+            ]
+        },
+        "增值税进项税额": {
+            "table": "vat_return_items",
+            "join_table": "vat_returns",
+            "join_condition": "vat_return_items.return_id = vat_returns.id",
+            "item_name_field": "item_name",
+            "item_name_value": "进项税额",
+            "value_field": "amount_current",
+            "company_field": "vat_returns.company_id",
+            "year_field": "vat_returns.period_year",
+            "month_field": "vat_returns.period_month",
+            "unit": "元",
+            "aliases": [
+                "增值税进项税额",
+                "进项税额",
+                "进项税"
+            ]
+        },
+        "增值税应纳税额": {
+            "table": "vat_return_items",
+            "join_table": "vat_returns",
+            "join_condition": "vat_return_items.return_id = vat_returns.id",
+            "item_name_field": "item_name",
+            "item_name_value": "应纳税额",
+            "value_field": "amount_current",
+            "company_field": "vat_returns.company_id",
+            "year_field": "vat_returns.period_year",
+            "month_field": "vat_returns.period_month",
+            "unit": "元",
+            "aliases": [
+                "增值税应纳税额",
+                "增值税应纳额",
+                "增值税额"
+            ]
+        },
+        "增值税销售额": {
+            "table": "vat_return_items",
+            "join_table": "vat_returns",
+            "join_condition": "vat_return_items.return_id = vat_returns.id",
+            "item_name_field": "item_name",
+            "item_name_value": "按适用税率计税销售额",
+            "value_field": "amount_current",
+            "company_field": "vat_returns.company_id",
+            "year_field": "vat_returns.period_year",
+            "month_field": "vat_returns.period_month",
+            "unit": "元",
+            "aliases": [
+                "增值税销售额",
+                "计税销售额",
+                "适用税率销售额"
+            ]
+        },
+        "采购发票金额": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "INPUT",
+            "value_field": "total_amount",
+            "aggregate": "SUM",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "采购发票金额",
+                "进项发票金额",
+                "采购发票总额",
+                "进项发票总额"
+            ]
+        },
+        "销售发票金额": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "OUTPUT",
+            "value_field": "total_amount",
+            "aggregate": "SUM",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "销售发票金额",
+                "销项发票金额",
+                "销售发票总额",
+                "销项发票总额"
+            ]
+        },
+        "采购发票税额": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "INPUT",
+            "value_field": "tax_amount",
+            "aggregate": "SUM",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "采购发票税额",
+                "进项发票税额",
+                "进项税额发票"
+            ]
+        },
+        "销售发票税额": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "OUTPUT",
+            "value_field": "tax_amount",
+            "aggregate": "SUM",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "销售发票税额",
+                "销项发票税额",
+                "销项税额发票"
+            ]
+        },
+        "采购发票不含税金额": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "INPUT",
+            "value_field": "amount_excluding_tax",
+            "aggregate": "SUM",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "采购发票不含税金额",
+                "进项发票不含税金额",
+                "采购不含税金额"
+            ]
+        },
+        "销售发票不含税金额": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "OUTPUT",
+            "value_field": "amount_excluding_tax",
+            "aggregate": "SUM",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "销售发票不含税金额",
+                "销项发票不含税金额",
+                "销售不含税金额"
+            ]
+        },
+        "采购发票数量": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "INPUT",
+            "value_field": "id",
+            "aggregate": "COUNT",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "张",
+            "aliases": [
+                "采购发票数量",
+                "进项发票数量",
+                "采购发票张数",
+                "进项发票张数"
+            ]
+        },
+        "销售发票数量": {
+            "table": "invoices",
+            "join_table": null,
+            "filter_field": "invoice_type",
+            "filter_value": "OUTPUT",
+            "value_field": "id",
+            "aggregate": "COUNT",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "张",
+            "aliases": [
+                "销售发票数量",
+                "销项发票数量",
+                "销售发票张数",
+                "销项发票张数"
+            ]
+        }
+    }
+}

@@ -1,0 +1,369 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import ChatWidget from './ChatWidget';
+import { streamChat } from '../services/api';
+import './AIChat.css';
+
+/**
+ * AI智问页面组件
+ */
+function AIChat({ selectedCompanyId, companies }) {
+    const [messages, setMessages] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [history, setHistory] = useState([]);
+    const [inputText, setInputText] = useState('');
+    const [currentController, setCurrentController] = useState(null);
+    const [selectedHistory, setSelectedHistory] = useState(new Set());  // 新增: 选中的历史记录
+    const [showChart, setShowChart] = useState(true);  // 新增: 是否显示图表
+    const chatWidgetRef = useRef(null);
+
+    // 加载历史记录
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('chat_history');
+        if (savedHistory) {
+            try {
+                setHistory(JSON.parse(savedHistory));
+            } catch {
+                setHistory([]);
+            }
+        }
+    }, []);
+
+    // 保存历史记录
+    const saveHistory = useCallback((newHistory) => {
+        setHistory(newHistory);
+        localStorage.setItem('chat_history', JSON.stringify(newHistory));
+    }, []);
+
+    // 发送消息
+    const handleSend = useCallback(() => {
+        const question = inputText.trim();
+        if (!question || isLoading) return;
+
+        // 添加用户消息
+        const timestamp = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        setMessages(prev => [...prev, { role: 'user', content: question, timestamp }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: '', route: null }]);
+        setIsLoading(true);
+        setInputText('');
+
+        // 保存到历史记录 (移到最前面，如已存在则先移除)
+        const filteredHistory = history.filter(h => h !== question);
+        const newHistory = [question, ...filteredHistory.slice(0, 49)];
+        saveHistory(newHistory);
+
+        // 流式请求
+        const controller = streamChat(question, selectedCompanyId, showChart, {
+            onMessage: (content) => {
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastIdx = newMessages.length - 1;
+                    if (lastIdx >= 0 && newMessages[lastIdx].role === 'assistant') {
+                        newMessages[lastIdx] = {
+                            ...newMessages[lastIdx],
+                            content: newMessages[lastIdx].content + content
+                        };
+                    }
+                    return newMessages;
+                });
+            },
+            onRoute: (route) => {
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastIdx = newMessages.length - 1;
+                    if (lastIdx >= 0 && newMessages[lastIdx].role === 'assistant') {
+                        newMessages[lastIdx] = { ...newMessages[lastIdx], route };
+                    }
+                    return newMessages;
+                });
+            },
+            onChart: (chartData) => {
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastIdx = newMessages.length - 1;
+                    if (lastIdx >= 0 && newMessages[lastIdx].role === 'assistant') {
+                        const currentCharts = newMessages[lastIdx].charts || [];
+                        newMessages[lastIdx] = {
+                            ...newMessages[lastIdx],
+                            charts: [...currentCharts, chartData]
+                        };
+                    }
+                    return newMessages;
+                });
+            },
+            onSummary: (content) => {
+                // 分析总结（渲染在图表之后）
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastIdx = newMessages.length - 1;
+                    if (lastIdx >= 0 && newMessages[lastIdx].role === 'assistant') {
+                        const currentSummary = newMessages[lastIdx].summary || '';
+                        newMessages[lastIdx] = {
+                            ...newMessages[lastIdx],
+                            summary: currentSummary + content
+                        };
+                    }
+                    return newMessages;
+                });
+            },
+            onError: (error) => {
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastIdx = newMessages.length - 1;
+                    if (lastIdx >= 0 && newMessages[lastIdx].role === 'assistant') {
+                        newMessages[lastIdx] = {
+                            ...newMessages[lastIdx],
+                            content: newMessages[lastIdx].content + `\n\n❌ 错误: ${error}`
+                        };
+                    }
+                    return newMessages;
+                });
+                setIsLoading(false);
+            },
+            onDone: () => setIsLoading(false)
+        });
+
+        setCurrentController(controller);
+    }, [inputText, isLoading, selectedCompanyId, history, saveHistory]);
+
+    // 清空对话
+    const handleClear = useCallback(() => {
+        if (currentController) currentController.abort();
+        setMessages([]);
+        setIsLoading(false);
+    }, [currentController]);
+
+    // 导出 PDF
+    const handleExportPDF = useCallback(async () => {
+        if (messages.length === 0) {
+            alert('没有对话内容需要导出');
+            return;
+        }
+
+        // 1. 立即打开窗口，避开浏览器拦截
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert('无法打开打印窗口，请检查是否被浏览器拦截');
+            return;
+        }
+
+        // 2. 显示加载提示
+        printWindow.document.write('<!DOCTYPE html><html><head><title>正在生成...</title></head><body><div style="font-family: sans-serif; padding: 20px; text-align: center;">正在生成对话记录，请稍候...</div></body></html>');
+
+        try {
+            const { marked } = await import('marked');
+            marked.setOptions({ breaks: true, gfm: true });
+
+            let htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>对话记录</title>
+            <style>
+                * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                body { font-family: 'Microsoft YaHei', sans-serif; padding: 15px; line-height: 1.5; font-size: 12px; }
+                .user { background: #eff6ff !important; padding: 8px 12px; border-radius: 6px; margin: 8px 0; }
+                .assistant { background: #f8fafc !important; border: 1px solid #e5e7eb; padding: 10px 12px; border-radius: 6px; margin: 8px 0; }
+                .assistant table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+                .assistant th, .assistant td { border: 1px solid #d1d5db !important; padding: 4px 8px; }
+                .assistant th { background: #f9fafb !important; }
+                .assistant img { max-width: 100%; -webkit-print-color-adjust: exact !important; }
+                h1.title { text-align: center; font-size: 18px; }
+                @media print { img { max-height: 300px; } }
+            </style></head><body>
+            <h1 class="title">💬 税务智能咨询 - 对话记录</h1>
+            <p style="text-align: center; color: #6b7280;">导出时间: ${new Date().toLocaleString('zh-CN')}</p><hr>`;
+
+            messages.forEach((msg, msgIndex) => {
+                if (msg.role === 'user') {
+                    htmlContent += `<div class="user"><strong>您：</strong>${msg.content}</div>`;
+                } else {
+                    let msgContent = `<div class="assistant"><strong>智能体：</strong><br>${marked.parse(msg.content)}`;
+
+                    // 处理图表导出
+                    if (msg.charts && msg.charts.length > 0) {
+                        msg.charts.forEach((_, chartIndex) => {
+                            // 使用与 ChatWidget 一致的 ID 生成规则
+                            const canvasId = `chart-canvas-${msgIndex}-${chartIndex}`;
+                            const canvas = document.getElementById(canvasId);
+                            if (canvas) {
+                                try {
+                                    const imgData = canvas.toDataURL('image/png');
+                                    msgContent += `<div style="text-align: center; margin: 15px 0;">
+                                        <img src="${imgData}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    </div>`;
+                                } catch (e) {
+                                    console.error('导出图表失败:', e);
+                                }
+                            }
+                        });
+                    }
+
+                    msgContent += `</div>`;
+                    htmlContent += msgContent;
+                }
+            });
+
+            htmlContent += `<div style="text-align:center;color:#9ca3af;margin-top:20px;">本文档由税务智能咨询系统自动生成</div></body></html>`;
+
+            // 3. 写入最终内容
+            printWindow.document.open();
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+
+            // 4. 延迟调用打印，确保图片（base64）渲染完成
+            setTimeout(() => printWindow.print(), 500);
+
+        } catch (error) {
+            console.error('导出PDF出错:', error);
+            printWindow.document.body.innerHTML = `<div style="color: red; padding: 20px;">导出失败: ${error.message}</div>`;
+        }
+    }, [messages]);
+
+    // 选择性删除历史记录
+    const handleClearHistory = useCallback(() => {
+        if (selectedHistory.size > 0) {
+            // 有选中项，删除选中的
+            if (window.confirm(`确定删除选中的 ${selectedHistory.size} 条记录吗？`)) {
+                const newHistory = history.filter(h => !selectedHistory.has(h));
+                saveHistory(newHistory);
+                setSelectedHistory(new Set());
+            }
+        } else if (history.length > 0) {
+            // 无选中项，确认删除全部
+            if (window.confirm(`未选择任何记录。\n\n确定要删除全部 ${history.length} 条历史记录吗？`)) {
+                saveHistory([]);
+            }
+        }
+    }, [selectedHistory, history, saveHistory]);
+
+    // 切换历史记录选中状态
+    const toggleHistorySelection = (item, e) => {
+        e.stopPropagation();
+        const newSelected = new Set(selectedHistory);
+        if (newSelected.has(item)) {
+            newSelected.delete(item);
+        } else {
+            newSelected.add(item);
+        }
+        setSelectedHistory(newSelected);
+    };
+
+    // 历史记录单击: 填充输入框 + 导航到回答
+    const handleHistoryClick = (item) => {
+        setInputText(item);  // 填充到输入框
+        const idx = messages.findIndex(msg => msg.role === 'user' && msg.content === item);
+        if (idx !== -1 && chatWidgetRef.current) {
+            chatWidgetRef.current.scrollToMessage(idx);
+        }
+    };
+
+    return (
+        <div className="ai-chat-page">
+            {/* 页面标题栏 */}
+            <div className="page-header">
+                <div className="page-title">
+                    <span className="title-icon">💬</span>
+                    <div className="title-text">
+                        <h2>AI智能问答</h2>
+                        <span className="subtitle">基于专业税务财务知识库的智能问答</span>
+                    </div>
+                </div>
+                <div className="page-actions">
+                    <button className="action-btn" onClick={handleClear}>清空对话</button>
+                    <button className="action-btn" onClick={handleExportPDF}>导出PDF</button>
+                </div>
+            </div>
+
+            {/* 主体内容 */}
+            <div className="chat-main">
+                {/* 对话区域 */}
+                <div className="chat-area">
+                    <ChatWidget
+                        ref={chatWidgetRef}
+                        messages={messages}
+                        isLoading={isLoading}
+                        showChart={showChart}
+                    />
+
+                    {/* 输入区域 */}
+                    <div className="input-section">
+                        <div className="input-hint">
+                            请输入要咨询的财务指标，或财税政策，或实务操作问题
+                        </div>
+                        <div className="input-box">
+                            <textarea
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSend();
+                                    }
+                                }}
+                                placeholder="例如：2022-2025收入、利润变动情况；小微企业优惠政策有哪些；小微企业优惠需要申请吗"
+                                disabled={isLoading}
+                                rows={2}
+                            />
+                            <div className="input-footer">
+                                <div className="input-tools">
+                                    <span className="tool-btn">📎 上传文档</span>
+                                    <span className="tool-btn">🎤 语音输入</span>
+                                    <label className="tool-btn chart-toggle">
+                                        <input
+                                            type="checkbox"
+                                            checked={showChart}
+                                            onChange={(e) => setShowChart(e.target.checked)}
+                                        />
+                                        📊 显示图表
+                                    </label>
+                                </div>
+                                <div className="input-actions">
+                                    <span className="char-count">{inputText.length}/500字符</span>
+                                    <span className="input-tip">支持自然语言，逐步响应</span>
+                                    <button
+                                        className={`submit-btn ${inputText.trim() ? 'active' : ''}`}
+                                        onClick={handleSend}
+                                        disabled={isLoading || !inputText.trim()}
+                                    >
+                                        ✨ 提交咨询
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="disclaimer">
+                            AI 智能问答基于 Coze 知识库，回答仅供参考，具体以相关法律法规为准
+                        </div>
+                    </div>
+                </div>
+
+                {/* 右侧历史记录面板 */}
+                <div className="history-panel">
+                    <div className="history-header">
+                        <span className="history-title">📜 历史记录</span>
+                        <button className="clear-history-btn" onClick={handleClearHistory}>删除历史</button>
+                    </div>
+                    <ul className="history-list">
+                        {history.length === 0 ? (
+                            <li className="empty-history">暂无历史记录</li>
+                        ) : (
+                            history.map((item, index) => (
+                                <li
+                                    key={index}
+                                    className={selectedHistory.has(item) ? 'selected' : ''}
+                                    onClick={() => handleHistoryClick(item)}
+                                    title="单击加载到输入框并定位回答"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedHistory.has(item)}
+                                        onChange={(e) => toggleHistorySelection(item, e)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <span>{item.length > 25 ? item.substring(0, 25) + '...' : item}</span>
+                                </li>
+                            ))
+                        )}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default AIChat;
