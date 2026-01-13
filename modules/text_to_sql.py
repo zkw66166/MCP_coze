@@ -148,7 +148,8 @@ class TextToSQLEngine:
 3. 必须包含 {year_condition} 条件{quarter_condition}
 4. 使用SUM()对金额进行汇总
 5. 按period_year分组
-6. 只返回SQL语句,不要有任何解释
+6. 如果涉及多个指标，请作为多个列查询，并为每列使用有意义的别名(AS '别名')
+7. 只返回SQL语句,不要有任何解释
 
 ## 用户问题
 {question}

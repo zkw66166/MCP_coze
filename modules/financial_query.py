@@ -461,6 +461,10 @@ class FinancialQuery:
             r'[卖买]方名称[为是]', r'seller_name', r'buyer_name',
             r'发票类型[为是]', r'invoice_type',
             r'税目[为是]', r'类别[为是]',
+            # 科目余额表触发词 (借方/贷方)
+            r'借方', r'贷方', r'debit', r'credit',
+            # 薪资/人事数据触发词 (部门)
+            r'部门', r'销售部', r'市场部', r'生产部', r'行政部', r'财务部', r'研发部', r'人事部',
         ]
         has_complex_condition = False
         if question:
@@ -491,22 +495,27 @@ class FinancialQuery:
                     for row in sql_results:
                         year = row.get('period_year') or row.get('year')
                         qtr = row.get('period_quarter') or row.get('quarter') or 1
-                        value = None
-                        for k, v in row.items():
-                            if k not in ('period_year', 'period_quarter', 'period_month', 'year', 'quarter', 'company_id'):
-                                if isinstance(v, (int, float)) and v is not None:
-                                    value = v
-                                    break
                         
-                        if year and value is not None:
-                            results.append({
-                                'metric_name': metric_name,
-                                'year': year,
-                                'quarter': qtr,
-                                'value': value,
-                                'unit': '元'
-                            })
-                    print(f"✅ Text-to-SQL成功: {len(results)} 条记录")
+                        # 遍历所有字段,提取多个指标
+                        # 排出标准时间字段和ID字段
+                        excluded_fields = ('period_year', 'period_quarter', 'period_month', 
+                                         'year', 'quarter', 'company_id', 'month')
+                        
+                        for k, v in row.items():
+                            if k not in excluded_fields:
+                                if isinstance(v, (int, float)) and v is not None:
+                                    # 如果有显式别名且不是默认的"value",使用别名作为指标名
+                                    # 否则使用识别到的第一个指标名,或回退到KEY
+                                    current_metric = k if k != 'value' else (metrics[0] if metrics else k)
+                                    
+                                    results.append({
+                                        'metric_name': current_metric,
+                                        'year': year,
+                                        'quarter': qtr,
+                                        'value': v,
+                                        'unit': '元'
+                                    })
+                    print(f"✅ Text-to-SQL成功: 提取到 {len(results)} 个数据点")
                     return results
             except Exception as e:
                 print(f"⚠️  Text-to-SQL失败: {e}, 回退到常规策略")
