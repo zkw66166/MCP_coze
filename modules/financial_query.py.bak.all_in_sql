@@ -297,23 +297,6 @@ class FinancialQuery:
                 years = sorted(set(years))  # 去重并排序
                 has_explicit_time = bool(years)
         
-        # 模式X: 两位数列表 (如 "22、23年", "21,22年")
-        if not years:
-            # 匹配类似 "22、23" 或 "21,22" 后面跟着 "年" 的情况
-            # 先找包含分隔符的两位数串
-            list_match = re.search(r'((?:\d{2}[、，,])+\d{2})年', question)
-            if list_match:
-                year_str = list_match.group(1)
-                # 分割并提取
-                parts = re.split(r'[、，,]', year_str)
-                for p in parts:
-                    if p.isdigit():
-                        y = to_full_year(int(p))
-                        if 1990 <= y <= 2060:
-                            years.append(y)
-                years = sorted(set(years))
-                has_explicit_time = bool(years)
-
         # 模式5: 两位数年份+年字 (如 23年、24年 → 2023、2024)
         if not years:
             short_match = re.findall(r'(?<!\d)(\d{2})年', question)
@@ -332,26 +315,6 @@ class FinancialQuery:
             if standalone:
                 years = [int(y) for y in standalone if 1990 <= int(y) <= 2060]
                 has_explicit_time = bool(years)
-
-        # 模式7: 两位数范围 (如 "22-25" -> 2022-2025, "22-25年")
-        # 必须确保不与上面的 "2022-25" 冲突
-        if not years:
-            # 优先匹配带'年'的: "22-25年"
-            range_short_year = re.search(r'(?<!\d)(\d{2})[—\-](\d{2})年', question)
-            # 或者是无单位的: "22-25"
-            if not range_short_year:
-                range_short_year = re.search(r'(?<!\d)(\d{2})[—\-](\d{2})(?!\d)', question)
-            
-            if range_short_year:
-                s = int(range_short_year.group(1))
-                e = int(range_short_year.group(2))
-                # 简单的合法性检查: start < end, 且都在合理年份区间
-                sy = to_full_year(s)
-                ey = to_full_year(e)
-                if 1990 <= sy <= 2060 and 1990 <= ey <= 2060 and sy <= ey:
-                    years = list(range(sy, ey + 1))
-                    result['is_comparison'] = True
-                    has_explicit_time = True
         
         # 设置结果
         if len(years) > 1:
@@ -492,39 +455,57 @@ class FinancialQuery:
         
         注意: 当问题包含复杂条件(如seller_name过滤)时,优先使用Text-to-SQL
         """
-        # === 全面启用 Text-to-SQL ===
-        # 所有非公式指标查询，优先使用Text-to-SQL
-        try:
-            from modules.text_to_sql import get_text_to_sql_engine
-            engine = get_text_to_sql_engine()
-            
-            years = time_range.get('years', [time_range.get('year')])
-            years = [y for y in years if y is not None]
-            quarter = time_range.get('quarter')
-            
-            # 记录查询尝试
-            if question:
-                print(f"🤖 尝试Text-to-SQL: {question}")
+        # === 复杂条件检测 ===
+        # 如果问题包含字段过滤条件(如"卖方名称为..."),应使用Text-to-SQL
+        complex_condition_patterns = [
+            r'[卖买]方名称[为是]', r'seller_name', r'buyer_name',
+            r'发票类型[为是]', r'invoice_type',
+            r'税目[为是]', r'类别[为是]',
+            # 科目余额表触发词 (借方/贷方)
+            r'借方', r'贷方', r'debit', r'credit',
+            # 薪资/人事数据触发词 (部门)
+            r'部门', r'销售部', r'市场部', r'生产部', r'行政部', r'财务部', r'研发部', r'人事部',
+        ]
+        has_complex_condition = False
+        if question:
+            import re as cond_re
+            for pattern in complex_condition_patterns:
+                if cond_re.search(pattern, question):
+                    has_complex_condition = True
+                    break
+        
+        # 如果有复杂条件,直接使用Text-to-SQL
+        if has_complex_condition and question:
+            print(f"🔍 检测到复杂过滤条件,使用Text-to-SQL")
+            try:
+                from modules.text_to_sql import get_text_to_sql_engine
+                engine = get_text_to_sql_engine()
+                
+                years = time_range.get('years', [time_range.get('year')])
+                years = [y for y in years if y is not None]
+                quarter = time_range.get('quarter')
+                
                 sql_results, status = engine.query(question, company_id, years, quarter)
                 
                 if status == "success" and sql_results:
                     results = []
-                    # 从问题中智能提取指标名 (仅作为备用)
+                    # 从问题中智能提取指标名
                     metric_name = metrics[0] if metrics else self._extract_metric_name_from_question(question)
                     
                     for row in sql_results:
                         year = row.get('period_year') or row.get('year')
-                        # BUG FIX: Do not default to 1. If quarter is missing, it's likely Annual data.
-                        qtr = row.get('period_quarter') or row.get('quarter')
+                        qtr = row.get('period_quarter') or row.get('quarter') or 1
                         
                         # 遍历所有字段,提取多个指标
+                        # 排出标准时间字段和ID字段
                         excluded_fields = ('period_year', 'period_quarter', 'period_month', 
                                          'year', 'quarter', 'company_id', 'month')
                         
                         for k, v in row.items():
                             if k not in excluded_fields:
                                 if isinstance(v, (int, float)) and v is not None:
-                                    # 优先使用列名(别名)作为指标名
+                                    # 如果有显式别名且不是默认的"value",使用别名作为指标名
+                                    # 否则使用识别到的第一个指标名,或回退到KEY
                                     current_metric = k if k != 'value' else (metrics[0] if metrics else k)
                                     
                                     results.append({
@@ -532,23 +513,12 @@ class FinancialQuery:
                                         'year': year,
                                         'quarter': qtr,
                                         'value': v,
-                                        'unit': '元' # 默认单位
+                                        'unit': '元'
                                     })
                     print(f"✅ Text-to-SQL成功: 提取到 {len(results)} 个数据点")
                     return results
-                else:
-                    print(f"⚠️  Text-to-SQL未返回结果或验证失败: {status}")
-        except Exception as e:
-            print(f"❌ Text-to-SQL执行异常: {e}")
-        
-        # === 以下为旧逻辑保留 (仅作为公式计算的数据源支持) ===
-        # 注意: 纯指标查询不应走到这里，除非Text-to-SQL彻底失败。
-        # 但按照"All-in"策略，我们主要依赖上面的块。
-        # 如果Text-to-SQL失败，我们直接返回空列表不再fallback，
-        # 或者仅保留公式计算部分。
-        
-        # 暂时返回空，或根据需要抛出错误
-        return []
+            except Exception as e:
+                print(f"⚠️  Text-to-SQL失败: {e}, 回退到常规策略")
         
         conn = self._get_connection()
         cursor = conn.cursor()

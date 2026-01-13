@@ -349,6 +349,35 @@ async def stream_financial_response(
         # 显示标题
         yield send_content("📊 **企业财务数据查询**\n\n")
         
+        # === 检查是否需要提示默认平均值 ===
+        # 条件: 1.数据是按年分组(结果中没有quarter) 2.指标是比率类 3.问题中没有明确指明"平均"等词
+        try:
+            has_ratio = False
+            is_annual = True
+            
+            # 检查是否包含比率指标
+            for r in results:
+                m_name = r.get('metric_name', '')
+                # 简单判断: 包含"率", "比", "burden", "margin"等
+                if any(x in m_name for x in ["率", "比", "burden", "margin"]):
+                    has_ratio = True
+                
+                # 检查是否包含季度信息 (如果任一行有季度且不为None/0，则不是纯年度)
+                q = r.get('quarter') or r.get('period_quarter')
+                if q:
+                    is_annual = False
+            
+            # 检查问题关键词
+            explicit_keywords = ["平均", "最大", "最小", "每季", "季度", "明细", "趋势", "detail", "avg", "max", "min"]
+            has_explicit_intent = any(kw in question for kw in explicit_keywords)
+            
+            if has_ratio and is_annual and not has_explicit_intent:
+                warning_msg = "💡 *系统提示: 用户没有明确是查询平均值还是明细数据，系统默认计算平均值；如果希望查询明细数据，请给出明确提示*\n\n"
+                yield send_content(warning_msg)
+                
+        except Exception as w_e:
+            print(f"Warning logic error: {w_e}")
+
         # === 1. 生成表格 (详细/标准模式) ===
         if response_mode in ["detailed", "standard"]:
             formatted = financial_query.format_results(results, company)

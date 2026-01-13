@@ -1,0 +1,61 @@
+{
+    "tables": {
+        "income_statements": [
+            "利润表",
+            "损益表",
+            "收益表"
+        ],
+        "account_balances": [
+            "科目余额表",
+            "账户余额表",
+            "总账余额表"
+        ],
+        "balance_sheets": [
+            "资产负债表",
+            "财务状况表"
+        ],
+        "hr_salary_data": [
+            "人力资源薪资数据",
+            "工资数据表",
+            "薪酬数据"
+        ],
+        "tax_reports": [
+            "税务报表",
+            "纳税申报表",
+            "税款报告"
+        ],
+        "cash_flow_statements": [
+            "现金流量表",
+            "现金流动表"
+        ],
+        "invoices": [
+            "发票",
+            "开票",
+            "票据"
+        ]
+    },
+    "value_mappings": {
+        "invoices.invoice_type.INPUT": [
+            "进项",
+            "采购",
+            "进货",
+            "购买",
+            "购入"
+        ],
+        "invoices.invoice_type.OUTPUT": [
+            "销项",
+            "销售",
+            "出货",
+            "卖出",
+            "开给客户"
+        ],
+        "account_balances.direction.debit": [
+            "借方",
+            "借项"
+        ],
+        "account_balances.direction.credit": [
+            "贷方",
+            "贷项"
+        ]
+    }
+}

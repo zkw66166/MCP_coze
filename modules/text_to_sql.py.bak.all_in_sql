@@ -120,17 +120,9 @@ class TextToSQLEngine:
         # 获取Schema描述
         schema_desc = self.schema_provider.get_schema_description()
         
-        # 加载LLM生成的映射配置
-        try:
-            base_dir = Path(__file__).parent.parent
-            mapping_path = base_dir / 'config' / 'schema_mappings.json'
-            with open(mapping_path, 'r', encoding='utf-8') as f:
-                mappings = json.load(f)
-            mapping_str = json.dumps(mappings, indent=2, ensure_ascii=False)
-        except Exception as e:
-            print(f"⚠️  加载映射配置失败: {e}")
-            mapping_str = "无"
-
+        # 获取业务术语
+        glossary = self.schema_provider.format_glossary_for_prompt()
+        
         # 构建年份条件
         if len(years) == 1:
             year_condition = f"period_year = {years[0]}"
@@ -147,22 +139,17 @@ class TextToSQLEngine:
 ## 数据库Schema
 {schema_desc}
 
-## 业务规则与同义词映射 (Business Rules)
-{mapping_str}
+## 业务术语映射
+{glossary}
 
 ## 必须遵守的约束
 1. 只生成SELECT语句
 2. 必须包含 company_id = {company_id} 条件
 3. 必须包含 {year_condition} 条件{quarter_condition}
-4. 聚合规则 (Aggregation Rules):
-   - 金额类 (Amounts): 使用 SUM(col).
-   - 比例/率类 (Ratios/Rates, e.g. tax_burden, profit_margin): 如果用户问题包含“平均”或“最大值”或”最小值“或“每季”，则按用户指示处理；如果不包含，则使用 AVG(col) 或按季度展示. 禁止在Group By时直接选择原始列.
-   - 快照/计数类 (Snapshots, e.g. employee_count): 使用 AVG(col) 或 MAX(col).
-   - 通用规则: 如果按年份分组(period_year), 所有被查出的列必须包裹在聚合函数(SUM, AVG, MAX, MIN)中.
-5. 分组规则：如果用户询问"每年"或未强调季度，按period_year分组；如果用户询问"季度"、"详细数据"或"趋势"，请按 period_year, period_quarter 分组。
+4. 使用SUM()对金额进行汇总
+5. 按period_year分组
 6. 如果涉及多个指标，请作为多个列查询，并为每列使用有意义的别名(AS '别名')
-7. 对于枚举值字段(如invoice_type, direction)，请严格参考'value_mappings'进行过滤
-8. 只返回SQL语句,不要有任何解释
+7. 只返回SQL语句,不要有任何解释
 
 ## 用户问题
 {question}
