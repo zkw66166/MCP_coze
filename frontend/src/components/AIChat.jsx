@@ -274,14 +274,7 @@ function AIChat({ selectedCompanyId, companies }) {
             <div className="chat-main">
                 {/* 对话区域 */}
                 <div className="chat-area">
-                    <ChatWidget
-                        ref={chatWidgetRef}
-                        messages={messages}
-                        isLoading={isLoading}
-                        showChart={responseMode === 'detailed'}
-                    />
-
-                    {/* 输入区域 */}
+                    {/* 输入区域 (置顶) */}
                     <div className="input-section">
                         <div className="input-hint">
                             请输入要咨询的财务指标，或财税政策，或实务操作问题
@@ -311,14 +304,14 @@ function AIChat({ selectedCompanyId, companies }) {
                                             onClick={() => setResponseMode('detailed')}
                                             title="全量模式：显示数据表格、图表和AI分析"
                                         >
-                                            📑 全量
+                                            📑 图文
                                         </span>
                                         <span
                                             className={`mode-opt ${responseMode === 'standard' ? 'active' : ''}`}
                                             onClick={() => setResponseMode('standard')}
                                             title="数据模式：显示数据表格和AI分析，不显示图表"
                                         >
-                                            📊 数据
+                                            📊 纯数据
                                         </span>
                                         <span
                                             className={`mode-opt ${responseMode === 'concise' ? 'active' : ''}`}
@@ -342,9 +335,17 @@ function AIChat({ selectedCompanyId, companies }) {
                                 </div>
                             </div>
                         </div>
-                        <div className="disclaimer">
-                            AI 智能问答基于 Coze 知识库，回答仅供参考，具体以相关法律法规为准
-                        </div>
+                    </div>
+
+                    <ChatWidget
+                        ref={chatWidgetRef}
+                        messages={messages}
+                        isLoading={isLoading}
+                        showChart={responseMode === 'detailed'}
+                    />
+
+                    <div className="disclaimer">
+                        AI 智能问答基于 Coze 知识库，回答仅供参考，具体以相关法律法规为准
                     </div>
                 </div>
 

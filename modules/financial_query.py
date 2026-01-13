@@ -431,7 +431,15 @@ class FinancialQuery:
         
         for metric_name in sorted_metrics:
             if metric_name in question:
-                found_metrics.append(metric_name)
+                # 检查是否为已找到指标的子串(避免重复,如找到了'企业所得税'就不应再找'所得税')
+                is_substring = False
+                for existing in found_metrics:
+                    if metric_name in existing:
+                        is_substring = True
+                        break
+                
+                if not is_substring:
+                    found_metrics.append(metric_name)
         
         # 不再使用默认值 - 如果没找到指标，返回空列表
         # 由execute_query决定是否使用Text-to-SQL或返回无数据
@@ -643,13 +651,29 @@ class FinancialQuery:
         
         where_clause = ' AND '.join(conditions)
         
+        # 判断是否需要聚合(对流量型数据进行求和,如税额、收入等)
+        # 资产负债表等存量数据不需要求和(通常取期末值)
+        should_aggregate = table in [
+            'income_statements', 'tax_reports', 'tax_returns_income', 
+            'vat_returns', 'cash_flow_statements', 'tax_return_stamp_items'
+        ]
+        
         # 构建查询语句
-        query = f"""
-            SELECT period_year, period_quarter, {field} as value
-            FROM {table}
-            WHERE {where_clause}
-            ORDER BY period_year, period_quarter
-        """
+        if should_aggregate:
+            query = f"""
+                SELECT period_year, period_quarter, SUM({field}) as value
+                FROM {table}
+                WHERE {where_clause}
+                GROUP BY period_year, period_quarter
+                ORDER BY period_year, period_quarter
+            """
+        else:
+            query = f"""
+                SELECT period_year, period_quarter, {field} as value
+                FROM {table}
+                WHERE {where_clause}
+                ORDER BY period_year, period_quarter
+            """
         
         try:
             cursor.execute(query)
