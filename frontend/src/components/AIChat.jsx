@@ -359,6 +359,18 @@ function AIChat({ selectedCompanyId, companies }) {
             <div className="chat-main">
                 {/* 对话区域 */}
                 <div className="chat-area">
+                    <ChatWidget
+                        ref={chatWidgetRef}
+                        messages={messages}
+                        isLoading={isLoading}
+                        showChart={responseMode === 'detailed'}
+
+                        // New props for selection mode
+                        isSelectionMode={isSelectionMode}
+                        selectedIndices={selectedMessageIndices}
+                        onToggleSelect={toggleMessageSelection}
+                    />
+
                     {/* 输入区域 (常规模式显示) 或者 操作栏 (选择模式显示) */}
                     {isSelectionMode ? (
                         <div className="input-section selection-bar">
@@ -399,9 +411,17 @@ function AIChat({ selectedCompanyId, companies }) {
                                 />
                                 <div className="input-footer">
                                     <div className="input-tools">
-                                        <span className="tool-btn">📎 上传文档</span>
-                                        <span className="tool-btn">🎤 语音输入</span>
-                                        <div className="tool-separator">|</div>
+                                        {/* 管理消息按钮 - 移到最左侧 */}
+                                        <div className="manage-btn-wrapper">
+                                            <span
+                                                className="tool-btn manage-btn"
+                                                onClick={toggleSelectionMode}
+                                                title="进入消息选择模式，支持批量删除"
+                                            >
+                                                ⚙️ 管理消息
+                                            </span>
+                                        </div>
+
                                         <div className="mode-toggle">
                                             <span
                                                 className={`mode-opt ${responseMode === 'detailed' ? 'active' : ''}`}
@@ -425,19 +445,13 @@ function AIChat({ selectedCompanyId, companies }) {
                                                 📝 简报
                                             </span>
                                         </div>
-
-                                        {/* 管理消息按钮 - 与前方按钮组保持距离 */}
-                                        <div className="manage-btn-wrapper">
-                                            <span
-                                                className="tool-btn manage-btn"
-                                                onClick={toggleSelectionMode}
-                                                title="进入消息选择模式，支持批量删除"
-                                            >
-                                                ⚙️ 管理消息
-                                            </span>
-                                        </div>
                                     </div>
+
                                     <div className="input-actions">
+                                        {/* 上传和语音 - 移到右侧 */}
+                                        <span className="tool-btn">📎 上传文档</span>
+                                        <span className="tool-btn">🎤 语音输入</span>
+
                                         <span className="char-count">{inputText.length}/500字符</span>
                                         <span className="input-tip">支持自然语言，逐步响应</span>
                                         <button
@@ -452,18 +466,6 @@ function AIChat({ selectedCompanyId, companies }) {
                             </div>
                         </div>
                     )}
-
-                    <ChatWidget
-                        ref={chatWidgetRef}
-                        messages={messages}
-                        isLoading={isLoading}
-                        showChart={responseMode === 'detailed'}
-
-                        // New props for selection mode
-                        isSelectionMode={isSelectionMode}
-                        selectedIndices={selectedMessageIndices}
-                        onToggleSelect={toggleMessageSelection}
-                    />
 
                     <div className="disclaimer">
                         AI 智能问答基于 Coze 知识库，回答仅供参考，具体以相关法律法规为准

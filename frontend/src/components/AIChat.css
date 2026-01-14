@@ -319,6 +319,8 @@
     border-radius: 4px;
     padding: 2px;
     gap: 2px;
+    margin-left: 80px;
+    /* Gap from the left Manage button */
 }
 
 .mode-opt {
@@ -344,11 +346,7 @@
 
 /* 消息管理按钮 */
 .manage-btn-wrapper {
-    margin-left: 20px;
-    /* 拉开距离 */
-    padding-left: 20px;
-    border-left: 1px solid #e5e7eb;
-    /* 可选：添加一条分隔线增强分组感 */
+    /* Removed margin-left, padding-left, border-left as it's now first */
     display: flex;
     align-items: center;
 }
