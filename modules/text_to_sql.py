@@ -150,6 +150,13 @@ class TextToSQLEngine:
 ## 业务规则与同义词映射 (Business Rules)
 {mapping_str}
 
+## 表用途提示 (Table Usage Hints)
+- **financial_metrics**: 存放所有计算好的比率/率指标(如 net_profit_margin, tax_burden_rate, turnover_days). 不包含绝对金额.
+- **income_statements**: 存放利润表绝对金额(如 revenue, cost, total_profit, net_profit). 不包含比率.
+- **balance_sheets**: 存放资产负债表绝对金额.
+- **hr_salary_data**: 存放人员和薪酬数据.
+- **跨表查询**: 如果同时查询绝对金额(如利润)和比率(如利润率), **必须使用 JOIN** 连接相关表 (ON company_id, period_year, period_quarter).
+
 ## 必须遵守的约束
 1. 只生成SELECT语句
 2. 必须包含 company_id = {company_id} 条件

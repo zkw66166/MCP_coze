@@ -33,7 +33,7 @@ def generate_cit_data():
     cursor = conn.cursor()
 
     # Clear old data
-    cursor.execute("DELETE FROM tax_return_income_items")
+    # cursor.execute("DELETE FROM tax_return_income_items") # Table migrated
     cursor.execute("DELETE FROM tax_returns_income")
     conn.commit()
 
@@ -61,48 +61,37 @@ def generate_cit_data():
             tax_reduction = nominal_tax - actual_tax
             
             # If reduction is negative (Actual > Standard), which is rare but possible if mistakes exist,
-            # we just set reduction to 0 and let payable be nominal? Or allow negative reduction (additional tax)?
-            # Let's align exactly to the Financial Statement by forcing the reduction math.
+            # we align exactly to the Financial Statement.
             
-            # Insert Return Header
+            tax_payable = nominal_tax - tax_reduction
+            final_tax_payable = actual_tax
+
+            # Insert Return (Flattened)
             filing_date_obj = datetime.date(year + 1, 5, 31) # Annual filing by May 31 next year
             filing_txt = filing_date_obj.strftime("%Y-%m-%d")
             
             cursor.execute("""
-                INSERT INTO tax_returns_income (company_id, period_year, filing_date)
-                VALUES (?, ?, ?)
-            """, (company_id, year, filing_txt))
-            return_id = cursor.lastrowid
-            
-            # Insert Return Items
-            # Mapping based on "A100000主表" row numbers roughly
-            items = [
-                (1, "一、营业收入", revenue),
-                (2, "减：营业成本", costs),
-                (3, "减：税金及附加", taxes),
-                (4, "减：销售费用", selling),
-                (5, "减：管理费用", admin),
-                (6, "减：财务费用", fin_exp),
-                (10, "二、营业利润", op_profit),
-                (13, "三、利润总额", total_profit),
-                (23, "五、应纳税所得额", taxable_income),
-                (24, "税率（25%）", standard_tax_rate),
-                (25, "六、应纳所得税额", nominal_tax),
-                (26, "减：减免所得税额", tax_reduction), # Using this line to bridge the gap
-                (28, "七、应纳税额", nominal_tax - tax_reduction), # Should equal actual_tax
-                (31, "八、实际应纳所得税额", actual_tax)
-            ]
-            
-            for item in items:
-                l_no, name, val = item
-                cursor.execute("""
-                    INSERT INTO tax_return_income_items (return_id, line_no, item_name, amount)
-                    VALUES (?, ?, ?, ?)
-                """, (return_id, l_no, name, round(val, 2)))
+                INSERT INTO tax_returns_income (
+                    company_id, period_year, filing_date,
+                    revenue, cost, taxes_and_surcharges, 
+                    selling_expenses, administrative_expenses, financial_expenses,
+                    operating_profit, total_profit, 
+                    taxable_income, tax_rate, nominal_tax, 
+                    tax_reduction, tax_payable, final_tax_payable
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                company_id, year, filing_txt,
+                revenue, costs, taxes,
+                selling, admin, fin_exp,
+                op_profit, total_profit,
+                taxable_income, standard_tax_rate, nominal_tax,
+                tax_reduction, tax_payable, final_tax_payable
+            ))
                 
     conn.commit()
     conn.close()
-    print("CIT Data Generation Complete.")
+    print("CIT Data Generation Complete (Flattened Schema).")
 
 if __name__ == "__main__":
     generate_cit_data()

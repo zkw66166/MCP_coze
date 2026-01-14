@@ -372,7 +372,7 @@ async def stream_financial_response(
             has_explicit_intent = any(kw in question for kw in explicit_keywords)
             
             if has_ratio and is_annual and not has_explicit_intent:
-                warning_msg = "💡 *系统提示: 用户没有明确是查询平均值还是明细数据，系统默认计算平均值；如果希望查询明细数据，请给出明确提示*\n\n"
+                warning_msg = "💡 *系统提示: 用户没有明确提示比率指标是查询明细还是平均值、最大值等统计值，系统默认计算平均值；如果希望更精确查询，请给出明确提示*\n\n"
                 yield send_content(warning_msg)
                 
         except Exception as w_e:

@@ -289,7 +289,7 @@ function AIChat({ selectedCompanyId, companies }) {
                                         handleSend();
                                     }
                                 }}
-                                placeholder="例如：2022-2025收入、利润变动情况；小微企业优惠政策有哪些；小微企业优惠需要申请吗"
+                                placeholder="例如：2022-2025收入、利润变动情况；或小微企业优惠政策有哪些；或小微企业优惠需要申请吗"
                                 disabled={isLoading}
                                 rows={2}
                             />

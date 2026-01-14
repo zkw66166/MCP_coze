@@ -1200,6 +1200,86 @@
                 }
             }
         },
+        "tax_returns_income": {
+            "description": "企业所得税申报表",
+            "fields": {
+                "taxable_income": {
+                    "aliases": [
+                        "应纳税所得额",
+                        "纳税所得额",
+                        "应税所得额",
+                        "应税所得",
+                        "所得额"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "nominal_tax": {
+                    "aliases": [
+                        "应纳所得税额",
+                        "企业所得税应纳税额",
+                        "所得税应纳额"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "total_profit": {
+                    "aliases": [
+                        "企业所得税利润总额",
+                        "所得税申报利润"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "revenue": {
+                    "aliases": [
+                        "企业所得税营业收入",
+                        "所得税申报收入"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "cost": {
+                    "aliases": [
+                        "企业所得税营业成本",
+                        "所得税申报成本"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "tax_rate": {
+                    "aliases": [
+                        "企业所得税税率",
+                        "适用税率"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "tax_reduction": {
+                    "aliases": [
+                        "减免所得税额",
+                        "减免税额"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "tax_payable": {
+                    "aliases": [
+                        "应纳税额",
+                        "所得税应补退税额"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                },
+                "final_tax_payable": {
+                    "aliases": [
+                        "实际应纳所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "申报表"
+                }
+            }
+        },
         "tax_return_stamp_items": {
             "description": "印花税申报明细",
             "fields": {
@@ -1564,85 +1644,6 @@
     ],
     "item_queries": {
         "_description": "特殊处理:针对item_name/amount结构的表进行查询",
-        "应纳税所得额": {
-            "table": "tax_return_income_items",
-            "join_table": "tax_returns_income",
-            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
-            "item_name_field": "item_name",
-            "item_name_value": "应纳税所得额",
-            "value_field": "amount",
-            "company_field": "tax_returns_income.company_id",
-            "year_field": "tax_returns_income.period_year",
-            "unit": "元",
-            "aliases": [
-                "应纳税所得额",
-                "纳税所得额",
-                "应税所得额",
-                "应税所得",
-                "所得额"
-            ]
-        },
-        "应纳所得税额": {
-            "table": "tax_return_income_items",
-            "join_table": "tax_returns_income",
-            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
-            "item_name_field": "item_name",
-            "item_name_value": "应纳所得税额",
-            "value_field": "amount",
-            "company_field": "tax_returns_income.company_id",
-            "year_field": "tax_returns_income.period_year",
-            "unit": "元",
-            "aliases": [
-                "应纳所得税额",
-                "企业所得税应纳税额",
-                "所得税应纳额"
-            ]
-        },
-        "企业所得税利润总额": {
-            "table": "tax_return_income_items",
-            "join_table": "tax_returns_income",
-            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
-            "item_name_field": "item_name",
-            "item_name_value": "利润总额",
-            "value_field": "amount",
-            "company_field": "tax_returns_income.company_id",
-            "year_field": "tax_returns_income.period_year",
-            "unit": "元",
-            "aliases": [
-                "企业所得税利润总额",
-                "所得税申报利润"
-            ]
-        },
-        "企业所得税营业收入": {
-            "table": "tax_return_income_items",
-            "join_table": "tax_returns_income",
-            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
-            "item_name_field": "item_name",
-            "item_name_value": "营业收入",
-            "value_field": "amount",
-            "company_field": "tax_returns_income.company_id",
-            "year_field": "tax_returns_income.period_year",
-            "unit": "元",
-            "aliases": [
-                "企业所得税营业收入",
-                "所得税申报收入"
-            ]
-        },
-        "企业所得税营业成本": {
-            "table": "tax_return_income_items",
-            "join_table": "tax_returns_income",
-            "join_condition": "tax_return_income_items.return_id = tax_returns_income.id",
-            "item_name_field": "item_name",
-            "item_name_value": "营业成本",
-            "value_field": "amount",
-            "company_field": "tax_returns_income.company_id",
-            "year_field": "tax_returns_income.period_year",
-            "unit": "元",
-            "aliases": [
-                "企业所得税营业成本",
-                "所得税申报成本"
-            ]
-        },
         "印花税": {
             "table": "tax_return_stamp_items",
             "join_table": "tax_returns_stamp",

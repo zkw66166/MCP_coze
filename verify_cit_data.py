@@ -17,10 +17,10 @@ def verify_cit_data():
     SELECT 
         tri.company_id,
         tri.period_year,
-        trii.amount as tax_return_payable
+        tri.final_tax_payable as tax_return_payable
     FROM tax_returns_income tri
-    JOIN tax_return_income_items trii ON tri.id = trii.return_id
-    WHERE trii.line_no = 31 -- 实际应纳所得税额
+    -- JOIN removed
+    WHERE 1=1 -- trii.line_no = 31 removed
     """
     df_cit = pd.read_sql_query(query, conn)
     

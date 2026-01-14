@@ -36,10 +36,22 @@ def debug_sql_generation():
     print("\n--- TEST 2: Headcount ---")
     q2 = "2023年销售部人数"
     try:
-        system_sql2 = engine.generate_sql(q2, 1, [2023])
+        system_sql2 = engine.generate_sql(q2, 1, [2023]) 
         print(f"GENERATED SQL 2: {system_sql2}")
     except Exception as e:
         print(f"Error 2: {e}")
+
+    # Test Case 3: Mixed Metrics (Amount + Ratio)
+    print("\n--- TEST 3: Mixed Metrics (Profit + Margin) ---")
+    q3 = "22-25年利润总额、利润率"
+    # Need to simulate extract_time_range logic for years list if I use generate_sql with explicit years
+    # 22-25 -> 2022, 2023, 2024, 2025
+    years = [2022, 2023, 2024, 2025]
+    try:
+        system_sql3 = engine.generate_sql(q3, 1, years)
+        print(f"GENERATED SQL 3: {system_sql3}")
+    except Exception as e:
+        print(f"Error 3: {e}")
 
 if __name__ == "__main__":
     debug_sql_generation()

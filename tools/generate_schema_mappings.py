@@ -44,7 +44,7 @@ def generate_mappings(schema_info):
     
     # We focus on key tables for financial queries
     target_tables = ['invoices', 'account_balances', 'income_statements', 'balance_sheets', 
-                     'cash_flow_statements', 'tax_reports', 'hr_salary_data']
+                     'cash_flow_statements', 'tax_reports', 'hr_salary_data', 'tax_returns_income']
     
     prompt_content = f"""
     Analyze the following SQLite database schema and generate a JSON mapping of synonyms (aliases) for key tables, columns, and column values.
