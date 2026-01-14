@@ -19,6 +19,10 @@ const ChatWidget = forwardRef(function ChatWidget({
     const containerRef = useRef(null);
     const messageRefs = useRef([]);
 
+    // 滚动状态追踪
+    const isUserAtBottomRef = useRef(true);
+    const prevIsLoadingRef = useRef(isLoading);
+
     // 暴露 scrollToMessage 方法给父组件
     useImperativeHandle(ref, () => ({
         scrollToMessage: (index) => {
@@ -27,14 +31,56 @@ const ChatWidget = forwardRef(function ChatWidget({
                     behavior: 'smooth',
                     block: 'start'
                 });
+                // 跳转后认为不再底部，或者是特定位置，简单起见暂不强制置为true，由onScroll更新
             }
         }
     }));
 
-    // 自动滚动到底部
+    // 监听滚动事件，判断用户是否在底部
+    const handleScroll = () => {
+        const container = containerRef.current;
+        if (container) {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            // 阈值设为 50px，在此范围内认为在底部
+            isUserAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 50;
+        }
+    };
+
+    // 智能自动滚动
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        const container = containerRef.current;
+        if (!container) return;
+
+        // 1. 响应结束时 (isLoading 从 true -> false)，强制滚动到底部
+        if (prevIsLoadingRef.current && !isLoading) {
+            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 2. 正在响应时 (isLoading 为 true)
+        else if (isLoading) {
+            const lastMsg = messages[messages.length - 1];
+            const hasContent = lastMsg && lastMsg.role === 'assistant' && lastMsg.content && lastMsg.content.length > 0;
+
+            if (!hasContent) {
+                // 阶段1: 新问题开始，尚未输出流式内容 (Waiting) -> 强制滚动
+                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                isUserAtBottomRef.current = true;
+            } else {
+                // 阶段2: 流式显示开始 (Streaming) -> 智能滚动 (仅当用户在底部时)
+                if (isUserAtBottomRef.current) {
+                    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        // 3. 开始加载瞬间
+        if (!prevIsLoadingRef.current && isLoading) {
+            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            isUserAtBottomRef.current = true;
+        }
+
+        prevIsLoadingRef.current = isLoading;
+    }, [messages, isLoading]);
 
     // 渲染消息内容（支持 Markdown、图表和分析总结）
     const renderMessageContent = (msg, index) => {
@@ -87,7 +133,11 @@ const ChatWidget = forwardRef(function ChatWidget({
     }
 
     return (
-        <div className={`chat-widget ${isSelectionMode ? 'selection-mode' : ''}`} ref={containerRef}>
+        <div
+            className={`chat-widget ${isSelectionMode ? 'selection-mode' : ''}`}
+            ref={containerRef}
+            onScroll={handleScroll}
+        >
             {messages.map((msg, index) => {
                 const isSelected = selectedIndices.has(index);
                 return (

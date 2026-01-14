@@ -342,6 +342,28 @@
     color: #4b5563;
 }
 
+/* 消息管理按钮 */
+.manage-btn-wrapper {
+    margin-left: 20px;
+    /* 拉开距离 */
+    padding-left: 20px;
+    border-left: 1px solid #e5e7eb;
+    /* 可选：添加一条分隔线增强分组感 */
+    display: flex;
+    align-items: center;
+}
+
+.tool-btn.manage-btn {
+    color: #6b7280;
+    font-size: 11px;
+    transition: color 0.15s;
+    cursor: pointer;
+}
+
+.tool-btn.manage-btn:hover {
+    color: #3b82f6;
+}
+
 /* 消息选择模式样式 */
 .input-section.selection-bar {
     display: flex;
@@ -416,10 +438,11 @@
 
 .selection-checkbox {
     position: absolute;
-    top: 50%;
+    top: 10px;
+    /* Align to top with some padding */
     left: -30px;
     /* Checkbox appears to the left */
-    transform: translateY(-50%);
+    /* Removed transform translateY to stop centering */
     display: flex;
     align-items: center;
     justify-content: center;

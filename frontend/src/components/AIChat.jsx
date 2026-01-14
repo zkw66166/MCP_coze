@@ -350,17 +350,7 @@ function AIChat({ selectedCompanyId, companies }) {
                     </div>
                 </div>
                 <div className="page-actions">
-                    <button
-                        className={`action-btn ${isSelectionMode ? 'active' : ''}`}
-                        onClick={toggleSelectionMode}
-                        disabled={messages.length === 0}
-                        title="选择性删除消息"
-                    >
-                        {isSelectionMode ? '取消管理' : '📝 管理消息'}
-                    </button>
-                    {!isSelectionMode && (
-                        <button className="action-btn" onClick={handleClear} disabled={messages.length === 0}>清空对话</button>
-                    )}
+                    <button className="action-btn" onClick={handleClear} disabled={messages.length === 0}>清空对话</button>
                     <button className="action-btn" onClick={handleExportPDF} disabled={messages.length === 0}>导出PDF</button>
                 </div>
             </div>
@@ -418,14 +408,14 @@ function AIChat({ selectedCompanyId, companies }) {
                                                 onClick={() => setResponseMode('detailed')}
                                                 title="全量模式：显示数据表格、图表和AI分析"
                                             >
-                                                📑 图文
+                                                📊 图文
                                             </span>
                                             <span
                                                 className={`mode-opt ${responseMode === 'standard' ? 'active' : ''}`}
                                                 onClick={() => setResponseMode('standard')}
                                                 title="数据模式：显示数据表格和AI分析，不显示图表"
                                             >
-                                                📊 纯数据
+                                                📑 纯数据
                                             </span>
                                             <span
                                                 className={`mode-opt ${responseMode === 'concise' ? 'active' : ''}`}
@@ -433,6 +423,17 @@ function AIChat({ selectedCompanyId, companies }) {
                                                 title="简报模式：仅显示AI文字总结"
                                             >
                                                 📝 简报
+                                            </span>
+                                        </div>
+
+                                        {/* 管理消息按钮 - 与前方按钮组保持距离 */}
+                                        <div className="manage-btn-wrapper">
+                                            <span
+                                                className="tool-btn manage-btn"
+                                                onClick={toggleSelectionMode}
+                                                title="进入消息选择模式，支持批量删除"
+                                            >
+                                                ⚙️ 管理消息
                                             </span>
                                         </div>
                                     </div>
