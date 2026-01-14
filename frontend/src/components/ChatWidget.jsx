@@ -7,7 +7,14 @@ import './ChatWidget.css';
 /**
  * 聊天显示组件
  */
-const ChatWidget = forwardRef(function ChatWidget({ messages, isLoading, showChart = true }, ref) {
+const ChatWidget = forwardRef(function ChatWidget({
+    messages,
+    isLoading,
+    showChart = true,
+    isSelectionMode = false,
+    selectedIndices = new Set(),
+    onToggleSelect = () => { }
+}, ref) {
     const chatEndRef = useRef(null);
     const containerRef = useRef(null);
     const messageRefs = useRef([]);
@@ -80,51 +87,66 @@ const ChatWidget = forwardRef(function ChatWidget({ messages, isLoading, showCha
     }
 
     return (
-        <div className="chat-widget" ref={containerRef}>
-            {messages.map((msg, index) => (
-                <div
-                    key={index}
-                    className={`chat-message ${msg.role}`}
-                    ref={el => messageRefs.current[index] = el}
-                >
-                    {msg.role === 'user' ? (
-                        <div className="user-message">
-                            <span className="timestamp">[{msg.timestamp}]</span>
-                            <strong>您：</strong>
-                            {msg.content}
-                        </div>
-                    ) : (
-                        <div className="assistant-message">
-                            <div className="message-header">
-                                <strong>智能体：</strong>
-                                {msg.route && (
-                                    <span className={`route-badge ${msg.route}`}>
-                                        {msg.route === 'financial' && '📊 财务数据'}
-                                        {msg.route === 'tax_incentive' && '📋 税收优惠'}
-                                        {msg.route === 'coze' && '🤖 知识库'}
-                                        {msg.route === 'financial_data' && '📊 财务数据'}
-                                    </span>
+        <div className={`chat-widget ${isSelectionMode ? 'selection-mode' : ''}`} ref={containerRef}>
+            {messages.map((msg, index) => {
+                const isSelected = selectedIndices.has(index);
+                return (
+                    <div
+                        key={index}
+                        className={`chat-message ${msg.role} ${isSelected ? 'selected' : ''}`}
+                        ref={el => messageRefs.current[index] = el}
+                        onClick={() => isSelectionMode && onToggleSelect(index)}
+                    >
+                        {isSelectionMode && (
+                            <div className="selection-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    readOnly
+                                />
+                            </div>
+                        )}
+
+                        {msg.role === 'user' ? (
+                            <div className="user-message">
+                                <span className="timestamp">[{msg.timestamp}]</span>
+                                <strong>您：</strong>
+                                {msg.content}
+                            </div>
+                        ) : (
+                            <div className="assistant-message">
+                                <div className="message-header">
+                                    <strong>智能体：</strong>
+                                    {msg.route && (
+                                        <span className={`route-badge ${msg.route}`}>
+                                            {msg.route === 'financial' && '📊 财务数据'}
+                                            {msg.route === 'tax_incentive' && '📋 税收优惠'}
+                                            {msg.route === 'coze' && '🤖 知识库'}
+                                            {msg.route === 'financial_data' && '📊 财务数据'}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="message-content">
+                                    {renderMessageContent(msg, index)}
+                                </div>
+                                {!isLoading && msg.content && !isSelectionMode && (
+                                    <div className="message-actions">
+                                        <button
+                                            className="copy-btn"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigator.clipboard.writeText(msg.content);
+                                            }}
+                                        >
+                                            📋 复制回答
+                                        </button>
+                                    </div>
                                 )}
                             </div>
-                            <div className="message-content">
-                                {renderMessageContent(msg, index)}
-                            </div>
-                            {!isLoading && msg.content && (
-                                <div className="message-actions">
-                                    <button
-                                        className="copy-btn"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(msg.content);
-                                        }}
-                                    >
-                                        📋 复制回答
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            ))}
+                        )}
+                    </div>
+                );
+            })}
 
             {isLoading && (
                 <div className="loading-indicator">

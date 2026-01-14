@@ -14,7 +14,12 @@ function AIChat({ selectedCompanyId, companies }) {
     const [currentController, setCurrentController] = useState(null);
     const [selectedHistory, setSelectedHistory] = useState(new Set());  // 新增: 选中的历史记录
     const [responseMode, setResponseMode] = useState('detailed'); // 新增: 回答模式 (detailed/standard/concise)
+    const [isSelectionMode, setIsSelectionMode] = useState(false); // 新增: 消息选择模式
+    const [selectedMessageIndices, setSelectedMessageIndices] = useState(new Set()); // 新增: 选中的消息索引
     const chatWidgetRef = useRef(null);
+
+    const historyListRef = useRef(null); // Ref for history list scrolling
+    const historyNavRef = useRef({});    // Ref for history navigation state { [question]: lastIndex }
 
     // 加载历史记录
     useEffect(() => {
@@ -50,6 +55,13 @@ function AIChat({ selectedCompanyId, companies }) {
         const filteredHistory = history.filter(h => h !== question);
         const newHistory = [question, ...filteredHistory.slice(0, 49)];
         saveHistory(newHistory);
+
+        // 滚动历史记录到顶部
+        if (historyListRef.current) {
+            setTimeout(() => {
+                historyListRef.current.scrollTop = 0;
+            }, 0);
+        }
 
         // 流式请求
         const controller = streamChat(question, selectedCompanyId, responseMode, {
@@ -125,12 +137,46 @@ function AIChat({ selectedCompanyId, companies }) {
         setCurrentController(controller);
     }, [inputText, isLoading, selectedCompanyId, history, saveHistory, responseMode]);
 
-    // 清空对话
+    // 清空对话 (全部)
     const handleClear = useCallback(() => {
-        if (currentController) currentController.abort();
-        setMessages([]);
-        setIsLoading(false);
+        if (window.confirm('确定要清空所有对话吗？此操作无法撤销。')) {
+            if (currentController) currentController.abort();
+            setMessages([]);
+            setIsLoading(false);
+            setIsSelectionMode(false);
+            setSelectedMessageIndices(new Set());
+        }
     }, [currentController]);
+
+    // 切换选择模式
+    const toggleSelectionMode = useCallback(() => {
+        setIsSelectionMode(prev => !prev);
+        setSelectedMessageIndices(new Set()); // 进入或退出都重置选择
+    }, []);
+
+    // 切换单条消息选中
+    const toggleMessageSelection = useCallback((index) => {
+        setSelectedMessageIndices(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    }, []);
+
+    // 删除选中的消息
+    const handleDeleteSelectedMessages = useCallback(() => {
+        if (selectedMessageIndices.size === 0) return;
+
+        if (window.confirm(`确定删除选中的 ${selectedMessageIndices.size} 条消息吗？`)) {
+            setMessages(prev => prev.filter((_, index) => !selectedMessageIndices.has(index)));
+            setIsSelectionMode(false); // 删除后退出选择模式
+            setSelectedMessageIndices(new Set());
+        }
+    }, [selectedMessageIndices]);
 
     // 导出 PDF
     const handleExportPDF = useCallback(async () => {
@@ -244,12 +290,51 @@ function AIChat({ selectedCompanyId, companies }) {
         setSelectedHistory(newSelected);
     };
 
-    // 历史记录单击: 填充输入框 + 导航到回答
+    // 历史记录单击: 循环定位所有回答（最新 -> 上一个 -> ...）
     const handleHistoryClick = (item) => {
         setInputText(item);  // 填充到输入框
-        const idx = messages.findIndex(msg => msg.role === 'user' && msg.content === item);
-        if (idx !== -1 && chatWidgetRef.current) {
-            chatWidgetRef.current.scrollToMessage(idx);
+
+        // 1. 找到所有匹配的消息索引
+        const indices = [];
+        messages.forEach((msg, idx) => {
+            if (msg.role === 'user' && msg.content === item) {
+                indices.push(idx);
+            }
+        });
+
+        if (indices.length === 0) return;
+
+        let targetIndex;
+        const lastNavIndex = historyNavRef.current[item];
+
+        // 2. 决定跳转目标
+        if (indices.length === 1) {
+            // 只有一条，直接跳转
+            targetIndex = indices[0];
+            historyNavRef.current[item] = targetIndex;
+        } else {
+            // 多条记录，循环逻辑
+            if (lastNavIndex === undefined || !indices.includes(lastNavIndex)) {
+                // 首次点击或状态失效，定位到最后一条（最新）
+                targetIndex = indices[indices.length - 1];
+            } else {
+                // 不是首次，找当前位置的前一个
+                const currentPos = indices.indexOf(lastNavIndex);
+                if (currentPos > 0) {
+                    targetIndex = indices[currentPos - 1]; // 上一个
+                } else {
+                    targetIndex = indices[indices.length - 1]; // 循环回到最后一个
+                }
+            }
+            historyNavRef.current[item] = targetIndex;
+        }
+
+        // 3. 执行跳转
+        if (targetIndex !== undefined && chatWidgetRef.current) {
+            chatWidgetRef.current.scrollToMessage(targetIndex);
+
+            // 可选：如果是多条，给个轻提示告诉用户当前是第几条
+            // console.log(`Navigated to ${targetIndex}, match ${indices.indexOf(targetIndex) + 1}/${indices.length}`);
         }
     };
 
@@ -265,8 +350,18 @@ function AIChat({ selectedCompanyId, companies }) {
                     </div>
                 </div>
                 <div className="page-actions">
-                    <button className="action-btn" onClick={handleClear}>清空对话</button>
-                    <button className="action-btn" onClick={handleExportPDF}>导出PDF</button>
+                    <button
+                        className={`action-btn ${isSelectionMode ? 'active' : ''}`}
+                        onClick={toggleSelectionMode}
+                        disabled={messages.length === 0}
+                        title="选择性删除消息"
+                    >
+                        {isSelectionMode ? '取消管理' : '📝 管理消息'}
+                    </button>
+                    {!isSelectionMode && (
+                        <button className="action-btn" onClick={handleClear} disabled={messages.length === 0}>清空对话</button>
+                    )}
+                    <button className="action-btn" onClick={handleExportPDF} disabled={messages.length === 0}>导出PDF</button>
                 </div>
             </div>
 
@@ -274,74 +369,99 @@ function AIChat({ selectedCompanyId, companies }) {
             <div className="chat-main">
                 {/* 对话区域 */}
                 <div className="chat-area">
-                    {/* 输入区域 (置顶) */}
-                    <div className="input-section">
-                        <div className="input-hint">
-                            请输入要咨询的财务指标，或财税政策，或实务操作问题
+                    {/* 输入区域 (常规模式显示) 或者 操作栏 (选择模式显示) */}
+                    {isSelectionMode ? (
+                        <div className="input-section selection-bar">
+                            <div className="selection-info">
+                                已选择 <strong>{selectedMessageIndices.size}</strong> 条消息
+                            </div>
+                            <div className="selection-actions">
+                                <button className="select-action-btn cancel" onClick={toggleSelectionMode}>
+                                    取消
+                                </button>
+                                <button
+                                    className="select-action-btn delete"
+                                    onClick={handleDeleteSelectedMessages}
+                                    disabled={selectedMessageIndices.size === 0}
+                                >
+                                    🗑️ 删除选中
+                                </button>
+                            </div>
                         </div>
-                        <div className="input-box">
-                            <textarea
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleSend();
-                                    }
-                                }}
-                                placeholder="例如：2022-2025收入、利润变动情况；或小微企业优惠政策有哪些；或小微企业优惠需要申请吗"
-                                disabled={isLoading}
-                                rows={2}
-                            />
-                            <div className="input-footer">
-                                <div className="input-tools">
-                                    <span className="tool-btn">📎 上传文档</span>
-                                    <span className="tool-btn">🎤 语音输入</span>
-                                    <div className="tool-separator">|</div>
-                                    <div className="mode-toggle">
-                                        <span
-                                            className={`mode-opt ${responseMode === 'detailed' ? 'active' : ''}`}
-                                            onClick={() => setResponseMode('detailed')}
-                                            title="全量模式：显示数据表格、图表和AI分析"
-                                        >
-                                            📑 图文
-                                        </span>
-                                        <span
-                                            className={`mode-opt ${responseMode === 'standard' ? 'active' : ''}`}
-                                            onClick={() => setResponseMode('standard')}
-                                            title="数据模式：显示数据表格和AI分析，不显示图表"
-                                        >
-                                            📊 纯数据
-                                        </span>
-                                        <span
-                                            className={`mode-opt ${responseMode === 'concise' ? 'active' : ''}`}
-                                            onClick={() => setResponseMode('concise')}
-                                            title="简报模式：仅显示AI文字总结"
-                                        >
-                                            📝 简报
-                                        </span>
+                    ) : (
+                        <div className="input-section">
+                            <div className="input-hint">
+                                请输入要咨询的财务指标，或财税政策，或实务操作问题
+                            </div>
+                            <div className="input-box">
+                                <textarea
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSend();
+                                        }
+                                    }}
+                                    placeholder="例如：2022-2025收入、利润变动情况；或小微企业优惠政策有哪些；或小微企业优惠需要申请吗"
+                                    disabled={isLoading}
+                                    rows={2}
+                                />
+                                <div className="input-footer">
+                                    <div className="input-tools">
+                                        <span className="tool-btn">📎 上传文档</span>
+                                        <span className="tool-btn">🎤 语音输入</span>
+                                        <div className="tool-separator">|</div>
+                                        <div className="mode-toggle">
+                                            <span
+                                                className={`mode-opt ${responseMode === 'detailed' ? 'active' : ''}`}
+                                                onClick={() => setResponseMode('detailed')}
+                                                title="全量模式：显示数据表格、图表和AI分析"
+                                            >
+                                                📑 图文
+                                            </span>
+                                            <span
+                                                className={`mode-opt ${responseMode === 'standard' ? 'active' : ''}`}
+                                                onClick={() => setResponseMode('standard')}
+                                                title="数据模式：显示数据表格和AI分析，不显示图表"
+                                            >
+                                                📊 纯数据
+                                            </span>
+                                            <span
+                                                className={`mode-opt ${responseMode === 'concise' ? 'active' : ''}`}
+                                                onClick={() => setResponseMode('concise')}
+                                                title="简报模式：仅显示AI文字总结"
+                                            >
+                                                📝 简报
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="input-actions">
-                                    <span className="char-count">{inputText.length}/500字符</span>
-                                    <span className="input-tip">支持自然语言，逐步响应</span>
-                                    <button
-                                        className={`submit-btn ${inputText.trim() ? 'active' : ''}`}
-                                        onClick={handleSend}
-                                        disabled={isLoading || !inputText.trim()}
-                                    >
-                                        ✨ 提交咨询
-                                    </button>
+                                    <div className="input-actions">
+                                        <span className="char-count">{inputText.length}/500字符</span>
+                                        <span className="input-tip">支持自然语言，逐步响应</span>
+                                        <button
+                                            className={`submit-btn ${inputText.trim() ? 'active' : ''}`}
+                                            onClick={handleSend}
+                                            disabled={isLoading || !inputText.trim()}
+                                        >
+                                            ✨ 提交咨询
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     <ChatWidget
                         ref={chatWidgetRef}
                         messages={messages}
                         isLoading={isLoading}
                         showChart={responseMode === 'detailed'}
+
+                        // New props for selection mode
+                        isSelectionMode={isSelectionMode}
+                        selectedIndices={selectedMessageIndices}
+                        onToggleSelect={toggleMessageSelection}
                     />
 
                     <div className="disclaimer">
@@ -355,7 +475,7 @@ function AIChat({ selectedCompanyId, companies }) {
                         <span className="history-title">📜 历史记录</span>
                         <button className="clear-history-btn" onClick={handleClearHistory}>删除历史</button>
                     </div>
-                    <ul className="history-list">
+                    <ul className="history-list" ref={historyListRef}>
                         {history.length === 0 ? (
                             <li className="empty-history">暂无历史记录</li>
                         ) : (
