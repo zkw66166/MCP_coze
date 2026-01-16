@@ -36,7 +36,7 @@ def create_database():
         -- Excel现有字段
         serial_number INTEGER,             -- 序号
         tax_type TEXT NOT NULL,            -- 税种(增值税、企业所得税等)
-        project_name TEXT,                 -- 优惠项目
+        incentive_items TEXT,              -- 优惠项目
         qualification TEXT,                -- 优惠认定条件
         incentive_method TEXT,             -- 税收优惠方式(免征、减征等)
         detailed_rules TEXT,               -- 具体优惠规定
@@ -78,7 +78,7 @@ def create_database():
     cursor.execute("""
     CREATE VIRTUAL TABLE IF NOT EXISTS tax_incentives_fts USING fts5(
         tax_type,
-        project_name,
+        incentive_items,
         qualification,
         detailed_rules,
         legal_basis,
@@ -92,8 +92,8 @@ def create_database():
     # 创建触发器:自动更新全文搜索索引
     cursor.execute("""
     CREATE TRIGGER IF NOT EXISTS tax_incentives_ai AFTER INSERT ON tax_incentives BEGIN
-        INSERT INTO tax_incentives_fts(rowid, tax_type, project_name, qualification, detailed_rules, legal_basis, explanation, keywords)
-        VALUES (new.id, new.tax_type, new.project_name, new.qualification, new.detailed_rules, new.legal_basis, new.explanation, new.keywords);
+        INSERT INTO tax_incentives_fts(rowid, tax_type, incentive_items, qualification, detailed_rules, legal_basis, explanation, keywords)
+        VALUES (new.id, new.tax_type, new.incentive_items, new.qualification, new.detailed_rules, new.legal_basis, new.explanation, new.keywords);
     END
     """)
     
@@ -106,8 +106,8 @@ def create_database():
     cursor.execute("""
     CREATE TRIGGER IF NOT EXISTS tax_incentives_au AFTER UPDATE ON tax_incentives BEGIN
         DELETE FROM tax_incentives_fts WHERE rowid = old.id;
-        INSERT INTO tax_incentives_fts(rowid, tax_type, project_name, qualification, detailed_rules, legal_basis, explanation, keywords)
-        VALUES (new.id, new.tax_type, new.project_name, new.qualification, new.detailed_rules, new.legal_basis, new.explanation, new.keywords);
+        INSERT INTO tax_incentives_fts(rowid, tax_type, incentive_items, qualification, detailed_rules, legal_basis, explanation, keywords)
+        VALUES (new.id, new.tax_type, new.incentive_items, new.qualification, new.detailed_rules, new.legal_basis, new.explanation, new.keywords);
     END
     """)
     
@@ -157,7 +157,7 @@ def import_excel_data():
     field_mapping = {
         '序号': 'serial_number',
         '税种': 'tax_type',
-        '优惠项目': 'project_name',
+        '优惠项目': 'incentive_items',
         '优惠认定条件': 'qualification',
         '税收优惠方式': 'incentive_method',
         '具体优惠规定': 'detailed_rules',
@@ -188,7 +188,7 @@ def import_excel_data():
         insert_data = {
             'serial_number': int(row['序号']) if pd.notna(row['序号']) else None,
             'tax_type': str(row['税种']) if pd.notna(row['税种']) else None,
-            'project_name': str(row['优惠项目']) if pd.notna(row['优惠项目']) else None,
+            'incentive_items': str(row['优惠项目']) if pd.notna(row['优惠项目']) else None,
             'qualification': str(row['优惠认定条件']) if pd.notna(row['优惠认定条件']) else None,
             'incentive_method': str(row['税收优惠方式']) if pd.notna(row['税收优惠方式']) else None,
             'detailed_rules': str(row['具体优惠规定']) if pd.notna(row['具体优惠规定']) else None,
@@ -203,11 +203,11 @@ def import_excel_data():
         # 插入数据
         cursor.execute("""
             INSERT INTO tax_incentives (
-                serial_number, tax_type, project_name, qualification,
+                serial_number, tax_type, incentive_items, qualification,
                 incentive_method, detailed_rules, legal_basis, special_notes,
                 explanation, keywords, data_source, data_quality
             ) VALUES (
-                :serial_number, :tax_type, :project_name, :qualification,
+                :serial_number, :tax_type, :incentive_items, :qualification,
                 :incentive_method, :detailed_rules, :legal_basis, :special_notes,
                 :explanation, :keywords, :data_source, :data_quality
             )

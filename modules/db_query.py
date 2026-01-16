@@ -328,7 +328,7 @@ class TaxIncentiveQuery:
             entity_conditions = []
             for entity in entity_keywords:
                 entity_conditions.append("""(
-                    project_name LIKE ? 
+                    incentive_items LIKE ? 
                     OR detailed_rules LIKE ? 
                     OR qualification LIKE ?
                     OR incentive_method LIKE ?
@@ -397,7 +397,7 @@ class TaxIncentiveQuery:
             entity_conditions = []
             for entity in entity_keywords:
                 entity_conditions.append("""(
-                    project_name LIKE ? 
+                    incentive_items LIKE ? 
                     OR detailed_rules LIKE ? 
                     OR qualification LIKE ?
                     OR incentive_method LIKE ?
@@ -541,7 +541,7 @@ class TaxIncentiveQuery:
             # 每个关键词在多个字段中搜索
             conditions.append("""(
                 tax_type LIKE ? OR
-                project_name LIKE ? OR
+                incentive_items LIKE ? OR
                 qualification LIKE ? OR
                 detailed_rules LIKE ? OR
                 keywords LIKE ? OR
@@ -702,24 +702,24 @@ if __name__ == "__main__":
     
     for q in test_questions:
         print(f"\n  问题: {q}")
-        results = query.search(q, limit=3)
+        results, total, intent = query.search(q, limit=3)
         print(f"  找到 {len(results)} 条结果:")
         for idx, r in enumerate(results, 1):
-            print(f"    {idx}. [{r['tax_type']}] {r['project_name']} - {r['incentive_method']}")
+            print(f"    {idx}. [{r['tax_type']}] {r['incentive_items']} - {r['incentive_method']}")
     
     # 测试3: 按税种搜索
     print("\n【测试3: 按税种搜索】")
     results = query.search_by_tax_type("增值税", limit=5)
     print(f"  增值税优惠政策: {len(results)} 条")
     for idx, r in enumerate(results[:3], 1):
-        print(f"    {idx}. {r['project_name']}")
+        print(f"    {idx}. {r['incentive_items']}")
     
     # 测试4: 按优惠方式搜索
     print("\n【测试4: 按优惠方式搜索】")
     results = query.search_by_incentive_method("免征", limit=5)
     print(f"  免征类优惠: {len(results)} 条")
     for idx, r in enumerate(results[:3], 1):
-        print(f"    {idx}. [{r['tax_type']}] {r['project_name']}")
+        print(f"    {idx}. [{r['tax_type']}] {r['incentive_items']}")
     
     print("\n" + "=" * 60)
     print("✅ 测试完成!")

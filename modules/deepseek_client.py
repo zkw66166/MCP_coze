@@ -201,7 +201,7 @@ class DeepSeekClient:
         for idx, result in enumerate(results, 1):
             results_text += f"\n### 政策 {idx}\n"
             results_text += f"- **税种**: {result.get('tax_type', 'N/A')}\n"
-            results_text += f"- **优惠项目**: {result.get('project_name', 'N/A')}\n"
+            results_text += f"- **优惠项目**: {result.get('incentive_items', 'N/A')}\n"
             results_text += f"- **优惠方式**: {result.get('incentive_method', 'N/A')}\n"
             
             if result.get('qualification'):
