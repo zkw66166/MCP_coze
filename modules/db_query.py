@@ -47,24 +47,38 @@ class TaxIncentiveQuery:
             (查询结果列表, 总数, 查询意图)
         """
         # 提取税种、优惠关键词、实体关键词和查询意图
-        tax_type, incentive_keywords, entity_keywords, query_intent = self._extract_tax_and_incentive(question)
+        tax_type, incentive_keywords, entity_keywords, query_intent, tax_type_source = self._extract_tax_and_incentive(question)
         
         results = []
         total_count = 0
         
-        # 策略1: 如果提取到税种,使用结构化查询(税种+优惠方式+实体)
-        if tax_type:
+        # 策略选择逻辑:
+        # - 如果用户明确指定了税种(explicit),使用结构化查询(限定该税种)
+        # - 如果税种是LLM推理的(inferred),且有实体关键词,使用跨税种实体搜索
+        # - 如果没有税种也没有实体关键词,使用关键词搜索
+        
+        # 策略1: 用户明确指定了税种,使用结构化查询
+        if tax_type and tax_type_source == "explicit":
             # 先查询总数
             total_count = self.count_structured_results(tax_type, entity_keywords)
             # 再查询限定数量的结果
             results = self.structured_search(tax_type, entity_keywords, limit=limit)
             
             if entity_keywords:
-                print(f"📊 结构化查询: 税种='{tax_type}', 实体={entity_keywords}, 总数={total_count}条, 返回={len(results)}条")
+                print(f"📊 结构化查询: 税种='{tax_type}'(用户指定), 实体={entity_keywords}, 总数={total_count}条, 返回={len(results)}条")
             else:
-                print(f"📊 结构化查询: 税种='{tax_type}', 总数={total_count}条, 返回={len(results)}条")
+                print(f"📊 结构化查询: 税种='{tax_type}'(用户指定), 总数={total_count}条, 返回={len(results)}条")
         
-        # 策略2: 如果没有提取到税种,使用关键词搜索
+        # 策略2: 有实体关键词(无论是否有LLM推理的税种),跨税种搜索
+        elif entity_keywords:
+            results = self.entity_search(entity_keywords, limit=limit)
+            total_count = len(results)
+            if tax_type and tax_type_source == "inferred":
+                print(f"📊 跨税种实体搜索: 实体={entity_keywords}, 结果={len(results)}条 (忽略LLM推理税种'{tax_type}')")
+            else:
+                print(f"📊 跨税种实体搜索: 实体={entity_keywords}, 结果={len(results)}条")
+        
+        # 策略3: 如果没有提取到税种和实体,使用关键词搜索
         if not results:
             keywords = self._extract_keywords(question)
             if keywords:
@@ -72,7 +86,7 @@ class TaxIncentiveQuery:
                 total_count = len(results)  # 关键词搜索已限制数量,总数=结果数
                 print(f"📊 关键词查询: 关键词='{keywords}', 结果={len(results)}条")
         
-        # 策略3: 如果仍然没有结果,使用原问题搜索
+        # 策略4: 如果仍然没有结果,使用原问题搜索
         if not results:
             results = self.keyword_search(question, limit=limit)
             total_count = len(results)
@@ -88,7 +102,8 @@ class TaxIncentiveQuery:
             question: 用户问题
         
         Returns:
-            (税种, 优惠关键词列表, 实体关键词列表, 查询意图)
+            (税种, 优惠关键词列表, 实体关键词列表, 查询意图, 税种来源)
+            税种来源: "explicit"=用户明确指定, "inferred"=LLM推理, None=未识别
         """
         # 税种关键词(按长度排序,优先匹配长的)
         tax_types = [
@@ -124,9 +139,12 @@ class TaxIncentiveQuery:
         
         # 提取税种(精确匹配)
         matched_tax_type = None
+        tax_type_source = None  # 税种来源: "explicit" 或 "inferred"
+        
         for tax_type in tax_types:
             if tax_type in question:
                 matched_tax_type = tax_type
+                tax_type_source = "explicit"
                 break
         
         # 如果精确匹配失败,尝试模糊匹配
@@ -134,6 +152,7 @@ class TaxIncentiveQuery:
             for fuzzy_key, full_tax_type in tax_fuzzy_map.items():
                 if fuzzy_key in question:
                     matched_tax_type = full_tax_type
+                    tax_type_source = "explicit"
                     print(f"🔍 模糊匹配: '{fuzzy_key}' → '{full_tax_type}'")
                     break
         
@@ -141,6 +160,7 @@ class TaxIncentiveQuery:
         if not matched_tax_type:
             matched_tax_type = self._infer_tax_type_with_llm(question)
             if matched_tax_type:
+                tax_type_source = "inferred"
                 print(f"🤖 DeepSeek推理: 税种='{matched_tax_type}'")
         
         # 提取优惠关键词
@@ -166,7 +186,7 @@ class TaxIncentiveQuery:
         is_condition_focused = any(kw in question for kw in condition_intent_keywords)
         query_intent = "condition" if is_condition_focused else "general"
         
-        return matched_tax_type, matched_incentives, matched_entities, query_intent
+        return matched_tax_type, matched_incentives, matched_entities, query_intent, tax_type_source
     
     def _infer_tax_type_with_llm(self, question: str) -> Optional[str]:
         """
@@ -293,6 +313,78 @@ class TaxIncentiveQuery:
             print(f"⚠️  DeepSeek提取优惠项目失败: {str(e)}")
             return None
     
+    def entity_search(self, entity_keywords: List[str], limit: int = 50) -> List[Dict]:
+        """
+        跨税种实体搜索:根据实体关键词搜索所有税种的相关政策
+        
+        当用户问题包含实体关键词(如"小微企业"、"高新技术")但没有指定税种时使用
+        
+        Args:
+            entity_keywords: 实体关键词列表(如["小微企业"])
+            limit: 返回结果数量限制
+        
+        Returns:
+            查询结果列表
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        
+        # 实体关键词同义词扩展(增加相关术语的覆盖)
+        entity_synonyms = {
+            "小微企业": ["小微企业", "小型微利", "小微"],
+            "小型微利": ["小型微利", "小微企业", "小微"],
+            "高新技术": ["高新技术", "高新企业"],
+        }
+        
+        # 扩展实体关键词
+        expanded_keywords = []
+        for entity in entity_keywords:
+            if entity in entity_synonyms:
+                expanded_keywords.extend(entity_synonyms[entity])
+            else:
+                expanded_keywords.append(entity)
+        # 去重
+        expanded_keywords = list(set(expanded_keywords))
+        
+        print(f"🔍 实体关键词扩展: {entity_keywords} → {expanded_keywords}")
+        
+        # 构建实体关键词条件(在多个字段中搜索)
+        entity_conditions = []
+        params = []
+        for entity in expanded_keywords:
+            entity_conditions.append("""(
+                incentive_items LIKE ? 
+                OR detailed_rules LIKE ? 
+                OR qualification LIKE ?
+                OR incentive_method LIKE ?
+                OR keywords LIKE ?
+                OR explanation LIKE ?
+            )""")
+            params.extend([f"%{entity}%"] * 6)
+        
+        # 多个实体关键词用 OR 连接(包含任一实体即匹配)
+        entity_clause = " OR ".join(entity_conditions)
+        
+        query = f"""
+            SELECT * FROM tax_incentives
+            WHERE {entity_clause}
+            ORDER BY 
+                CASE tax_type 
+                    WHEN '企业所得税' THEN 1 
+                    WHEN '增值税' THEN 2 
+                    ELSE 3 
+                END,
+                id
+            LIMIT ?
+        """
+        params.append(limit)
+        
+        cursor.execute(query, params)
+        results = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return results
+    
     def structured_search(self, tax_type: str, entity_keywords: List[str] = None, limit: int = 50) -> List[Dict]:
         """
         结构化查询:税种精确匹配 + 优惠方式包含特定关键词 + 实体关键词过滤
@@ -324,16 +416,34 @@ class TaxIncentiveQuery:
         
         # 如果有实体关键词,增加实体过滤条件
         if entity_keywords:
+            # 实体关键词同义词扩展(与entity_search保持一致)
+            entity_synonyms = {
+                "小微企业": ["小微企业", "小型微利", "小微"],
+                "小型微利": ["小型微利", "小微企业", "小微"],
+                "高新技术": ["高新技术", "高新企业"],
+            }
+            
+            # 扩展实体关键词
+            expanded_keywords = []
+            for entity in entity_keywords:
+                if entity in entity_synonyms:
+                    expanded_keywords.extend(entity_synonyms[entity])
+                else:
+                    expanded_keywords.append(entity)
+            # 去重
+            expanded_keywords = list(set(expanded_keywords))
+            
+            print(f"🔍 结构化查询实体扩展: {entity_keywords} → {expanded_keywords}")
+            
             # 在多个字段中搜索实体关键词(增加incentive_method字段)
             entity_conditions = []
-            for entity in entity_keywords:
+            for entity in expanded_keywords:
                 entity_conditions.append("""(
                     incentive_items LIKE ? 
                     OR detailed_rules LIKE ? 
                     OR qualification LIKE ?
                     OR incentive_method LIKE ?
                 )""")
-                params.extend([f"%{entity}%", f"%{entity}%", f"%{entity}%", f"%{entity}%"])
             
             entity_clause = " OR ".join(entity_conditions)
             
@@ -344,9 +454,9 @@ class TaxIncentiveQuery:
                 AND ({entity_clause})
                 LIMIT ?
             """
-            # 重新构建params(移除method_params)
+            # 重新构建params
             params = [tax_type]
-            for entity in entity_keywords:
+            for entity in expanded_keywords:
                 params.extend([f"%{entity}%", f"%{entity}%", f"%{entity}%", f"%{entity}%"])
             params.append(limit)
         else:
@@ -394,8 +504,24 @@ class TaxIncentiveQuery:
         
         # 如果有实体关键词,增加实体过滤条件(与structured_search保持一致)
         if entity_keywords:
-            entity_conditions = []
+            # 实体关键词同义词扩展(与structured_search保持一致)
+            entity_synonyms = {
+                "小微企业": ["小微企业", "小型微利", "小微"],
+                "小型微利": ["小型微利", "小微企业", "小微"],
+                "高新技术": ["高新技术", "高新企业"],
+            }
+            
+            # 扩展实体关键词
+            expanded_keywords = []
             for entity in entity_keywords:
+                if entity in entity_synonyms:
+                    expanded_keywords.extend(entity_synonyms[entity])
+                else:
+                    expanded_keywords.append(entity)
+            expanded_keywords = list(set(expanded_keywords))
+            
+            entity_conditions = []
+            for entity in expanded_keywords:
                 entity_conditions.append("""(
                     incentive_items LIKE ? 
                     OR detailed_rules LIKE ? 
@@ -413,7 +539,7 @@ class TaxIncentiveQuery:
             """
             # 重新构建params
             params = [tax_type]
-            for entity in entity_keywords:
+            for entity in expanded_keywords:
                 params.extend([f"%{entity}%", f"%{entity}%", f"%{entity}%", f"%{entity}%"])
         else:
             query = f"""
