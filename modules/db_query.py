@@ -6,9 +6,12 @@
 1. 提供多种查询方式(关键词、税种、优惠方式等)
 2. 支持全文搜索
 3. 结果排序和过滤
+4. 支持配置热更新
 """
 
 import sqlite3
+import json
+import os
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -16,18 +19,87 @@ from typing import List, Dict, Optional
 class TaxIncentiveQuery:
     """税收优惠政策查询类"""
     
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: Optional[str] = None, config_path: Optional[str] = None):
         if db_path is None:
             # 默认数据库路径
             db_path = Path(__file__).parent.parent / "database" / "tax_incentives.db"
         
+        if config_path is None:
+            # 默认配置文件路径
+            config_path = Path(__file__).parent.parent / "config" / "tax_query_config.json"
+        
         self.db_path = str(db_path)
+        self.config_path = str(config_path)
+        self._config_mtime = 0  # 配置文件修改时间(用于热更新检测)
+        self._config = {}  # 配置缓存
+        
         self._verify_database()
+        self._load_config()  # 初始化时加载配置
     
     def _verify_database(self):
         """验证数据库是否存在"""
         if not Path(self.db_path).exists():
             raise FileNotFoundError(f"数据库文件不存在: {self.db_path}")
+    
+    def _load_config(self):
+        """
+        加载配置文件(支持热更新)
+        每次调用时检查文件修改时间,只有文件变化时才重新加载
+        """
+        try:
+            current_mtime = os.path.getmtime(self.config_path)
+            
+            # 如果文件未修改,直接返回缓存的配置
+            if current_mtime == self._config_mtime and self._config:
+                return self._config
+            
+            # 文件已修改,重新加载
+            with open(self.config_path, 'r', encoding='utf-8') as f:
+                self._config = json.load(f)
+            
+            self._config_mtime = current_mtime
+            print(f"📂 配置已加载/更新: {self.config_path}")
+            
+        except FileNotFoundError:
+            print(f"⚠️ 配置文件不存在,使用默认配置: {self.config_path}")
+            self._config = self._get_default_config()
+        except json.JSONDecodeError as e:
+            print(f"⚠️ 配置文件格式错误,使用默认配置: {e}")
+            self._config = self._get_default_config()
+        
+        return self._config
+    
+    def _get_default_config(self) -> dict:
+        """返回默认配置(当配置文件不可用时使用)"""
+        return {
+            "tax_types": [
+                "城镇土地使用税", "企业所得税", "个人所得税", "土地增值税",
+                "增值税", "印花税", "房产税", "消费税", "资源税", "车船税", "契税", "关税"
+            ],
+            "tax_fuzzy_map": {
+                "企业所得": "企业所得税",
+                "个人所得": "个人所得税",
+                "土地增值": "土地增值税",
+                "城镇土地使用": "城镇土地使用税"
+            },
+            "incentive_keywords": [
+                "优惠", "减免", "免征", "减征", "抵扣", "退税",
+                "补贴", "扶持", "即征即退", "先征后退", "免税", "减税"
+            ],
+            "core_entity_keywords": [
+                "集成电路", "软件", "高新技术", "小微企业", "小型微利",
+                "残疾人", "创业投资", "天使投资"
+            ],
+            "condition_intent_keywords": [
+                "条件", "要求", "认定条件", "优惠条件", "减免条件",
+                "资格", "标准", "手续", "资料", "备案", "申请", "流程"
+            ],
+            "entity_synonyms": {
+                "小微企业": ["小微企业", "小型微利", "小微"],
+                "小型微利": ["小型微利", "小微企业", "小微"],
+                "高新技术": ["高新技术", "高新企业"]
+            }
+        }
     
     def _get_connection(self) -> sqlite3.Connection:
         """获取数据库连接"""
@@ -105,37 +177,23 @@ class TaxIncentiveQuery:
             (税种, 优惠关键词列表, 实体关键词列表, 查询意图, 税种来源)
             税种来源: "explicit"=用户明确指定, "inferred"=LLM推理, None=未识别
         """
+        # 从配置文件加载(支持热更新)
+        config = self._load_config()
+        
         # 税种关键词(按长度排序,优先匹配长的)
-        tax_types = [
-            "城镇土地使用税", "企业所得税", "个人所得税", "土地增值税",
-            "增值税", "印花税", "房产税", "消费税", "资源税", "车船税", "契税", "关税"
-        ]
+        tax_types = config.get("tax_types", [])
         
         # 税种模糊匹配映射(支持缺少"税"字的情况)
-        tax_fuzzy_map = {
-            "企业所得": "企业所得税",
-            "个人所得": "个人所得税",
-            "土地增值": "土地增值税",
-            "城镇土地使用": "城镇土地使用税",
-        }
+        tax_fuzzy_map = config.get("tax_fuzzy_map", {})
         
         # 优惠关键词
-        incentive_keywords = [
-            "优惠", "减免", "免征", "减征", "抵扣", "退税", 
-            "补贴", "扶持", "即征即退", "先征后退", "免税", "减税"
-        ]
+        incentive_keywords = config.get("incentive_keywords", [])
         
         # 核心实体关键词(高频、重要的,用于快速匹配)
-        core_entity_keywords = [
-            "集成电路", "软件", "高新技术", "小微企业", "小型微利",
-            "残疾人", "创业投资", "天使投资"
-        ]
+        core_entity_keywords = config.get("core_entity_keywords", [])
         
         # 条件意图关键词(判断用户是否关注优惠条件)
-        condition_intent_keywords = [
-            "条件", "要求", "认定条件", "优惠条件", "减免条件",
-            "资格", "标准", "手续", "资料", "备案", "申请", "流程"
-        ]
+        condition_intent_keywords = config.get("condition_intent_keywords", [])
         
         # 提取税种(精确匹配)
         matched_tax_type = None
@@ -329,12 +387,9 @@ class TaxIncentiveQuery:
         conn = self._get_connection()
         cursor = conn.cursor()
         
-        # 实体关键词同义词扩展(增加相关术语的覆盖)
-        entity_synonyms = {
-            "小微企业": ["小微企业", "小型微利", "小微"],
-            "小型微利": ["小型微利", "小微企业", "小微"],
-            "高新技术": ["高新技术", "高新企业"],
-        }
+        # 从配置文件加载实体同义词(支持热更新)
+        config = self._load_config()
+        entity_synonyms = config.get("entity_synonyms", {})
         
         # 扩展实体关键词
         expanded_keywords = []
@@ -416,12 +471,9 @@ class TaxIncentiveQuery:
         
         # 如果有实体关键词,增加实体过滤条件
         if entity_keywords:
-            # 实体关键词同义词扩展(与entity_search保持一致)
-            entity_synonyms = {
-                "小微企业": ["小微企业", "小型微利", "小微"],
-                "小型微利": ["小型微利", "小微企业", "小微"],
-                "高新技术": ["高新技术", "高新企业"],
-            }
+            # 从配置文件加载实体同义词(支持热更新)
+            config = self._load_config()
+            entity_synonyms = config.get("entity_synonyms", {})
             
             # 扩展实体关键词
             expanded_keywords = []
@@ -504,12 +556,9 @@ class TaxIncentiveQuery:
         
         # 如果有实体关键词,增加实体过滤条件(与structured_search保持一致)
         if entity_keywords:
-            # 实体关键词同义词扩展(与structured_search保持一致)
-            entity_synonyms = {
-                "小微企业": ["小微企业", "小型微利", "小微"],
-                "小型微利": ["小型微利", "小微企业", "小微"],
-                "高新技术": ["高新技术", "高新企业"],
-            }
+            # 从配置文件加载实体同义词(支持热更新)
+            config = self._load_config()
+            entity_synonyms = config.get("entity_synonyms", {})
             
             # 扩展实体关键词
             expanded_keywords = []
