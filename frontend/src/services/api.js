@@ -133,6 +133,45 @@ export function streamChat(question, companyId, responseMode, { onMessage, onRou
 }
 
 /**
+ * 获取企业画像数据
+ * @param {number} companyId 企业 ID
+ * @param {number|null} year 年份（可选，默认当年）
+ */
+export async function fetchCompanyProfile(companyId, year = null) {
+    let url = `${API_BASE_URL}/api/company-profile/${companyId}`;
+    if (year) {
+        url += `?year=${year}`;
+    }
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`获取企业画像失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+/**
+ * 获取企业画像基本信息
+ */
+export async function fetchProfileBasic(companyId) {
+    const response = await fetch(`${API_BASE_URL}/api/company-profile/${companyId}/basic`);
+    if (!response.ok) {
+        throw new Error(`获取基本信息失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+/**
+ * 获取企业股东信息
+ */
+export async function fetchProfileShareholders(companyId) {
+    const response = await fetch(`${API_BASE_URL}/api/company-profile/${companyId}/shareholders`);
+    if (!response.ok) {
+        throw new Error(`获取股东信息失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+/**
  * 健康检查
  */
 export async function healthCheck() {

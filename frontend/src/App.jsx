@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import AIChat from './components/AIChat';
+import CompanyProfile from './components/CompanyProfile';
 import { fetchCompanies, fetchStatistics } from './services/api';
 import './App.css';
 
@@ -43,7 +44,7 @@ function App() {
       case 'workbench':
         return <div className="placeholder-page">📋 工作台 - 功能开发中...</div>;
       case 'company-profile':
-        return <div className="placeholder-page">📈 企业画像 - 功能开发中...</div>;
+        return <CompanyProfile selectedCompanyId={selectedCompanyId} companies={companies} />;
       case 'data-management':
         return <div className="placeholder-page">📊 数据管理 - 功能开发中...</div>;
       case 'settings':
