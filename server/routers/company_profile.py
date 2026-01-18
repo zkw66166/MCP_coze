@@ -922,3 +922,516 @@ def get_risk_type_name(risk_type: str) -> str:
         "abnormal": "经营异常"
     }
     return names.get(risk_type, risk_type)
+
+
+# =============================================================================
+# 新增API端点 - 支持14模块完整画像
+# =============================================================================
+
+@router.get("/company-profile/{company_id}/certifications")
+async def get_certifications(company_id: int) -> List[Dict[str, Any]]:
+    """获取资质认证信息"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT cert_type, cert_name, cert_level, issue_date, expire_date, status
+            FROM company_certifications
+            WHERE company_id = ?
+            ORDER BY expire_date DESC
+        ''', (company_id,))
+        
+        certs = []
+        for row in cursor.fetchall():
+            certs.append({
+                "cert_type": row["cert_type"],
+                "cert_name": row["cert_name"],
+                "cert_level": row["cert_level"],
+                "issue_date": row["issue_date"],
+                "expire_date": row["expire_date"],
+                "status": row["status"]
+            })
+        return certs
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/employee-structure")
+async def get_employee_structure(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
+    """获取人员结构信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM employee_structure
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        row = cursor.fetchone()
+        
+        if not row:
+            # 尝试获取最近年份
+            cursor.execute('''
+                SELECT * FROM employee_structure
+                WHERE company_id = ?
+                ORDER BY period_year DESC LIMIT 1
+            ''', (company_id,))
+            row = cursor.fetchone()
+        
+        if not row:
+            return {"year": year, "has_data": False}
+        
+        total = row["total_employees"] or 0
+        rd_ratio = (row["rd_employees"] / total * 100) if total > 0 else 0
+        bachelor_above = ((row["master_above"] or 0) + (row["bachelor"] or 0))
+        bachelor_ratio = (bachelor_above / total * 100) if total > 0 else 0
+        
+        return {
+            "year": row["period_year"],
+            "has_data": True,
+            "total_employees": row["total_employees"],
+            "rd_employees": row["rd_employees"],
+            "sales_employees": row["sales_employees"],
+            "admin_employees": row["admin_employees"],
+            "other_employees": row["other_employees"],
+            "rd_ratio": round(rd_ratio, 1),
+            "rd_ratio_eval": ("高" if rd_ratio >= 40 else "中" if rd_ratio >= 20 else "低", 
+                            "green" if rd_ratio >= 40 else "blue" if rd_ratio >= 20 else "yellow"),
+            "master_above": row["master_above"],
+            "bachelor": row["bachelor"],
+            "below_bachelor": row["below_bachelor"],
+            "bachelor_above_ratio": round(bachelor_ratio, 1),
+            "bachelor_eval": ("优秀" if bachelor_ratio >= 70 else "良好" if bachelor_ratio >= 50 else "一般",
+                             "green" if bachelor_ratio >= 70 else "blue" if bachelor_ratio >= 50 else "yellow"),
+            "total_salary": row["total_salary"],
+            "avg_salary": row["avg_salary"],
+            "social_insurance_coverage": row["social_insurance_coverage"]
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/rd-innovation")
+async def get_rd_innovation(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
+    """获取研发创新信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM rd_innovation
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.execute('''
+                SELECT * FROM rd_innovation
+                WHERE company_id = ?
+                ORDER BY period_year DESC LIMIT 1
+            ''', (company_id,))
+            row = cursor.fetchone()
+        
+        if not row:
+            return {"year": year, "has_data": False}
+        
+        rd_ratio = row["rd_investment_ratio"] or 0
+        
+        return {
+            "year": row["period_year"],
+            "has_data": True,
+            "rd_investment": row["rd_investment"],
+            "rd_investment_ratio": rd_ratio,
+            "rd_ratio_eval": ("高" if rd_ratio >= 6 else "中" if rd_ratio >= 3 else "低",
+                            "green" if rd_ratio >= 6 else "blue" if rd_ratio >= 3 else "yellow"),
+            "patent_total": row["patent_total"],
+            "patent_invention": row["patent_invention"],
+            "patent_utility": row["patent_utility"],
+            "patent_design": row["patent_design"],
+            "patent_eval": ("丰富" if row["patent_total"] >= 30 else "良好" if row["patent_total"] >= 10 else "一般",
+                          "green" if row["patent_total"] >= 30 else "blue" if row["patent_total"] >= 10 else "yellow"),
+            "software_copyright": row["software_copyright"],
+            "new_patents_year": row["new_patents_year"],
+            "high_tech_product_ratio": row["high_tech_product_ratio"]
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/cross-border")
+async def get_cross_border(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
+    """获取跨境业务信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM cross_border_business
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.execute('''
+                SELECT * FROM cross_border_business
+                WHERE company_id = ?
+                ORDER BY period_year DESC LIMIT 1
+            ''', (company_id,))
+            row = cursor.fetchone()
+        
+        if not row:
+            return {"year": year, "has_data": False}
+        
+        overseas_ratio = row["overseas_revenue_ratio"] or 0
+        
+        return {
+            "year": row["period_year"],
+            "has_data": True,
+            "overseas_revenue": row["overseas_revenue"],
+            "overseas_revenue_ratio": overseas_ratio,
+            "overseas_eval": ("大量" if overseas_ratio >= 20 else "少量" if overseas_ratio >= 5 else "极少",
+                            "green" if overseas_ratio >= 20 else "blue" if overseas_ratio >= 5 else "yellow"),
+            "export_sales": row["export_sales"],
+            "import_purchase": row["import_purchase"],
+            "applicable_treaty": row["applicable_treaty"],
+            "overseas_tax_paid": row["overseas_tax_paid"],
+            "overseas_tax_credit": row["overseas_tax_credit"]
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/bank-relations")
+async def get_bank_relations(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
+    """获取银行关系信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM bank_relations
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.execute('''
+                SELECT * FROM bank_relations
+                WHERE company_id = ?
+                ORDER BY period_year DESC LIMIT 1
+            ''', (company_id,))
+            row = cursor.fetchone()
+        
+        if not row:
+            return {"year": year, "has_data": False}
+        
+        credit_line = row["total_credit_line"] or 0
+        loan_balance = row["loan_balance"] or 0
+        usage_ratio = (loan_balance / credit_line * 100) if credit_line > 0 else 0
+        
+        return {
+            "year": row["period_year"],
+            "has_data": True,
+            "bank_count": row["bank_count"],
+            "total_credit_line": credit_line,
+            "credit_eval": ("充足" if credit_line >= 20000000 else "适中" if credit_line >= 10000000 else "有限",
+                          "green" if credit_line >= 20000000 else "blue" if credit_line >= 10000000 else "yellow"),
+            "loan_balance": loan_balance,
+            "usage_ratio": round(usage_ratio, 1),
+            "weighted_avg_rate": row["weighted_avg_rate"],
+            "rate_eval": ("优惠" if row["weighted_avg_rate"] <= 4.5 else "正常" if row["weighted_avg_rate"] <= 5.5 else "偏高",
+                         "green" if row["weighted_avg_rate"] <= 4.5 else "blue" if row["weighted_avg_rate"] <= 5.5 else "yellow"),
+            "pboc_credit_rating": row["pboc_credit_rating"],
+            "customs_credit_rating": row["customs_credit_rating"]
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/compliance")
+async def get_compliance_summary(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
+    """获取合规评估信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM compliance_summary
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.execute('''
+                SELECT * FROM compliance_summary
+                WHERE company_id = ?
+                ORDER BY period_year DESC LIMIT 1
+            ''', (company_id,))
+            row = cursor.fetchone()
+        
+        if not row:
+            return {"year": year, "has_data": False}
+        
+        return {
+            "year": row["period_year"],
+            "has_data": True,
+            "tax_compliance": {
+                "filing_rate": row["tax_filing_rate"],
+                "payment_rate": row["tax_payment_rate"],
+                "audit_count": row["tax_audit_count"],
+                "audit_amount": row["tax_audit_amount"],
+                "penalty_count": row["tax_penalty_count"],
+                "penalty_amount": row["tax_penalty_amount"],
+                "risk_level": row["tax_risk_level"]
+            },
+            "financial_compliance": {
+                "audit_opinion": row["audit_opinion"],
+                "control_defects": row["internal_control_defects"],
+                "accounting_standard": row["accounting_standard"]
+            },
+            "operational_compliance": {
+                "env_penalty_count": row["env_penalty_count"],
+                "safety_incident_count": row["safety_incident_count"],
+                "quality_penalty_count": row["quality_penalty_count"]
+            },
+            "risk_assessment": {
+                "liquidity_risk": row["liquidity_risk_level"],
+                "customer_concentration_risk": row["customer_concentration_risk"],
+                "supplier_dependency_risk": row["supplier_dependency_risk"],
+                "overall_rating": row["overall_risk_rating"]
+            }
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/digital-capability")
+async def get_digital_capability(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
+    """获取数字化能力信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM digital_capability
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.execute('''
+                SELECT * FROM digital_capability
+                WHERE company_id = ?
+                ORDER BY period_year DESC LIMIT 1
+            ''', (company_id,))
+            row = cursor.fetchone()
+        
+        if not row:
+            return {"year": year, "has_data": False}
+        
+        return {
+            "year": row["period_year"],
+            "has_data": True,
+            "erp_coverage": row["erp_coverage"],
+            "finance_system_coverage": row["finance_system_coverage"],
+            "tax_system_coverage": row["tax_system_coverage"],
+            "finance_data_quality": row["finance_data_quality"],
+            "tax_data_quality": row["tax_data_quality"],
+            "system_integration": row["system_integration"],
+            "data_completeness": row["data_completeness"],
+            "process_automation": row["process_automation"]
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/esg")
+async def get_esg_indicators(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
+    """获取ESG指标信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM esg_indicators
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.execute('''
+                SELECT * FROM esg_indicators
+                WHERE company_id = ?
+                ORDER BY period_year DESC LIMIT 1
+            ''', (company_id,))
+            row = cursor.fetchone()
+        
+        if not row:
+            return {"year": year, "has_data": False}
+        
+        return {
+            "year": row["period_year"],
+            "has_data": True,
+            "environmental": {
+                "investment_ratio": row["env_investment_ratio"],
+                "energy_saving_investment": row["energy_saving_investment"]
+            },
+            "social": {
+                "charity_donation": row["charity_donation"],
+                "disability_employment_ratio": row["disability_employment_ratio"]
+            },
+            "governance": {
+                "info_disclosure_level": row["info_disclosure_level"],
+                "related_party_review": row["related_party_review"]
+            }
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/policy-eligibility")
+async def get_policy_eligibility(company_id: int, year: Optional[int] = None) -> List[Dict[str, Any]]:
+    """获取政策匹配信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM policy_eligibility
+            WHERE company_id = ? AND period_year = ?
+            ORDER BY benefit_amount DESC
+        ''', (company_id, year))
+        
+        policies = []
+        for row in cursor.fetchall():
+            policies.append({
+                "policy_name": row["policy_name"],
+                "eligibility_status": row["eligibility_status"],
+                "eligibility_detail": row["eligibility_detail"],
+                "benefit_amount": row["benefit_amount"],
+                "expire_date": row["expire_date"],
+                "alert_level": row["alert_level"],
+                "missing_conditions": row["missing_conditions"]
+            })
+        return policies
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/special-business")
+async def get_special_business(company_id: int, year: Optional[int] = None) -> List[Dict[str, Any]]:
+    """获取特殊业务信息"""
+    if year is None:
+        year = datetime.now().year
+    
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM special_business
+            WHERE company_id = ? AND period_year = ?
+            ORDER BY business_revenue DESC
+        ''', (company_id, year))
+        
+        businesses = []
+        for row in cursor.fetchall():
+            businesses.append({
+                "business_type": row["business_type"],
+                "business_revenue": row["business_revenue"],
+                "revenue_ratio": row["revenue_ratio"],
+                "value_added_rate": row["value_added_rate"],
+                "tax_refund_amount": row["tax_refund_amount"],
+                "cert_type": row["cert_type"]
+            })
+        return businesses
+    finally:
+        conn.close()
+
+
+@router.get("/company-profile/{company_id}/full")
+async def get_full_company_profile(company_id: int, year: Optional[int] = None):
+    """
+    获取完整14模块企业画像数据
+    """
+    if year is None:
+        year = datetime.now().year
+    
+    # 获取所有模块数据
+    basic = await get_basic_info(company_id)
+    shareholders = await get_shareholders(company_id)
+    investments = await get_investments(company_id)
+    certifications = await get_certifications(company_id)
+    employee = await get_employee_structure(company_id, year)
+    financial = await get_financial_summary(company_id, year)
+    rd = await get_rd_innovation(company_id, year)
+    tax = await get_tax_summary(company_id, year)
+    invoice = await get_invoice_summary(company_id, year)
+    customers = await get_top_customers(company_id, year)
+    suppliers = await get_top_suppliers(company_id, year)
+    cross_border = await get_cross_border(company_id, year)
+    compliance = await get_compliance_summary(company_id, year)
+    risks = await get_risk_info(company_id)
+    growth = await get_growth_metrics(company_id, year)
+    cash_flow = await get_cash_flow_summary(company_id, year)
+    bank = await get_bank_relations(company_id, year)
+    digital = await get_digital_capability(company_id, year)
+    esg = await get_esg_indicators(company_id, year)
+    policies = await get_policy_eligibility(company_id, year)
+    special = await get_special_business(company_id, year)
+    
+    return {
+        "company_id": company_id,
+        "year": year,
+        # 一、企业身份画像
+        "basic_info": basic,
+        "certifications": certifications,
+        # 二、股权与治理画像
+        "shareholders": shareholders,
+        "investments": investments,
+        # 三、组织与人力画像
+        "employee_structure": employee,
+        # 四、财务画像
+        "financial_summary": financial,
+        "growth_metrics": growth,
+        "cash_flow_summary": cash_flow,
+        # 五、业务运营画像
+        "top_customers": customers,
+        "top_suppliers": suppliers,
+        "invoice_summary": invoice,
+        # 六、研发创新画像
+        "rd_innovation": rd,
+        # 七、税务画像
+        "tax_summary": tax,
+        # 八、跨境业务画像
+        "cross_border": cross_border,
+        # 九、合规风险画像
+        "compliance": compliance,
+        "risk_info": risks,
+        # 十、外部关系画像
+        "bank_relations": bank,
+        # 十一、数字化画像
+        "digital_capability": digital,
+        # 十二、ESG画像
+        "esg": esg,
+        # 十三、政策匹配画像
+        "policy_eligibility": policies,
+        # 十四、特殊业务画像
+        "special_business": special
+    }
+
