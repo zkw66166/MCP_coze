@@ -436,6 +436,68 @@ function CompanyProfile({ selectedCompanyId, companies }) {
                 <div className="profile-card">
                     <h3 className="card-title"><BarChart3 size={18} /> 四、财务画像</h3>
 
+                    {/* 财务图表区 */}
+                    <div className="metrics-row-3">
+                        {/* 资产结构分析 - 饼图 */}
+                        <div className="chart-section bg-gradient-blue">
+                            <SectionTitle name="资产结构分析" color="blue" />
+                            <div className="chart-container" style={{ height: '180px' }}>
+                                <PieChart
+                                    data={[
+                                        { name: `流动资产: ${((financial_summary?.current_assets || 0) / 10000).toFixed(0)}`, value: financial_summary?.current_assets || 3850, color: '#3b82f6' },
+                                        { name: `固定资产: ${((financial_summary?.fixed_assets || 0) / 10000).toFixed(0)}`, value: financial_summary?.fixed_assets || 980, color: '#8b5cf6' },
+                                        { name: `无形资产: ${((financial_summary?.intangible_assets || 0) / 10000).toFixed(0)}`, value: financial_summary?.intangible_assets || 320, color: '#10b981' },
+                                        { name: `其他: ${((financial_summary?.other_assets || 0) / 10000).toFixed(0)}`, value: financial_summary?.other_assets || 130, color: '#f59e0b' },
+                                    ]}
+                                />
+                            </div>
+                            <CompactMetric
+                                label="资产总额"
+                                value={`${((financial_summary?.total_assets || 0) / 10000).toFixed(0)}万`}
+                                evalInfo={growth_metrics?.asset_growth ? { text: `${growth_metrics.asset_growth > 0 ? '+' : ''}${growth_metrics.asset_growth.toFixed(1)}%`, type: growth_metrics.asset_growth > 0 ? 'growth' : 'negative' } : null}
+                                bgColor="bg-white"
+                            />
+                        </div>
+
+                        {/* 负债与权益 - 柱状图 */}
+                        <div className="chart-section bg-gradient-purple">
+                            <SectionTitle name="负债与权益" color="purple" />
+                            <div className="chart-container" style={{ height: '180px' }}>
+                                <BarChart
+                                    data={[
+                                        { name: '负债', value: (financial_summary?.total_liabilities || 3618) / 10000, color: '#f59e0b' },
+                                        { name: '所有者权益', value: (financial_summary?.equity || 1662) / 10000, color: '#10b981' },
+                                    ]}
+                                />
+                            </div>
+                            <CompactMetric
+                                label="资产负债率"
+                                value={`${(financial_summary?.debt_ratio || 0).toFixed(1)}%`}
+                                evalInfo={{ text: financial_summary?.debt_ratio < 70 ? '稳健' : '偏高', type: financial_summary?.debt_ratio < 70 ? 'positive' : 'warning' }}
+                                bgColor="bg-white"
+                            />
+                        </div>
+
+                        {/* 财务综合能力 - 横向进度条 */}
+                        <div className="chart-section bg-gradient-green">
+                            <SectionTitle name="财务综合能力" color="green" />
+                            <div className="progress-section">
+                                <ProgressBar label="盈利能力" value={Math.min(Math.round((financial_summary?.net_margin || 0) * 10 + 50), 100)} color="blue" />
+                                <ProgressBar label="偿债能力" value={Math.min(Math.round(100 - (financial_summary?.debt_ratio || 50)), 100)} color="purple" />
+                                <ProgressBar label="运营效率" value={Math.min(Math.round((financial_summary?.asset_turnover || 0) * 50 + 30), 100)} color="green" />
+                                <ProgressBar label="成长能力" value={Math.min(Math.round((growth_metrics?.revenue_growth || 0) * 3 + 50), 100)} color="orange" />
+                                <ProgressBar label="现金流" value={cash_flow_summary?.operating > 0 ? 90 : 40} color="blue" />
+                            </div>
+                            <CompactMetric
+                                label="综合评分"
+                                value={`${(((financial_summary?.net_margin || 5) * 2 + (100 - (financial_summary?.debt_ratio || 50)) * 0.5 + (growth_metrics?.revenue_growth || 10) * 0.5 + 40) / 100 * 100).toFixed(1)}分`}
+                                evalInfo={{ text: '优秀', type: 'positive' }}
+                                bgColor="bg-white"
+                            />
+                        </div>
+                    </div>
+
+                    {/* 详细指标区 */}
                     <div className="metrics-row-4">
                         <div>
                             <SectionTitle name="盈利能力" color="cyan" />
