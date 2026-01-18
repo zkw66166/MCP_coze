@@ -17,7 +17,7 @@ from pathlib import Path
 
 
 class MetricsLoader:
-    """财务指标配置加载器"""
+    """财务指标配置加载器（支持热更新）"""
     
     def __init__(self, config_path: str = None, db_path: str = None):
         """
@@ -38,19 +38,39 @@ class MetricsLoader:
         self._formulas = None
         self._db_schema = None
         self._unconfigured_fields = None
+        
+        # 热更新支持: 配置文件修改时间
+        self._config_mtime = 0
     
     def load_config(self) -> Dict:
-        """加载配置文件"""
-        if self._config is None:
-            try:
+        """
+        加载配置文件(支持热更新)
+        每次调用时检查文件修改时间，只有文件变化时才重新加载
+        """
+        try:
+            current_mtime = os.path.getmtime(self.config_path)
+            
+            # 如果文件已修改或尚未加载，重新加载
+            if current_mtime != self._config_mtime or self._config is None:
                 with open(self.config_path, 'r', encoding='utf-8') as f:
                     self._config = json.load(f)
-            except FileNotFoundError:
-                print(f"⚠️  配置文件不存在: {self.config_path}")
-                self._config = {"tables": {}, "formulas": {}}
-            except json.JSONDecodeError as e:
-                print(f"⚠️  配置文件格式错误: {e}")
-                self._config = {"tables": {}, "formulas": {}}
+                
+                # 如果是重新加载（不是首次加载），清除相关缓存
+                if self._config_mtime != 0:
+                    self._metrics_map = None
+                    self._keywords = None
+                    self._formulas = None
+                    print(f"📂 配置已热更新: {self.config_path}")
+                
+                self._config_mtime = current_mtime
+                
+        except FileNotFoundError:
+            print(f"⚠️  配置文件不存在: {self.config_path}")
+            self._config = {"tables": {}, "formulas": {}}
+        except json.JSONDecodeError as e:
+            print(f"⚠️  配置文件格式错误: {e}")
+            self._config = {"tables": {}, "formulas": {}}
+        
         return self._config
     
     def get_metrics_map(self) -> Dict[str, Tuple[str, str]]:

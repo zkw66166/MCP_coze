@@ -1,8 +1,8 @@
 {
     "$schema": "metrics_config_schema.json",
-    "version": "2.0.0",
-    "description": "财务指标配置文件 - 覆盖financial.db所有业务表",
-    "last_updated": "2026-01-12",
+    "version": "2.1.0",
+    "description": "财务指标配置文件 - 覆盖financial.db所有业务表（支持热更新）",
+    "last_updated": "2026-01-18",
     "excluded_tables": [
         "sqlite_sequence",
         "users",
@@ -26,6 +26,45 @@
         "filing_date",
         "issue_date"
     ],
+    "query_settings": {
+        "_comment": "查询逻辑相关配置（从financial_query.py提取）",
+        "all_periods_keywords": [
+            "多少",
+            "是多少",
+            "数据",
+            "金额",
+            "查询",
+            "增长",
+            "增减",
+            "增加",
+            "减少",
+            "变动",
+            "改变",
+            "变化",
+            "趋势",
+            "情况"
+        ],
+        "comparison_keywords": [
+            "增长",
+            "对比",
+            "比较",
+            "vs",
+            "变化",
+            "趋势",
+            "同比",
+            "环比",
+            "差异",
+            "变动"
+        ],
+        "aggregation_tables": [
+            "income_statements",
+            "tax_reports",
+            "tax_returns_income",
+            "vat_returns",
+            "cash_flow_statements",
+            "tax_return_stamp_items"
+        ]
+    },
     "tables": {
         "income_statements": {
             "description": "利润表",

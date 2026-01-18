@@ -234,16 +234,24 @@ class FinancialQuery:
         result = {}
         current_year = datetime.now().year
         
-        # === 财务数据库优先关键词(包含这些关键词时，如果没有指定时间则查询所有期间) ===
-        all_periods_keywords = [
+        # === 从配置加载关键词（支持热更新）===
+        query_settings = {}
+        if self.metrics_loader:
+            config = self.metrics_loader.load_config()
+            query_settings = config.get('query_settings', {})
+        
+        # 全期查询关键词
+        all_periods_keywords = query_settings.get('all_periods_keywords', [
             "多少", "是多少", "数据", "金额", "查询", 
             "增长", "增减", "增加", "减少", 
             "变动", "改变", "变化", "趋势", "情况"
-        ]
+        ])
         has_all_periods_keyword = any(kw in question for kw in all_periods_keywords)
         
         # === 检测对比分析意图 ===
-        comparison_keywords = ['增长', '对比', '比较', 'vs', '变化', '趋势', '同比', '环比', '差异', '变动']
+        comparison_keywords = query_settings.get('comparison_keywords', [
+            '增长', '对比', '比较', 'vs', '变化', '趋势', '同比', '环比', '差异', '变动'
+        ])
         result['is_comparison'] = any(kw in question for kw in comparison_keywords)
         
         # === 提取年份(支持多个) ===
@@ -692,10 +700,14 @@ class FinancialQuery:
         
         # 判断是否需要聚合(对流量型数据进行求和,如税额、收入等)
         # 资产负债表等存量数据不需要求和(通常取期末值)
-        should_aggregate = table in [
-            'income_statements', 'tax_reports', 'tax_returns_income', 
-            'vat_returns', 'cash_flow_statements', 'tax_return_stamp_items'
-        ]
+        # 从配置加载（支持热更新）
+        aggregation_tables = ['income_statements', 'tax_reports', 'tax_returns_income', 
+                              'vat_returns', 'cash_flow_statements', 'tax_return_stamp_items']
+        if self.metrics_loader:
+            config = self.metrics_loader.load_config()
+            query_settings = config.get('query_settings', {})
+            aggregation_tables = query_settings.get('aggregation_tables', aggregation_tables)
+        should_aggregate = table in aggregation_tables
         
         # 构建查询语句
         if should_aggregate:
