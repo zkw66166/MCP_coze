@@ -182,3 +182,19 @@ export async function healthCheck() {
         return false;
     }
 }
+
+/**
+ * 获取数据管理统计信息
+ * @param {number|null} companyId 企业 ID (可选，不传则为多户汇总)
+ */
+export async function fetchDataManagementStats(companyId = null) {
+    let url = `${API_BASE_URL}/api/data-management/stats`;
+    if (companyId) {
+        url += `?company_id=${companyId}`;
+    }
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`获取数据管理统计失败: ${response.status}`);
+    }
+    return response.json();
+}

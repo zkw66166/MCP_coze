@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import AIChat from './components/AIChat';
 import CompanyProfile from './components/CompanyProfile';
+import DataManagement from './components/DataManagement';
 import { fetchCompanies, fetchStatistics } from './services/api';
 import './App.css';
 
@@ -46,7 +47,7 @@ function App() {
       case 'company-profile':
         return <CompanyProfile selectedCompanyId={selectedCompanyId} companies={companies} />;
       case 'data-management':
-        return <div className="placeholder-page">📊 数据管理 - 功能开发中...</div>;
+        return <DataManagement selectedCompanyId={selectedCompanyId} />;
       case 'settings':
         return <div className="placeholder-page">⚙️ 系统设置 - 功能开发中...</div>;
       default:

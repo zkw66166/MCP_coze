@@ -15,7 +15,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from server.routers import chat, companies, company_profile
+from server.routers import chat, companies, company_profile, data_management
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -37,6 +37,7 @@ app.add_middleware(
 app.include_router(chat.router, prefix="/api", tags=["聊天"])
 app.include_router(companies.router, prefix="/api", tags=["企业"])
 app.include_router(company_profile.router, prefix="/api", tags=["企业画像"])
+app.include_router(data_management.router)
 
 
 @app.get("/")
