@@ -133,10 +133,41 @@ async def get_data_management_stats(company_id: Optional[int] = None):
             "companies": companies_status,
             "quality_checks": quality_checks,
             "mapping_synonyms": _get_mapping_synonyms(),
-            "update_frequency": _get_update_frequency()
+            "update_frequency": [
+                {"source": "资产负债表", "frequency": "月度", "last_update": "2024-12-15"},
+                {"source": "利润表", "frequency": "月度", "last_update": "2024-12-15"},
+                {"source": "现金流量表", "frequency": "月度", "last_update": "2024-12-15"},
+                {"source": "增值税申报表", "frequency": "月度", "last_update": "2024-12-15"},
+                {"source": "企业所得税申报表", "frequency": "季度", "last_update": "2024-10-20"},
+                {"source": "印花税申报表", "frequency": "季度", "last_update": "2024-10-20"},
+                {"source": "科目余额表", "frequency": "月度", "last_update": "2024-12-15"}
+            ]
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/quality-check")
+async def check_data_quality(
+    company_id: Optional[int] = Query(None, description="Company ID"),
+    period_year: int = Query(2022, description="Year to check"), # Default 2022 for test data
+    period_month: int = Query(3, description="Month to check (for monthly reports)") # Default March
+):
+    try:
+        from ..services.data_quality import DataQualityChecker
+        db_path = "database/financial.db"
+        checker = DataQualityChecker(db_path)
+        
+        # If no company selected, check the first available one or a specific one for testing
+        target_company = company_id if company_id else 5 # Default to company 5 (from inspect log) if not specified
+        
+        results = checker.check_all(target_company, period_year, period_month)
+        return results
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 def _get_mapping_synonyms():
@@ -173,51 +204,24 @@ def _generate_quality_checks(cursor, company_ids):
     """
     checks = []
     
-    # 1. Financial Statements
-    checks.append({
-        "category": "Financial Statements",
-        "check": "Format Validation",
-        "status": "Pass",
-        "details": "Balance Sheet, Income Statement formats are correct",
-        "color": "green"
-    })
+    # Return 7 Placeholder checks for the initial view
+    categories = [
+        ("Subject Balance Sheet", "科目余额表", "Pending"),
+        ("Balance Sheet", "资产负债表", "Pending"),
+        ("Income Statement", "利润表", "Pending"),
+        ("Cash Flow Statement", "现金流量表", "Pending"),
+        ("VAT Return", "增值税申报表", "Pending"),
+        ("CIT Return", "企业所得税申报表", "Pending"),
+        ("Stamp Duty Return", "印花税申报表", "Pending")
+    ]
     
-    # 2. Subject Balance (Mock)
-    checks.append({
-        "category": "Subject Balance Sheet",
-        "check": "Balance Check",
-        "status": "Pass",
-        "details": "Debit/Credit balanced",
-        "color": "green"
-    })
-    
-    # 3. Tax Returns (Check consistency)
-    # Simple check: Do we have tax returns?
-    ids_str = ','.join(map(str, company_ids))
-    try:
-        cursor.execute(f"SELECT COUNT(*) FROM tax_returns_income WHERE company_id IN ({ids_str})")
-        cit_count = cursor.fetchone()[0]
-        status = "Pass" if cit_count > 0 else "Warning"
-        details = "Data consistent" if cit_count > 0 else "Missing CIT returns"
-        color = "green" if cit_count > 0 else "yellow"
-        
+    for en, cn, status in categories:
         checks.append({
-            "category": "Tax Returns",
-            "check": "Data Consistency",
+            "category": en,
+            "check": cn,
             "status": status,
-            "details": details,
-            "color": color
+            "details": "Click check to verify",
+            "color": "gray"
         })
-    except:
-        pass
-
-    # 4. Invoices
-    checks.append({
-        "category": "Invoices",
-        "check": "Verification",
-        "status": "Pass",
-        "details": "All invoices verified",
-        "color": "green"
-    })
 
     return checks

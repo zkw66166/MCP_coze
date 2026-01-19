@@ -1,0 +1,28 @@
+
+--- Table: subject_balance ---
+Columns: 
+Error reading subject_balance: no such table: subject_balance
+
+--- Table: balance_sheet ---
+Columns: 
+Error reading balance_sheet: no such table: balance_sheet
+
+--- Table: income_statements ---
+Columns: 
+Error reading income_statements: no such table: income_statements
+
+--- Table: cash_flow_statements ---
+Columns: 
+Error reading cash_flow_statements: no such table: cash_flow_statements
+
+--- Table: vat_returns ---
+Columns: 
+Error reading vat_returns: no such table: vat_returns
+
+--- Table: tax_returns_income ---
+Columns: 
+Error reading tax_returns_income: no such table: tax_returns_income
+
+--- Table: tax_returns_stamp ---
+Columns: 
+Error reading tax_returns_stamp: no such table: tax_returns_stamp

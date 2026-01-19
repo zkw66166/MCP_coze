@@ -1,0 +1,36 @@
+
+--- account_balances ---
+Columns: ['id', 'company_id', 'account_code', 'account_name', 'opening_balance', 'debit_amount', 'credit_amount', 'ending_balance', 'created_at', 'period_year', 'period_month', 'period_quarter']
+Sample: (115, 5, '1001', '库存现金', 655233.0, 35053.0, 0.0, 689719.0, '2026-01-09 01:16:44', 2022, 3, 1)
+
+--- balance_sheets ---
+Columns: ['id', 'company_id', 'period_end_date', 'cash_and_equivalents', 'trading_financial_assets', 'accounts_receivable', 'prepayments', 'other_receivables', 'inventory', 'current_assets_total', 'long_term_equity_investment', 'fixed_assets', 'accumulated_depreciation', 'intangible_assets', 'accumulated_amortization', 'non_current_assets_total', 'total_assets', 'short_term_loans', 'accounts_payable', 'employee_benefits_payable', 'taxes_payable', 'current_liabilities_total', 'long_term_loans', 'non_current_liabilities_total', 'total_liabilities', 'paid_in_capital', 'capital_surplus', 'surplus_reserves', 'retained_earnings', 'total_equity', 'created_at', 'current_assets', 'period_year', 'period_month', 'period_quarter', 'notes_receivable', 'contract_assets', 'right_of_use_assets', 'construction_in_progress', 'development_expenditure', 'long_term_deferred_expenses', 'goodwill', 'deferred_tax_assets', 'other_non_current_assets', 'notes_payable', 'contract_liabilities', 'lease_liabilities', 'long_term_payables', 'deferred_revenue', 'deferred_tax_liabilities', 'estimated_liabilities']
+Sample: (17, 5, '2022-03-31', 13794380.0, 1724297.0, 10345785.0, 1724297.0, 1724297.0, 3448595.0, 34485949.0, 1149532.0, 6897190.0, 2299063.0, 2299063.0, 574766.0, 11495316.0, 45981265.0, 3227885.0, 4303846.0, 1075962.0, 1075962.0, 10759616.0, 4634911.0, 5793639.0, 16553255.0, 14714005.0, 2942801.0, 0.0, 11771204.0, 29428009.0, '2026-01-09 01:16:44', 0.0, 2022, 3, 1, 1034578.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 645576.9, 215192.3, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+--- income_statements ---
+Columns: ['id', 'company_id', 'period_year', 'period_month', 'period_quarter', 'period', 'report_date', 'total_revenue', 'cost_of_sales', 'gross_profit', 'operating_revenue', 'operating_costs', 'taxes_and_surcharges', 'selling_expenses', 'administrative_expenses', 'financial_expenses', 'operating_profit', 'non_operating_income', 'non_operating_expenses', 'total_profit', 'income_tax_expense', 'net_profit', 'created_at', 'consumption_tax', 'city_maintenance_tax', 'education_surcharge', 'local_education_surcharge', 'resource_tax', 'land_appreciation_tax', 'property_tax', 'stamp_duty', 'other_taxes', 'research_expenses', 'entertainment_expenses', 'advertising_expenses', 'asset_impairment_loss', 'credit_impairment_loss', 'asset_disposal_income', 'other_income', 'govt_grants']
+Sample: (18, 5, 2022, 3, 1, '2022年第1季度', '2022-03-31', 7466723.0, 2638669.95, 4828053.05, 7429575.0, 2600351.0, 79707.37, 814068.52, 605529.63, 168258.31, 3160489.22, 33323.02, 27694.04, 3166118.2, 474917.78, 2691200.42, '2026-01-09 01:16:44', 0.0, 38733.68, 23240.21, 15493.47, 0.0, 0.0, 0.0, 2240.02, 0.0, 90829.44, 60552.96, 162813.7, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+--- cash_flow_statements ---
+Columns: ['id', 'company_id', 'period_year', 'period_quarter', 'period_month', 'cash_received_goods_services', 'cash_received_tax_refunds', 'cash_received_other_operating', 'subtotal_operate_inflow', 'cash_paid_goods_services', 'cash_paid_employees', 'cash_paid_taxes', 'cash_paid_other_operating', 'subtotal_operate_outflow', 'net_cash_operating', 'cash_received_investment_disposal', 'cash_received_investment_return', 'cash_received_asset_disposal', 'subtotal_invest_inflow', 'cash_paid_asset_acquisition', 'cash_paid_investments', 'subtotal_invest_outflow', 'net_cash_investing', 'cash_received_borrowings', 'cash_received_capital_contribution', 'subtotal_finance_inflow', 'cash_paid_debt_repayment', 'cash_paid_interest_dividends', 'subtotal_finance_outflow', 'net_cash_financing', 'exchange_rate_effect', 'net_increase_cash', 'cash_beginning', 'cash_ending', 'created_at']
+Sample: (1, 8, 2022, 1, 0, 15097313.02, 0.0, 0.0, 15097313.02, 11567095.84, 1209730.67, 140734.03, 19466838.07, 32384398.61, -17287085.59, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 18114721.0, 0.0, 18114721.0, 0.0, 255591.61, 255591.61, 17859129.39, 0.0, 572043.8, 5148394.2, 5720438.0, '2026-01-12 03:45:49')
+
+--- vat_returns ---
+Columns: ['id', 'company_id', 'period_year', 'period_month', 'filing_date', 'created_at']
+Sample: (157, 8, 2022, 1, '2022.0-01-15', '2026-01-12 04:10:36')
+
+--- vat_return_items ---
+Columns: ['id', 'return_id', 'line_no', 'item_name', 'amount_current', 'amount_ytd', 'refund_current', 'refund_ytd']
+Sample: (1093, 157, None, '按适用税率计税销售额', 4749884.2, 0.0, 0.0, 0.0)
+
+--- tax_returns_income ---
+Columns: ['id', 'company_id', 'period_year', 'filing_date', 'created_at', 'revenue', 'cost', 'taxes_and_surcharges', 'selling_expenses', 'administrative_expenses', 'financial_expenses', 'operating_profit', 'total_profit', 'taxable_income', 'tax_rate', 'nominal_tax', 'tax_reduction', 'tax_payable', 'final_tax_payable']
+Sample: (29, 8, 2022, '2023-05-31', '2026-01-14 00:55:26', 62752396.0, 48319345.0, 648425.3, 6563205.3, 4982864.71, 1248153.26, 524935.25, 616924.25, 616924.25, 0.25, 154231.0625, -183514.16749999998, 337745.23, 337745.23)
+
+--- tax_returns_stamp ---
+Columns: ['id', 'company_id', 'period_year', 'period_quarter', 'filing_date', 'created_at']
+Sample: (53, 8, 2022, 1, '2022.0-Q1.0', '2026-01-12 04:10:36')
+
+--- tax_return_stamp_items ---
+Columns: ['id', 'return_id', 'tax_category', 'tax_item', 'tax_base', 'tax_rate', 'tax_payable', 'tax_reduction', 'tax_amount']
+Sample: (53, 53, '买卖合同', '购销合同', 13360454.0, 0.0003, 4008.14, 2004.07, 2004.07)

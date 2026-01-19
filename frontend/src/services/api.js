@@ -187,7 +187,7 @@ export async function healthCheck() {
  * 获取数据管理统计信息
  * @param {number|null} companyId 企业 ID (可选，不传则为多户汇总)
  */
-export async function fetchDataManagementStats(companyId = null) {
+export async function fetchDataManagementStats(companyId) {
     let url = `${API_BASE_URL}/api/data-management/stats`;
     if (companyId) {
         url += `?company_id=${companyId}`;
@@ -195,6 +195,23 @@ export async function fetchDataManagementStats(companyId = null) {
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`获取数据管理统计失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+export async function runDataQualityCheck(companyId) {
+    let url = `${API_BASE_URL}/api/data-management/quality-check?period_year=2022&period_month=3`;
+    if (companyId) {
+        url += `&company_id=${companyId}`;
+    }
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) {
+        throw new Error(`执行数据质量检查失败: ${response.status}`);
     }
     return response.json();
 }

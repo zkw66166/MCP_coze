@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Database, Upload, Download, Settings, Shield, Archive, FileText, Eye, Edit, Trash2, Search, Filter, CheckCircle, AlertTriangle, Clock, Server, Globe, Building, RefreshCw, MoreHorizontal, Activity, BarChart3, Users, ChevronDown, Plus, Calendar } from 'lucide-react';
-import { fetchDataManagementStats } from '../services/api';
+import { Database, Upload, Download, Settings, Shield, Archive, FileText, Eye, Edit, Trash2, Search, Filter, CheckCircle, AlertTriangle, AlertCircle, Clock, Server, Globe, Building, RefreshCw, MoreHorizontal, Activity, BarChart3, Users, ChevronDown, Plus, Calendar } from 'lucide-react';
+import { fetchDataManagementStats, runDataQualityCheck } from '../services/api';
 import './DataManagement.css';
 
 const DataManagement = ({ selectedCompanyId }) => {
@@ -18,6 +18,24 @@ const DataManagement = ({ selectedCompanyId }) => {
         update_frequency: []
     });
     const [loading, setLoading] = useState(false);
+
+    // Quality Check State
+    const [checkResults, setCheckResults] = useState(null);
+    const [checking, setChecking] = useState(false);
+
+    const handleRunCheck = async () => {
+        setChecking(true);
+        try {
+            // Use selected company or default for test
+            const results = await runDataQualityCheck(selectedCompanyId);
+            setCheckResults(results);
+        } catch (error) {
+            console.error("Quality Check Failed", error);
+            // In a real app, use a toast notification here
+        } finally {
+            setChecking(false);
+        }
+    };
 
     useEffect(() => {
         const loadStats = async () => {
@@ -213,27 +231,147 @@ const DataManagement = ({ selectedCompanyId }) => {
                         <Shield className="dm-card-icon" style={{ color: '#ea580c' }} />
                         数据质量检查
                     </h3>
+                    <button
+                        className="dm-btn-primary"
+                        onClick={handleRunCheck}
+                        disabled={checking}
+                        style={{
+                            padding: '6px 16px',
+                            fontSize: '12px',
+                            marginLeft: 'auto', // Right align
+                            cursor: checking ? 'not-allowed' : 'pointer',
+                            opacity: checking ? 0.7 : 1
+                        }}
+                    >
+                        {checking ? <RefreshCw className="animate-spin" style={{ width: '14px', marginRight: '6px' }} /> : <Activity style={{ width: '14px', marginRight: '6px' }} />}
+                        {checking ? '检测中...' : '开始检测'}
+                    </button>
                 </div>
 
                 <div className="dm-checks-grid">
-                    {stats.quality_checks && stats.quality_checks.map((item, index) => {
-                        const IconComponent = getIconForCheck(item.status);
-                        return (
-                            <div key={index} className={`dm-check-item ${item.color}`}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <IconComponent className="dm-card-icon" style={{ color: 'inherit' }} />
-                                    <div>
-                                        <p style={{ fontWeight: 500, color: '#111827' }}>{item.category}</p>
-                                        <p style={{ fontSize: '14px', fontWeight: 500 }}>{item.check}</p>
-                                        <p style={{ fontSize: '12px', color: '#4b5563' }}>{item.details}</p>
+                    {(() => {
+                        // Define fixed order and mapping for the 7 report types
+                        const REPORT_TYPES = [
+                            { key: 'subject_balance', label: '科目余额表' },
+                            { key: 'balance_sheet', label: '资产负债表' },
+                            { key: 'income_statement', label: '利润表' },
+                            { key: 'cash_flow', label: '现金流量表' },
+                            { key: 'vat_return', label: '增值税申报表' },
+                            { key: 'cit_return', label: '企业所得税申报表' },
+                            { key: 'stamp_duty', label: '印花税申报表' }
+                        ];
+
+                        // If checks passed, map backend results to these types
+                        if (checkResults) {
+                            // DEBUG: Uncomment to see raw data on screen if issues persist
+                            // return <pre>{JSON.stringify(checkResults, null, 2)}</pre>;
+
+                            return REPORT_TYPES.map((type, index) => {
+                                const result = checkResults && checkResults[type.key];
+                                // Fallback if result is entirely missing or null
+                                if (!result) {
+                                    return (
+                                        <div key={index} className="dm-check-item gray">
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <Archive className="dm-card-icon" style={{ color: '#9ca3af' }} />
+                                                <div>
+                                                    <p style={{ fontWeight: 500, color: '#111827' }}>{type.label}</p>
+                                                    <p style={{ fontSize: '12px', color: '#6b7280' }}>未获取到结果</p>
+                                                </div>
+                                            </div>
+                                            <span className="dm-tag gray">未知</span>
+                                        </div>
+                                    );
+                                }
+
+
+                                const isPass = result.status === 'pass';
+                                // Safety check: details might be missing if status is 'skip' or error
+                                const details = result.details || [];
+                                const failedItems = details.filter(d => d.status !== 'pass');
+
+                                return (
+                                    <div key={index} className={`dm-check-item ${isPass ? 'green' : 'red'}`} style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: failedItems.length > 0 ? '8px' : '0' }}>
+                                            {isPass ?
+                                                <CheckCircle className="dm-card-icon" style={{ color: '#10b981' }} /> :
+                                                <AlertCircle className="dm-card-icon" style={{ color: '#ef4444' }} />
+                                            }
+                                            <div style={{ flex: 1, marginLeft: '12px' }}>
+                                                <div style={{ fontWeight: 500, color: '#111827' }}>{type.label}</div>
+                                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                    {isPass ? '检查通过' : `发现 ${failedItems.length} 个问题`}
+                                                </div>
+                                            </div>
+                                            <span className={`dm-tag ${isPass ? 'green' : 'red'}`}>
+                                                {isPass ? '通过' : '异常'}
+                                            </span>
+                                        </div>
+
+                                        {/* Show failed items details if any */}
+                                        {failedItems.length > 0 && (
+                                            <div style={{
+                                                width: '100%',
+                                                marginTop: '8px',
+                                                padding: '8px',
+                                                backgroundColor: '#fef2f2',
+                                                borderRadius: '6px',
+                                                border: '1px solid #fee2e2'
+                                            }}>
+                                                {failedItems.slice(0, 3).map((item, i) => (
+                                                    <div key={i} style={{ fontSize: '11px', color: '#b91c1c', marginBottom: '4px' }}>
+                                                        • {item.check}: {item.message || 'Check failed'}
+                                                    </div>
+                                                ))}
+                                                {failedItems.length > 3 && (
+                                                    <div style={{ fontSize: '11px', color: '#b91c1c', fontStyle: 'italic' }}>
+                                                        ...还有 {failedItems.length - 3} 个问题
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
+                                );
+                            });
+                        }
+
+                        // Initial State (Placeholder Stats)
+                        // Backend now returns 7 items in stats.quality_checks matching the types
+                        const displayList = stats.quality_checks || [];
+                        if (displayList.length === 0) {
+                            return (
+                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: '#9ca3af' }}>
+                                    暂无检查数据，请点击上方按钮开始检测
                                 </div>
-                                <span className={`dm-tag ${item.color}`}>
-                                    {item.status}
-                                </span>
-                            </div>
-                        );
-                    })}
+                            );
+                        }
+
+                        return displayList.map((item, index) => {
+                            // Map old/static status format
+                            let color = 'gray';
+                            let icon = Clock;
+                            let text = '待检测';
+
+                            if (item.status === 'Pass') { color = 'green'; icon = CheckCircle; text = '通过'; }
+                            else if (item.status === 'Warning') { color = 'yellow'; icon = AlertTriangle; text = '警告'; }
+                            else if (item.status === 'Pending') { color = 'blue'; icon = Clock; text = '待检测'; }
+
+                            return (
+                                <div key={index} className={`dm-check-item ${color}`}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        {React.createElement(icon, { className: "dm-card-icon", style: { color: 'inherit' } })}
+                                        <div>
+                                            <p style={{ fontWeight: 500, color: '#111827' }}>{item.check}</p> {/* Use CN name */}
+                                            <p style={{ fontSize: '12px', color: '#4b5563' }}>{item.category}</p> {/* Use EN name as subtitle or vice/versa */}
+                                        </div>
+                                    </div>
+                                    <span className={`dm-tag ${color}`}>
+                                        {text}
+                                    </span>
+                                </div>
+                            );
+                        });
+                    })()}
                 </div>
             </div>
 
