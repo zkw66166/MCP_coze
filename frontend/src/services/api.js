@@ -200,9 +200,9 @@ export async function fetchDataManagementStats(companyId) {
 }
 
 export async function runDataQualityCheck(companyId) {
-    let url = `${API_BASE_URL}/api/data-management/quality-check?period_year=2022&period_month=3`;
+    let url = `${API_BASE_URL}/api/data-management/quality-check`;
     if (companyId) {
-        url += `&company_id=${companyId}`;
+        url += `?company_id=${companyId}`;
     }
     const response = await fetch(url, {
         method: 'POST',

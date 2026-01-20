@@ -9,7 +9,9 @@ router = APIRouter(
     tags=["data-management"]
 )
 
-DB_PATH = 'database/financial.db'
+# 数据库路径 - 使用绝对路径
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                       'database', 'financial.db')
 
 def get_db_connection():
     if not os.path.exists(DB_PATH):
@@ -151,19 +153,20 @@ async def get_data_management_stats(company_id: Optional[int] = None):
 
 @router.post("/quality-check")
 async def check_data_quality(
-    company_id: Optional[int] = Query(None, description="Company ID"),
-    period_year: int = Query(2022, description="Year to check"), # Default 2022 for test data
-    period_month: int = Query(3, description="Month to check (for monthly reports)") # Default March
+    company_id: Optional[int] = Query(None, description="Company ID")
 ):
+    """
+    执行数据质量检查
+    自动遍历所选企业的所有期间和所有表
+    """
     try:
         from ..services.data_quality import DataQualityChecker
-        db_path = "database/financial.db"
-        checker = DataQualityChecker(db_path)
+        checker = DataQualityChecker(DB_PATH)
         
-        # If no company selected, check the first available one or a specific one for testing
-        target_company = company_id if company_id else 5 # Default to company 5 (from inspect log) if not specified
+        # If no company selected, default to company 5 for testing
+        target_company = company_id if company_id else 5
         
-        results = checker.check_all(target_company, period_year, period_month)
+        results = checker.check_all(target_company)
         return results
     except Exception as e:
         import traceback

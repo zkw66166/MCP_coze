@@ -3,6 +3,89 @@ import { Database, Upload, Download, Settings, Shield, Archive, FileText, Eye, E
 import { fetchDataManagementStats, runDataQualityCheck } from '../services/api';
 import './DataManagement.css';
 
+/**
+ * 期间检查结果卡片组件
+ * 单独提取出来以便正确使用 useState hook
+ */
+const PeriodCard = ({ period, pIdx }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    const pIsPass = period.status === 'pass';
+    const pIsSkip = period.status === 'skip';
+    const pDetails = period.details || [];
+    const pFailed = pDetails.filter(d => d.status !== 'pass');
+    const displayCount = expanded ? pFailed.length : 2;
+
+    return (
+        <div style={{
+            padding: '8px 12px',
+            borderRadius: '6px',
+            border: `1px solid ${pIsPass ? '#d1fae5' : pIsSkip ? '#e5e7eb' : '#fee2e2'}`,
+            backgroundColor: pIsPass ? '#f0fdf4' : pIsSkip ? '#f9fafb' : '#fef2f2'
+        }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <span style={{ fontWeight: 500, fontSize: '13px', color: '#111827' }}>{period.period}</span>
+                <span style={{
+                    fontSize: '11px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: pIsPass ? '#10b981' : pIsSkip ? '#9ca3af' : '#ef4444',
+                    color: '#fff'
+                }}>
+                    {pIsPass ? '✓' : pIsSkip ? '-' : `${pFailed.length}项异常`}
+                </span>
+            </div>
+            {pFailed.length > 0 && (
+                <div style={{ fontSize: '11px', color: '#b91c1c' }}>
+                    {pFailed.slice(0, displayCount).map((f, fIdx) => (
+                        <div key={fIdx} style={{
+                            marginTop: '4px',
+                            padding: '4px 6px',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderRadius: '4px'
+                        }}>
+                            <div style={{ fontWeight: 500 }}>• {f.check}</div>
+                            {f.message && (
+                                <div style={{
+                                    marginLeft: '12px',
+                                    fontSize: '10px',
+                                    color: '#991b1b',
+                                    marginTop: '2px'
+                                }}>
+                                    {f.message}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                    {pFailed.length > 2 && (
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setExpanded(!expanded);
+                            }}
+                            style={{
+                                marginTop: '6px',
+                                cursor: 'pointer',
+                                fontStyle: 'italic',
+                                color: '#2563eb',
+                                textDecoration: 'underline',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}
+                        >
+                            {expanded ? '▲ 收起' : `▼ 还有 ${pFailed.length - 2} 项 (点击展开)`}
+                        </div>
+                    )}
+                </div>
+            )}
+            {pIsSkip && period.message && (
+                <div style={{ fontSize: '11px', color: '#6b7280' }}>{period.message}</div>
+            )}
+        </div>
+    );
+};
+
 const DataManagement = ({ selectedCompanyId }) => {
     const [activeTab, setActiveTab] = useState('single');
     const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -231,6 +314,17 @@ const DataManagement = ({ selectedCompanyId }) => {
                         <Shield className="dm-card-icon" style={{ color: '#ea580c' }} />
                         数据质量检查
                     </h3>
+                    {checkResults && checkResults.summary && (
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginRight: '16px' }}>
+                            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                                共 {checkResults.summary.total_periods} 期 |
+                                检查 {checkResults.summary.total_checks} 项 |
+                                通过率 <span style={{ color: checkResults.summary.pass_rate >= 90 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                                    {checkResults.summary.pass_rate}%
+                                </span>
+                            </span>
+                        </div>
+                    )}
                     <button
                         className="dm-btn-primary"
                         onClick={handleRunCheck}
@@ -238,7 +332,7 @@ const DataManagement = ({ selectedCompanyId }) => {
                         style={{
                             padding: '6px 16px',
                             fontSize: '12px',
-                            marginLeft: 'auto', // Right align
+                            marginLeft: 'auto',
                             cursor: checking ? 'not-allowed' : 'pointer',
                             opacity: checking ? 0.7 : 1
                         }}
@@ -248,9 +342,8 @@ const DataManagement = ({ selectedCompanyId }) => {
                     </button>
                 </div>
 
-                <div className="dm-checks-grid">
+                <div className="dm-checks-grid" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {(() => {
-                        // Define fixed order and mapping for the 7 report types
                         const REPORT_TYPES = [
                             { key: 'subject_balance', label: '科目余额表' },
                             { key: 'balance_sheet', label: '资产负债表' },
@@ -261,17 +354,13 @@ const DataManagement = ({ selectedCompanyId }) => {
                             { key: 'stamp_duty', label: '印花税申报表' }
                         ];
 
-                        // If checks passed, map backend results to these types
-                        if (checkResults) {
-                            // DEBUG: Uncomment to see raw data on screen if issues persist
-                            // return <pre>{JSON.stringify(checkResults, null, 2)}</pre>;
-
+                        // New API format: results_by_table
+                        if (checkResults && checkResults.results_by_table) {
                             return REPORT_TYPES.map((type, index) => {
-                                const result = checkResults && checkResults[type.key];
-                                // Fallback if result is entirely missing or null
-                                if (!result) {
+                                const tableResult = checkResults.results_by_table[type.key];
+                                if (!tableResult) {
                                     return (
-                                        <div key={index} className="dm-check-item gray">
+                                        <div key={index} className="dm-check-item gray" style={{ padding: '12px 16px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                 <Archive className="dm-card-icon" style={{ color: '#9ca3af' }} />
                                                 <div>
@@ -284,90 +373,94 @@ const DataManagement = ({ selectedCompanyId }) => {
                                     );
                                 }
 
-
-                                const isPass = result.status === 'pass';
-                                // Safety check: details might be missing if status is 'skip' or error
-                                const details = result.details || [];
-                                const failedItems = details.filter(d => d.status !== 'pass');
+                                const isPass = tableResult.status === 'pass';
+                                const isSkip = tableResult.status === 'skip';
+                                const periods = tableResult.periods || [];
+                                const failedPeriods = periods.filter(p => p.status === 'fail');
+                                const passedPeriods = periods.filter(p => p.status === 'pass');
 
                                 return (
-                                    <div key={index} className={`dm-check-item ${isPass ? 'green' : 'red'}`} style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: failedItems.length > 0 ? '8px' : '0' }}>
+                                    <details key={index} className="dm-check-details" style={{
+                                        border: `1px solid ${isPass ? '#d1fae5' : isSkip ? '#e5e7eb' : '#fee2e2'}`,
+                                        borderRadius: '8px',
+                                        backgroundColor: isPass ? '#f0fdf4' : isSkip ? '#f9fafb' : '#fef2f2',
+                                        overflow: 'hidden'
+                                    }}>
+                                        <summary style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '12px 16px',
+                                            cursor: 'pointer',
+                                            listStyle: 'none'
+                                        }}>
+                                            <ChevronDown style={{ width: '16px', height: '16px', marginRight: '8px', color: '#6b7280', transition: 'transform 0.2s' }} />
                                             {isPass ?
-                                                <CheckCircle className="dm-card-icon" style={{ color: '#10b981' }} /> :
-                                                <AlertCircle className="dm-card-icon" style={{ color: '#ef4444' }} />
+                                                <CheckCircle style={{ width: '20px', height: '20px', color: '#10b981', marginRight: '12px' }} /> :
+                                                isSkip ?
+                                                    <Clock style={{ width: '20px', height: '20px', color: '#9ca3af', marginRight: '12px' }} /> :
+                                                    <AlertCircle style={{ width: '20px', height: '20px', color: '#ef4444', marginRight: '12px' }} />
                                             }
-                                            <div style={{ flex: 1, marginLeft: '12px' }}>
-                                                <div style={{ fontWeight: 500, color: '#111827' }}>{type.label}</div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontWeight: 500, color: '#111827' }}>{tableResult.table_name || type.label}</div>
                                                 <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                                                    {isPass ? '检查通过' : `发现 ${failedItems.length} 个问题`}
+                                                    {periods.length} 期数据 | 通过 {passedPeriods.length} | 异常 {failedPeriods.length}
                                                 </div>
                                             </div>
-                                            <span className={`dm-tag ${isPass ? 'green' : 'red'}`}>
-                                                {isPass ? '通过' : '异常'}
+                                            <span className={`dm-tag ${isPass ? 'green' : isSkip ? 'gray' : 'red'}`}>
+                                                {isPass ? '全部通过' : isSkip ? '无数据' : `${failedPeriods.length} 期异常`}
                                             </span>
-                                        </div>
+                                        </summary>
 
-                                        {/* Show failed items details if any */}
-                                        {failedItems.length > 0 && (
-                                            <div style={{
-                                                width: '100%',
-                                                marginTop: '8px',
-                                                padding: '8px',
-                                                backgroundColor: '#fef2f2',
-                                                borderRadius: '6px',
-                                                border: '1px solid #fee2e2'
-                                            }}>
-                                                {failedItems.slice(0, 3).map((item, i) => (
-                                                    <div key={i} style={{ fontSize: '11px', color: '#b91c1c', marginBottom: '4px' }}>
-                                                        • {item.check}: {item.message || 'Check failed'}
-                                                    </div>
+                                        {/* Period Details */}
+                                        <div style={{
+                                            borderTop: '1px solid #e5e7eb',
+                                            padding: '12px 16px',
+                                            backgroundColor: '#fff',
+                                            maxHeight: '300px',
+                                            overflowY: 'auto'
+                                        }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                                                {periods.map((period, pIdx) => (
+                                                    <PeriodCard key={pIdx} period={period} pIdx={pIdx} />
                                                 ))}
-                                                {failedItems.length > 3 && (
-                                                    <div style={{ fontSize: '11px', color: '#b91c1c', fontStyle: 'italic' }}>
-                                                        ...还有 {failedItems.length - 3} 个问题
-                                                    </div>
-                                                )}
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    </details>
                                 );
                             });
                         }
 
-                        // Initial State (Placeholder Stats)
-                        // Backend now returns 7 items in stats.quality_checks matching the types
+                        // Initial/Placeholder State
                         const displayList = stats.quality_checks || [];
-                        if (displayList.length === 0) {
+                        if (displayList.length === 0 && !checkResults) {
                             return (
-                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: '#9ca3af' }}>
-                                    暂无检查数据，请点击上方按钮开始检测
+                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+                                    <Shield style={{ width: '48px', height: '48px', margin: '0 auto 16px', opacity: 0.3 }} />
+                                    <p style={{ marginBottom: '8px' }}>暂无检查数据</p>
+                                    <p style={{ fontSize: '12px' }}>点击上方"开始检测"按钮，对选中企业的所有期间数据进行质量检查</p>
                                 </div>
                             );
                         }
 
+                        // Fallback for old format or placeholder
                         return displayList.map((item, index) => {
-                            // Map old/static status format
                             let color = 'gray';
                             let icon = Clock;
                             let text = '待检测';
-
                             if (item.status === 'Pass') { color = 'green'; icon = CheckCircle; text = '通过'; }
                             else if (item.status === 'Warning') { color = 'yellow'; icon = AlertTriangle; text = '警告'; }
                             else if (item.status === 'Pending') { color = 'blue'; icon = Clock; text = '待检测'; }
 
                             return (
-                                <div key={index} className={`dm-check-item ${color}`}>
+                                <div key={index} className={`dm-check-item ${color}`} style={{ padding: '12px 16px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         {React.createElement(icon, { className: "dm-card-icon", style: { color: 'inherit' } })}
                                         <div>
-                                            <p style={{ fontWeight: 500, color: '#111827' }}>{item.check}</p> {/* Use CN name */}
-                                            <p style={{ fontSize: '12px', color: '#4b5563' }}>{item.category}</p> {/* Use EN name as subtitle or vice/versa */}
+                                            <p style={{ fontWeight: 500, color: '#111827' }}>{item.check}</p>
+                                            <p style={{ fontSize: '12px', color: '#4b5563' }}>{item.category}</p>
                                         </div>
                                     </div>
-                                    <span className={`dm-tag ${color}`}>
-                                        {text}
-                                    </span>
+                                    <span className={`dm-tag ${color}`}>{text}</span>
                                 </div>
                             );
                         });
