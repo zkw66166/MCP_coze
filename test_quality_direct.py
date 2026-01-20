@@ -32,6 +32,15 @@ try:
     for table_key, table_result in results.get('results_by_table', {}).items():
         status = table_result.get('status', 'unknown')
         print(f"  {table_result.get('table_name')}: {status} ({table_result.get('period_count')} periods)")
+        if status == 'fail' and table_key == 'balance_sheet':
+             # Print details for first failed period
+             for p in table_result.get('periods', []):
+                 if p.get('status') == 'fail':
+                     print(f"    Failed Period {p['period']}:")
+                     for d in p.get('details', []):
+                         if d['status'] == 'fail':
+                             print(f"      - {d['check']}: {d['message']}")
+                     break
         
 except Exception as e:
     import traceback

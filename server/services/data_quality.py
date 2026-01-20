@@ -259,12 +259,14 @@ class DataQualityChecker:
         
         # 4. 流动资产明细
         ca_calc = (val('cash_and_equivalents') + val('trading_financial_assets') + val('accounts_receivable') + 
-                  val('prepayments') + val('other_receivables') + val('inventory') + val('notes_receivable') + val('contract_assets'))
+                  val('prepayments') + val('other_receivables') + val('inventory') + val('notes_receivable') + 
+                  val('contract_assets') + val('current_assets'))
         check_eq("流动资产明细", val('current_assets_total'), ca_calc, tolerance=1000)
         
         # 5. 非流动资产明细
         nca_calc = (val('long_term_equity_investment') + val('fixed_assets') + val('construction_in_progress') + 
-                   val('intangible_assets') + val('goodwill') + val('long_term_deferred_expenses') + val('deferred_tax_assets'))
+                   val('intangible_assets') + val('goodwill') + val('long_term_deferred_expenses') + 
+                   val('deferred_tax_assets') + val('other_non_current_assets'))
         check_eq("非流动资产明细", val('non_current_assets_total'), nca_calc, tolerance=1000)
 
         return self._create_result(checks)

@@ -454,7 +454,7 @@
     window.autoClickerUI = ui;
 
     console.log('✅ AUTO-CLICKER ACTIVE');
-    console.log('🔍 Searching for "Accept" and "Accept All" buttons in iframes');
+    console.log('🔍 Searching for "Accept" and "Accept all" buttons in iframes');
     console.log('📊 Scanning every 3 seconds');
     console.log('☑️  Check the box to enable auto-clicking');
     console.log('═'.repeat(80));
