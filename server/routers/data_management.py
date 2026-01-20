@@ -72,7 +72,7 @@ async def get_data_management_stats(company_id: Optional[int] = None):
         # Report Quantity (Count of rows in main tables)
         tables_to_count = [
             'balance_sheet', 'income_statements', 'cash_flow_statements', 
-            'tax_returns_income', 'vat_returns', 'tax_returns_stamp', 'invoices'
+            'tax_returns_income', 'tax_returns_vat', 'tax_returns_stamp', 'invoices'
         ]
         
         total_reports = 0

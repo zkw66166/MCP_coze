@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Database, Upload, Download, Settings, Shield, Archive, FileText, Eye, Edit, Trash2, Search, Filter, CheckCircle, AlertTriangle, AlertCircle, Clock, Server, Globe, Building, RefreshCw, MoreHorizontal, Activity, BarChart3, Users, ChevronDown, Plus, Calendar } from 'lucide-react';
 import { fetchDataManagementStats, runDataQualityCheck } from '../services/api';
 import './DataManagement.css';
+import DataBrowser from './DataBrowser';
 
 /**
  * 期间检查结果卡片组件
@@ -721,6 +722,13 @@ const DataManagement = ({ selectedCompanyId }) => {
                         <Users className="dm-tab-icon" />
                         多户企业数据
                     </button>
+                    <button
+                        onClick={() => setActiveTab('browse')}
+                        className={`dm-tab-btn ${activeTab === 'browse' ? 'active' : ''}`}
+                    >
+                        <Search className="dm-tab-icon" />
+                        数据浏览
+                    </button>
                 </div>
             </div>
 
@@ -729,7 +737,11 @@ const DataManagement = ({ selectedCompanyId }) => {
                     <div className="dm-spinner"></div>
                 </div>
             ) : (
-                activeTab === 'single' ? <SingleCompanyTab /> : <MultiCompanyTab />
+                <>
+                    {activeTab === 'single' && <SingleCompanyTab />}
+                    {activeTab === 'multi' && <MultiCompanyTab />}
+                    {activeTab === 'browse' && <DataBrowser />}
+                </>
             )}
         </div>
     );

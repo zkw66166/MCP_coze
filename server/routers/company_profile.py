@@ -408,15 +408,18 @@ async def get_tax_summary(company_id: int, year: Optional[int] = None) -> Dict[s
         cursor = conn.cursor()
         
         # 获取增值税数据
-        cursor.execute('''
-            SELECT SUM(vi.amount_current) as vat_amount
-            FROM vat_returns vr
-            JOIN vat_return_items vi ON vr.id = vi.return_id
-            WHERE vr.company_id = ? AND vr.period_year = ?
-            AND vi.item_name LIKE '%应纳税额%'
-        ''', (company_id, year))
-        vat_row = cursor.fetchone()
-        vat_amount = vat_row["vat_amount"] if vat_row and vat_row["vat_amount"] else 0
+        # 兼容新表结构 tax_returns_vat
+        try:
+            cursor.execute('''
+                SELECT SUM(gen_tax_payable_current) as vat_amount
+                FROM tax_returns_vat
+                WHERE company_id = ? AND period_year = ?
+            ''', (company_id, year))
+            vat_row = cursor.fetchone()
+            vat_amount = vat_row["vat_amount"] if vat_row and vat_row["vat_amount"] else 0
+        except sqlite3.OperationalError:
+            # Fallback logic if table doesn't exist (should not happen if migration complete)
+            vat_amount = 0
         
         # 获取企业所得税数据
         cursor.execute('''

@@ -1,0 +1,148 @@
+
+.db-container {
+    padding: 24px;
+    background-color: #f9fafb;
+    min-height: 100%;
+}
+
+.db-filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    background-color: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    align-items: center;
+}
+
+.db-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+}
+
+.db-filter-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.db-select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #111827;
+    background-color: white;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.db-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.db-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    /* Remove explicit height to allow auto-sizing, 
+       but we want the table container to scroll if it gets too tall?
+       Actually user asked for "no pagination, just scrollbar".
+       So we can set a max-height on the table wrapper.
+    */
+    height: calc(100vh - 200px); /* Adjust based on header/filter height */
+}
+
+.db-table-header {
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.db-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.db-count {
+    font-size: 12px;
+    color: #6b7280;
+    background-color: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.db-table-wrapper {
+    flex: 1;
+    overflow: auto; /* Handles both X and Y scrolling */
+    position: relative;
+}
+
+.db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    white-space: nowrap; /* Prevent wrapping for data cells */
+}
+
+.db-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f9fafb;
+}
+
+.db-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 500;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb; /* Ensure background for sticky header */
+}
+
+.db-table td {
+    padding: 12px 16px;
+    color: #111827;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.db-table tr:hover {
+    background-color: #f9fafb;
+}
+
+.db-empty, .db-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #9ca3af;
+    padding: 40px;
+}
+
+.db-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f4f6;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

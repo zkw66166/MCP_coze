@@ -196,6 +196,42 @@ const LineChart = ({ data, lines, title }) => {
     return <canvas ref={canvasRef} />;
 };
 
+// 组织架构树状图组件
+const OrgTree = ({ rootName, children }) => {
+    if (!children || children.length === 0) return null;
+
+    return (
+        <div className="org-tree-container">
+            <div className="org-node-wrapper root-wrapper">
+                <div className="org-node root-node">
+                    <div className="node-content">
+                        <span className="node-icon">🏢</span>
+                        <span className="node-name">{rootName}</span>
+                    </div>
+                </div>
+                <div className="org-connector-vertical"></div>
+            </div>
+
+            <div className="org-children-wrapper">
+                <div className="org-connector-horizontal-bar"></div>
+                <div className="org-children-list">
+                    {children.map((child, index) => (
+                        <div key={index} className="org-node-wrapper child-wrapper">
+                            <div className="org-connector-vertical-top"></div>
+                            <div className="org-node child-node">
+                                <div className="node-content">
+                                    <span className="node-name" title={child.name}>{child.name?.substring(0, 8)}{child.name?.length > 8 ? '...' : ''}</span>
+                                    <span className="node-value">{child.value}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // ============================================================================
 // 主组件
 // ============================================================================
@@ -363,12 +399,11 @@ function CompanyProfile({ selectedCompanyId, companies }) {
                     <div className="metrics-row-2">
                         <div className="chart-section">
                             <SectionTitle name="股权结构" color="purple" />
-                            <div className="chart-container" style={{ height: '200px' }}>
-                                {shareholderPieData.length > 0 ? (
-                                    <PieChart data={shareholderPieData} />
-                                ) : (
-                                    <p className="no-data">暂无股东数据</p>
-                                )}
+                            <div className="chart-container" style={{ height: '220px', overflowX: 'auto', overflowY: 'hidden' }}>
+                                <OrgTree
+                                    rootName={companyName}
+                                    children={shareholderPieData}
+                                />
                             </div>
                         </div>
                         <div>

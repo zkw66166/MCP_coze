@@ -1123,80 +1123,55 @@
                 }
             }
         },
-        "vat_returns": {
+        "tax_returns_vat": {
             "description": "增值税申报表",
             "fields": {
                 "filing_date": {
                     "aliases": [
-                        "增值税申报日期",
-                        "增值税填报日期"
-                    ],
-                    "unit": "",
-                    "category": "基础信息"
-                }
-            }
-        },
-        "vat_return_items": {
-            "description": "增值税申报明细",
-            "fields": {
-                "line_no": {
-                    "aliases": [
-                        "行号"
+                        "增值税申报日期"
                     ],
                     "unit": "",
                     "category": "基础信息"
                 },
-                "item_name": {
+                "gen_sales_taxable_current": {
                     "aliases": [
-                        "增值税项目名称",
-                        "增值税明细项目"
-                    ],
-                    "unit": "",
-                    "category": "基础信息"
-                },
-                "amount_current": {
-                    "aliases": [
-                        "本期金额",
-                        "本期发生额"
+                        "一般项目本期销售额",
+                        "销售额"
                     ],
                     "unit": "元",
-                    "category": "金额"
+                    "category": "销售情况"
                 },
-                "amount_ytd": {
+                "gen_output_tax_current": {
                     "aliases": [
-                        "本年累计金额",
-                        "年初累计"
+                        "一般项目本期销项税额",
+                        "销项税额"
                     ],
                     "unit": "元",
-                    "category": "金额"
+                    "category": "税款计算"
                 },
-                "refund_current": {
+                "gen_input_tax_current": {
                     "aliases": [
-                        "本期退税",
-                        "即征即退税额"
+                        "一般项目本期进项税额",
+                        "进项税额"
                     ],
                     "unit": "元",
-                    "category": "金额"
+                    "category": "税款计算"
                 },
-                "refund_ytd": {
+                "gen_tax_payable_current": {
                     "aliases": [
-                        "累计退税"
+                        "一般项目本期应纳税额",
+                        "应纳税额"
                     ],
                     "unit": "元",
-                    "category": "金额"
-                }
-            }
-        },
-        "tax_returns_income": {
-            "description": "企业所得税年度申报表",
-            "fields": {
-                "filing_date": {
+                    "category": "税款计算"
+                },
+                "gen_paid_tax_total_current": {
                     "aliases": [
-                        "所得税申报日期",
-                        "年报申报日期"
+                        "本期已缴税额",
+                        "已缴税额"
                     ],
-                    "unit": "",
-                    "category": "基础信息"
+                    "unit": "元",
+                    "category": "税款缴纳"
                 }
             }
         },

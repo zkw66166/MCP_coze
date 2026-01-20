@@ -1,0 +1,202 @@
+/* 组织架构图样式 */
+.org-tree-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    width: 100%;
+}
+
+.org-node-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.org-node {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 6px 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+    min-width: 80px;
+    text-align: center;
+    z-index: 2;
+}
+
+.root-node {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.child-node {
+    background: #f9fafb;
+    font-size: 12px;
+}
+
+.child-node .node-name {
+    display: block;
+    margin-bottom: 2px;
+    color: #374151;
+}
+
+.child-node .node-value {
+    display: block;
+    font-weight: 600;
+    color: #3b82f6;
+}
+
+/* 连接线 */
+.org-connector-vertical {
+    width: 1px;
+    height: 15px;
+    background-color: #cbd5e1;
+}
+
+.org-connector-vertical-top {
+    width: 1px;
+    height: 15px;
+    background-color: #cbd5e1;
+    margin-bottom: -1px;
+    /* Overlap slightly */
+}
+
+.org-children-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.org-connector-horizontal-bar {
+    height: 1px;
+    background-color: #cbd5e1;
+    width: calc(100% - 80px);
+    /* Approximate width adjustment based on children count usually */
+    position: absolute;
+    top: 0;
+    /* This needs dynamic calculation or a smart CSS hack. 
+       Better hack: connect horizontal bar from first child center to last child center.
+    */
+    display: none;
+    /* Hide default, enable in specific logic if possible or use pseudo elements */
+}
+
+/* Using a more robust CSS-only tree approach */
+.org-children-list {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 0;
+    position: relative;
+}
+
+/* Connectors using pseudo-elements */
+.child-wrapper {
+    position: relative;
+}
+
+.child-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    /* Matches vertical-top height */
+    left: 50%;
+    width: 0;
+    height: 15px;
+    border-left: 1px solid #cbd5e1;
+}
+
+/* Horizontal line spanning children */
+.org-children-list::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: calc(12.5% + 20px);
+    /* Very rough approximation, hard to do perfectly generic with pure CSS without calc */
+    right: calc(12.5% + 20px);
+    height: 1px;
+    background-color: #cbd5e1;
+    /* Only works well if we know widths. 
+       Let's try a different approach:
+       Each child has a top border that extends 50% left or right to connect to center?
+    */
+    display: none;
+}
+
+/* Better CSS Tree Connectors */
+.child-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 50%;
+    height: 1px;
+    border-top: 1px solid #cbd5e1;
+}
+
+/* First child: line from center to right */
+.child-wrapper:first-child::after {
+    left: 50%;
+    width: 50%;
+}
+
+/* Last child: line from left to center */
+.child-wrapper:last-child::after {
+    left: 0;
+    width: 50%;
+}
+
+/* Middle children: full width line (actually need two pseudos or one spanning 100%) */
+/* Actually, the standard trick:
+   ::before is vertical line up.
+   ::after is horizontal line.
+ */
+
+.child-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    border-left: 1px solid #cbd5e1;
+    height: 15px;
+    width: 0;
+}
+
+.child-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 100%;
+    border-top: 1px solid #cbd5e1;
+}
+
+.child-wrapper:first-child::after {
+    left: 50%;
+    width: 50%;
+}
+
+.child-wrapper:last-child::after {
+    right: 50%;
+    width: 50%;
+}
+
+.child-wrapper:only-child::after {
+    display: none;
+}
+
+.child-wrapper:only-child::before {
+    height: 15px;
+    /* Just vertical up to root */
+    top: -15px;
+}
+
+.child-wrapper:only-child {
+    padding-top: 0;
+}

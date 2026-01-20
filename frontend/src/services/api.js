@@ -215,3 +215,51 @@ export async function runDataQualityCheck(companyId) {
     }
     return response.json();
 }
+
+/**
+ * 获取数据浏览支持的企业列表
+ */
+export async function fetchBrowseCompanies() {
+    const response = await fetch(`${API_BASE_URL}/api/data-browser/companies`);
+    if (!response.ok) {
+        throw new Error(`获取企业列表失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+/**
+ * 获取数据浏览支持的表列表
+ */
+export async function fetchBrowseTables() {
+    const response = await fetch(`${API_BASE_URL}/api/data-browser/tables`);
+    if (!response.ok) {
+        throw new Error(`获取数据表列表失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+/**
+ * 获取指定企业和表的数据期间
+ */
+export async function fetchBrowsePeriods(companyId, tableName) {
+    const response = await fetch(`${API_BASE_URL}/api/data-browser/periods?company_id=${companyId}&table_name=${tableName}`);
+    if (!response.ok) {
+        throw new Error(`获取数据期间失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+/**
+ * 获取表数据 (不分页)
+ */
+export async function fetchBrowseData(companyId, tableName, period = null) {
+    let url = `${API_BASE_URL}/api/data-browser/data?company_id=${companyId}&table_name=${tableName}`;
+    if (period) {
+        url += `&period=${encodeURIComponent(period)}`;
+    }
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`获取数据失败: ${response.status}`);
+    }
+    return response.json();
+}
