@@ -446,13 +446,13 @@ async def stream_financial_response(
                         if any(g is not None for g in growth_rates):
                             chart_data = {
                                 "chartType": "combo",
-                                "title": f"{company['name']} {metric}趋势对比",
+                                "title": f"{company['name']} {metric}趋势分析",
                                 "labels": labels,
                                 "datasets": [
                                     {
                                         "type": "bar",
-                                        "label": "增长额(万)",
-                                        "data": growth_amounts,
+                                        "label": metric,  # 显示原始指标名
+                                        "data": values,   # 显示原始数值
                                         "yAxisID": "y",
                                         "backgroundColor": "rgba(54, 162, 235, 0.8)",
                                         "borderColor": "rgba(54, 162, 235, 1)"
@@ -469,7 +469,7 @@ async def stream_financial_response(
                                 ],
                                 "options": {
                                     "scales": {
-                                        "y": {"type": "linear", "position": "left", "title": {"display": True, "text": "增长额(万)"}},
+                                        "y": {"type": "linear", "position": "left", "title": {"display": True, "text": metric}}, # Y轴为指标值
                                         "y1": {"type": "linear", "position": "right", "title": {"display": True, "text": "增长率(%)"}, "grid": {"drawOnChartArea": False}}
                                     }
                                 }
