@@ -458,18 +458,17 @@ async def stream_financial_response(
                                         "borderColor": "rgba(54, 162, 235, 1)"
                                     },
                                     {
-                                        "type": "line",
+                                        "type": "bar",
                                         "label": "增长率(%)",
                                         "data": growth_rates,
                                         "yAxisID": "y1",
                                         "borderColor": "rgba(255, 159, 64, 1)",
-                                        "backgroundColor": "rgba(255, 159, 64, 0.2)",
-                                        "tension": 0.1
+                                        "backgroundColor": "rgba(255, 159, 64, 0.7)", # Slightly more opaque for bar
                                     }
                                 ],
                                 "options": {
                                     "scales": {
-                                        "y": {"type": "linear", "position": "left", "title": {"display": True, "text": metric}}, # Y轴为指标值
+                                        "y": {"type": "linear", "position": "left", "title": {"display": True, "text": metric}}, 
                                         "y1": {"type": "linear", "position": "right", "title": {"display": True, "text": "增长率(%)"}, "grid": {"drawOnChartArea": False}}
                                     }
                                 }
