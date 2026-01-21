@@ -60,9 +60,9 @@
             "income_statements",
             "tax_reports",
             "tax_returns_income",
-            "vat_returns",
             "cash_flow_statements",
-            "tax_return_stamp_items"
+            "tax_return_stamp_items",
+            "tax_returns_vat"
         ]
     },
     "tables": {
@@ -1124,54 +1124,844 @@
             }
         },
         "tax_returns_vat": {
-            "description": "增值税申报表",
+            "description": "增值税申报表（一般纳税人适用）",
             "fields": {
+                "period_year": {
+                    "aliases": [
+                        "年份"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "period_month": {
+                    "aliases": [
+                        "月份"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "period_quarter": {
+                    "aliases": [
+                        "季度"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "tax_period": {
+                    "aliases": [
+                        "税款所属期"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
                 "filing_date": {
                     "aliases": [
-                        "增值税申报日期"
+                        "申报日期"
                     ],
                     "unit": "",
                     "category": "基础信息"
                 },
                 "gen_sales_taxable_current": {
                     "aliases": [
-                        "一般项目本期销售额",
-                        "销售额"
+                        "一般项目按适用税率计税销售额（本期）",
+                        "一般项目按适用税率计税销售额",
+                        "按适用税率计税销售额（本期）",
+                        "按适用税率计税销售额"
                     ],
                     "unit": "元",
-                    "category": "销售情况"
+                    "category": "一般项目"
+                },
+                "gen_sales_taxable_ytd": {
+                    "aliases": [
+                        "按适用税率计税销售额（本年累计）",
+                        "一般项目按适用税率计税销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_goods_current": {
+                    "aliases": [
+                        "其中：应税货物销售额（本期）",
+                        "其中：应税货物销售额",
+                        "一般项目其中：应税货物销售额",
+                        "一般项目其中：应税货物销售额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_goods_ytd": {
+                    "aliases": [
+                        "一般项目其中：应税货物销售额（本年累计）",
+                        "其中：应税货物销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_service_current": {
+                    "aliases": [
+                        "其中：应税劳务销售额（本期）",
+                        "一般项目其中：应税劳务销售额（本期）",
+                        "其中：应税劳务销售额",
+                        "一般项目其中：应税劳务销售额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_service_ytd": {
+                    "aliases": [
+                        "一般项目其中：应税劳务销售额（本年累计）",
+                        "其中：应税劳务销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_adjustment_current": {
+                    "aliases": [
+                        "纳税检查调整的销售额",
+                        "一般项目纳税检查调整的销售额（本期）",
+                        "一般项目纳税检查调整的销售额",
+                        "纳税检查调整的销售额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_adjustment_ytd": {
+                    "aliases": [
+                        "纳税检查调整的销售额（本年累计）",
+                        "一般项目纳税检查调整的销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_simple_current": {
+                    "aliases": [
+                        "一般项目按简易办法计税销售额（本期）",
+                        "按简易办法计税销售额（本期）",
+                        "一般项目按简易办法计税销售额",
+                        "按简易办法计税销售额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_simple_ytd": {
+                    "aliases": [
+                        "按简易办法计税销售额（本年累计）",
+                        "一般项目按简易办法计税销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_simple_adjustment_current": {
+                    "aliases": [
+                        "一般项目纳税检查调整的销售额（简易）",
+                        "纳税检查调整的销售额（简易）（本期）",
+                        "一般项目纳税检查调整的销售额（简易）（本期）",
+                        "纳税检查调整的销售额（简易）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_simple_adjustment_ytd": {
+                    "aliases": [
+                        "一般项目纳税检查调整的销售额（简易）（本年累计）",
+                        "纳税检查调整的销售额（简易）（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_export_current": {
+                    "aliases": [
+                        "一般项目免、抵、退办法出口销售额",
+                        "免、抵、退办法出口销售额",
+                        "一般项目免、抵、退办法出口销售额（本期）",
+                        "免、抵、退办法出口销售额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_export_ytd": {
+                    "aliases": [
+                        "免、抵、退办法出口销售额（本年累计）",
+                        "一般项目免、抵、退办法出口销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_exempt_current": {
+                    "aliases": [
+                        "一般项目免税销售额",
+                        "免税销售额",
+                        "免税销售额（本期）",
+                        "一般项目免税销售额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_exempt_ytd": {
+                    "aliases": [
+                        "一般项目免税销售额（本年累计）",
+                        "免税销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_exempt_goods_current": {
+                    "aliases": [
+                        "其中：免税货物销售额（本期）",
+                        "一般项目其中：免税货物销售额（本期）",
+                        "其中：免税货物销售额",
+                        "一般项目其中：免税货物销售额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_exempt_goods_ytd": {
+                    "aliases": [
+                        "其中：免税货物销售额（本年累计）",
+                        "一般项目其中：免税货物销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_exempt_service_current": {
+                    "aliases": [
+                        "一般项目其中：免税劳务销售额（本期）",
+                        "其中：免税劳务销售额（本期）",
+                        "一般项目其中：免税劳务销售额",
+                        "其中：免税劳务销售额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_sales_exempt_service_ytd": {
+                    "aliases": [
+                        "其中：免税劳务销售额（本年累计）",
+                        "一般项目其中：免税劳务销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
                 },
                 "gen_output_tax_current": {
                     "aliases": [
-                        "一般项目本期销项税额",
-                        "销项税额"
+                        "销项税额",
+                        "一般项目销项税额（本期）",
+                        "一般项目销项税额",
+                        "销项税额（本期）"
                     ],
                     "unit": "元",
-                    "category": "税款计算"
+                    "category": "一般项目"
+                },
+                "gen_output_tax_ytd": {
+                    "aliases": [
+                        "销项税额（本年累计）",
+                        "一般项目销项税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
                 },
                 "gen_input_tax_current": {
                     "aliases": [
-                        "一般项目本期进项税额",
-                        "进项税额"
+                        "进项税额（本期）",
+                        "一般项目进项税额",
+                        "进项税额",
+                        "一般项目进项税额（本期）"
                     ],
                     "unit": "元",
-                    "category": "税款计算"
+                    "category": "一般项目"
+                },
+                "gen_input_tax_ytd": {
+                    "aliases": [
+                        "一般项目进项税额（本年累计）",
+                        "进项税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_previous_credit_current": {
+                    "aliases": [
+                        "一般项目上期留抵税额",
+                        "上期留抵税额",
+                        "上期留抵税额（本期）",
+                        "一般项目上期留抵税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_previous_credit_ytd": {
+                    "aliases": [
+                        "一般项目上期留抵税额（本年累计）",
+                        "上期留抵税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_input_tax_transfer_current": {
+                    "aliases": [
+                        "一般项目进项税额转出（本期）",
+                        "一般项目进项税额转出",
+                        "进项税额转出",
+                        "进项税额转出（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_input_tax_transfer_ytd": {
+                    "aliases": [
+                        "一般项目进项税额转出（本年累计）",
+                        "进项税额转出（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_export_refund_current": {
+                    "aliases": [
+                        "免、抵、退应退税额",
+                        "一般项目免、抵、退应退税额",
+                        "免、抵、退应退税额（本期）",
+                        "一般项目免、抵、退应退税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_tax_inspection_current": {
+                    "aliases": [
+                        "按适用税率计算的纳税检查应补缴税额（本期）",
+                        "一般项目按适用税率计算的纳税检查应补缴税额（本期）",
+                        "按适用税率计算的纳税检查应补缴税额",
+                        "一般项目按适用税率计算的纳税检查应补缴税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_deductible_total_current": {
+                    "aliases": [
+                        "一般项目应抵扣税额合计（本期）",
+                        "一般项目应抵扣税额合计",
+                        "应抵扣税额合计",
+                        "应抵扣税额合计（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_actual_deduction_current": {
+                    "aliases": [
+                        "一般项目实际抵扣税额",
+                        "实际抵扣税额（本期）",
+                        "实际抵扣税额",
+                        "一般项目实际抵扣税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_actual_deduction_ytd": {
+                    "aliases": [
+                        "实际抵扣税额（本年累计）",
+                        "一般项目实际抵扣税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
                 },
                 "gen_tax_payable_current": {
                     "aliases": [
-                        "一般项目本期应纳税额",
-                        "应纳税额"
+                        "一般项目应纳税额",
+                        "应纳税额",
+                        "一般项目应纳税额（本期）",
+                        "应纳税额（本期）"
                     ],
                     "unit": "元",
-                    "category": "税款计算"
+                    "category": "一般项目"
+                },
+                "gen_tax_payable_ytd": {
+                    "aliases": [
+                        "应纳税额（本年累计）",
+                        "一般项目应纳税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_ending_credit_current": {
+                    "aliases": [
+                        "期末留抵税额",
+                        "一般项目期末留抵税额",
+                        "期末留抵税额（本期）",
+                        "一般项目期末留抵税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_simple_tax_current": {
+                    "aliases": [
+                        "简易计税办法计算的应纳税额",
+                        "一般项目简易计税办法计算的应纳税额",
+                        "简易计税办法计算的应纳税额（本期）",
+                        "一般项目简易计税办法计算的应纳税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_simple_tax_ytd": {
+                    "aliases": [
+                        "简易计税办法计算的应纳税额（本年累计）",
+                        "一般项目简易计税办法计算的应纳税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_simple_inspection_current": {
+                    "aliases": [
+                        "按简易计税办法计算的纳税检查应补缴税额（本期）",
+                        "一般项目按简易计税办法计算的纳税检查应补缴税额（本期）",
+                        "一般项目按简易计税办法计算的纳税检查应补缴税额",
+                        "按简易计税办法计算的纳税检查应补缴税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_tax_reduction_current": {
+                    "aliases": [
+                        "一般项目应纳税额减征额",
+                        "应纳税额减征额（本期）",
+                        "一般项目应纳税额减征额（本期）",
+                        "应纳税额减征额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_tax_reduction_ytd": {
+                    "aliases": [
+                        "一般项目应纳税额减征额（本年累计）",
+                        "应纳税额减征额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_tax_total_current": {
+                    "aliases": [
+                        "应纳税额合计",
+                        "应纳税额合计（本期）",
+                        "一般项目应纳税额合计（本期）",
+                        "一般项目应纳税额合计"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_tax_total_ytd": {
+                    "aliases": [
+                        "应纳税额合计（本年累计）",
+                        "一般项目应纳税额合计（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_opening_unpaid_tax_current": {
+                    "aliases": [
+                        "一般项目期初未缴税额（本期）",
+                        "期初未缴税额",
+                        "期初未缴税额（本期）",
+                        "一般项目期初未缴税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_opening_unpaid_tax_ytd": {
+                    "aliases": [
+                        "期初未缴税额（本年累计）",
+                        "一般项目期初未缴税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_export_refund_received_current": {
+                    "aliases": [
+                        "实收出口退税额（本期）",
+                        "一般项目实收出口退税额",
+                        "一般项目实收出口退税额（本期）",
+                        "实收出口退税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
                 },
                 "gen_paid_tax_total_current": {
                     "aliases": [
                         "本期已缴税额",
-                        "已缴税额"
+                        "一般项目本期已缴税额",
+                        "一般项目本期已缴税额（本期）",
+                        "本期已缴税额（本期）"
                     ],
                     "unit": "元",
-                    "category": "税款缴纳"
+                    "category": "一般项目"
+                },
+                "gen_paid_tax_total_ytd": {
+                    "aliases": [
+                        "一般项目本期已缴税额（本年累计）",
+                        "本期已缴税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_prepaid_tax_current": {
+                    "aliases": [
+                        "①分次预缴税额",
+                        "一般项目①分次预缴税额",
+                        "①分次预缴税额（本期）",
+                        "一般项目①分次预缴税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_export_prepaid_current": {
+                    "aliases": [
+                        "一般项目②出口开具专用缴款书预缴税额",
+                        "②出口开具专用缴款书预缴税额",
+                        "②出口开具专用缴款书预缴税额（本期）",
+                        "一般项目②出口开具专用缴款书预缴税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_paid_previous_tax_current": {
+                    "aliases": [
+                        "③本期缴纳上期应纳税额（本期）",
+                        "一般项目③本期缴纳上期应纳税额（本期）",
+                        "③本期缴纳上期应纳税额",
+                        "一般项目③本期缴纳上期应纳税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_paid_previous_tax_ytd": {
+                    "aliases": [
+                        "③本期缴纳上期应纳税额（本年累计）",
+                        "一般项目③本期缴纳上期应纳税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_paid_overdue_tax_current": {
+                    "aliases": [
+                        "④本期缴纳欠缴税额",
+                        "④本期缴纳欠缴税额（本期）",
+                        "一般项目④本期缴纳欠缴税额（本期）",
+                        "一般项目④本期缴纳欠缴税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_paid_overdue_tax_ytd": {
+                    "aliases": [
+                        "④本期缴纳欠缴税额（本年累计）",
+                        "一般项目④本期缴纳欠缴税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_ending_unpaid_tax_current": {
+                    "aliases": [
+                        "一般项目期末未缴税额",
+                        "期末未缴税额（本期）",
+                        "期末未缴税额",
+                        "一般项目期末未缴税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_ending_unpaid_tax_ytd": {
+                    "aliases": [
+                        "一般项目期末未缴税额（本年累计）",
+                        "期末未缴税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_overdue_tax_current": {
+                    "aliases": [
+                        "一般项目其中：欠缴税额",
+                        "一般项目其中：欠缴税额（本期）",
+                        "其中：欠缴税额（本期）",
+                        "其中：欠缴税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_tax_payable_refund_current": {
+                    "aliases": [
+                        "本期应补（退）税额（本期）",
+                        "本期应补（退）税额",
+                        "一般项目本期应补（退）税额（本期）",
+                        "一般项目本期应补（退）税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_opening_inspection_unpaid_current": {
+                    "aliases": [
+                        "即征即退期初未缴税额",
+                        "即征即退期初未缴税额（本期）",
+                        "一般项目即征即退期初未缴税额",
+                        "一般项目即征即退期初未缴税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_opening_inspection_unpaid_ytd": {
+                    "aliases": [
+                        "即征即退期初未缴税额（本年累计）",
+                        "一般项目即征即退期初未缴税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_inspection_paid_current": {
+                    "aliases": [
+                        "一般项目即征即退本期已缴税额（本期）",
+                        "一般项目即征即退本期已缴税额",
+                        "即征即退本期已缴税额（本期）",
+                        "即征即退本期已缴税额"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_inspection_paid_ytd": {
+                    "aliases": [
+                        "一般项目即征即退本期已缴税额（本年累计）",
+                        "即征即退本期已缴税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_ending_inspection_unpaid_current": {
+                    "aliases": [
+                        "即征即退期末未缴税额",
+                        "即征即退期末未缴税额（本期）",
+                        "一般项目即征即退期末未缴税额",
+                        "一般项目即征即退期末未缴税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "gen_ending_inspection_unpaid_ytd": {
+                    "aliases": [
+                        "一般项目即征即退期末未缴税额（本年累计）",
+                        "即征即退期末未缴税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "一般项目"
+                },
+                "ref_sales_taxable_current": {
+                    "aliases": [
+                        "即征即退按适用税率计税销售额",
+                        "按适用税率计税销售额（本期）",
+                        "按适用税率计税销售额",
+                        "即征即退按适用税率计税销售额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_sales_taxable_ytd": {
+                    "aliases": [
+                        "即征即退按适用税率计税销售额（本年累计）",
+                        "按适用税率计税销售额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_output_tax_current": {
+                    "aliases": [
+                        "销项税额",
+                        "即征即退销项税额（本期）",
+                        "即征即退销项税额",
+                        "销项税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_output_tax_ytd": {
+                    "aliases": [
+                        "即征即退销项税额（本年累计）",
+                        "销项税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_input_tax_current": {
+                    "aliases": [
+                        "进项税额（本期）",
+                        "即征即退进项税额（本期）",
+                        "进项税额",
+                        "即征即退进项税额"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_input_tax_ytd": {
+                    "aliases": [
+                        "即征即退进项税额（本年累计）",
+                        "进项税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_tax_payable_current": {
+                    "aliases": [
+                        "即征即退应纳税额",
+                        "应纳税额",
+                        "即征即退应纳税额（本期）",
+                        "应纳税额（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_tax_payable_ytd": {
+                    "aliases": [
+                        "应纳税额（本年累计）",
+                        "即征即退应纳税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_tax_total_current": {
+                    "aliases": [
+                        "应纳税额合计",
+                        "应纳税额合计（本期）",
+                        "即征即退应纳税额合计（本期）",
+                        "即征即退应纳税额合计"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_tax_total_ytd": {
+                    "aliases": [
+                        "即征即退应纳税额合计（本年累计）",
+                        "应纳税额合计（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_actual_refund_current": {
+                    "aliases": [
+                        "实际退税额",
+                        "即征即退实际退税额（本期）",
+                        "实际退税额（本期）",
+                        "即征即退实际退税额"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "ref_actual_refund_ytd": {
+                    "aliases": [
+                        "实际退税额（本年累计）",
+                        "即征即退实际退税额（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "即征即退项目"
+                },
+                "urban_construction_tax_current": {
+                    "aliases": [
+                        "城建税",
+                        "城建税（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "附加税及信息"
+                },
+                "urban_construction_tax_ytd": {
+                    "aliases": [
+                        "城建税（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "附加税及信息"
+                },
+                "education_surcharge_current": {
+                    "aliases": [
+                        "教育费附加",
+                        "教育费附加（本期）"
+                    ],
+                    "unit": "元",
+                    "category": "附加税及信息"
+                },
+                "education_surcharge_ytd": {
+                    "aliases": [
+                        "教育费附加（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "附加税及信息"
+                },
+                "local_education_surcharge_current": {
+                    "aliases": [
+                        "地方教育附加（本期）",
+                        "地方教育附加"
+                    ],
+                    "unit": "元",
+                    "category": "附加税及信息"
+                },
+                "local_education_surcharge_ytd": {
+                    "aliases": [
+                        "地方教育附加（本年累计）"
+                    ],
+                    "unit": "元",
+                    "category": "附加税及信息"
+                },
+                "preparer": {
+                    "aliases": [
+                        "办税人"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "preparer_id_card": {
+                    "aliases": [
+                        "办税人身份证号"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "taxpayer_signature": {
+                    "aliases": [
+                        "纳税人签字"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "signature_date": {
+                    "aliases": [
+                        "签字日期"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "receiver": {
+                    "aliases": [
+                        "受理人"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "agent_org": {
+                    "aliases": [
+                        "代理机构"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "agent_org_code": {
+                    "aliases": [
+                        "代理机构代码"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "tax_authority": {
+                    "aliases": [
+                        "受理税务机关"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
+                },
+                "acceptance_date": {
+                    "aliases": [
+                        "受理日期"
+                    ],
+                    "unit": "",
+                    "category": "基础信息"
                 }
             }
         },
@@ -1217,80 +2007,354 @@
         "tax_returns_income": {
             "description": "企业所得税申报表",
             "fields": {
-                "taxable_income": {
-                    "aliases": [
-                        "应纳税所得额",
-                        "纳税所得额",
-                        "应税所得额",
-                        "应税所得",
-                        "所得额"
-                    ],
-                    "unit": "元",
-                    "category": "申报表"
-                },
-                "nominal_tax": {
-                    "aliases": [
-                        "应纳所得税额",
-                        "企业所得税应纳税额",
-                        "所得税应纳额"
-                    ],
-                    "unit": "元",
-                    "category": "申报表"
-                },
-                "total_profit": {
-                    "aliases": [
-                        "企业所得税利润总额",
-                        "所得税申报利润"
-                    ],
-                    "unit": "元",
-                    "category": "申报表"
-                },
                 "revenue": {
                     "aliases": [
-                        "企业所得税营业收入",
-                        "所得税申报收入"
+                        "营业收入",
+                        "企业所得税营业收入"
                     ],
                     "unit": "元",
-                    "category": "申报表"
+                    "category": "利润总额计算"
                 },
                 "cost": {
                     "aliases": [
-                        "企业所得税营业成本",
-                        "所得税申报成本"
+                        "营业成本",
+                        "企业所得税营业成本"
                     ],
                     "unit": "元",
-                    "category": "申报表"
+                    "category": "利润总额计算"
+                },
+                "taxes_and_surcharges": {
+                    "aliases": [
+                        "税金及附加"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "selling_expenses": {
+                    "aliases": [
+                        "销售费用"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "administrative_expenses": {
+                    "aliases": [
+                        "管理费用"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "research_expenses": {
+                    "aliases": [
+                        "研发费用"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "financial_expenses": {
+                    "aliases": [
+                        "财务费用"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "other_income": {
+                    "aliases": [
+                        "其他收益"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "investment_income": {
+                    "aliases": [
+                        "投资收益"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "hedge_income": {
+                    "aliases": [
+                        "净敞口套期收益"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "fair_value_change_income": {
+                    "aliases": [
+                        "公允价值变动收益"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "credit_impairment_loss": {
+                    "aliases": [
+                        "信用减值损失"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "asset_impairment_loss": {
+                    "aliases": [
+                        "资产减值损失"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "asset_disposal_income": {
+                    "aliases": [
+                        "资产处置收益"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "operating_profit": {
+                    "aliases": [
+                        "营业利润"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "non_operating_revenue": {
+                    "aliases": [
+                        "营业外收入"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "non_operating_expense": {
+                    "aliases": [
+                        "营业外支出"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "total_profit": {
+                    "aliases": [
+                        "利润总额",
+                        "企业所得税利润总额"
+                    ],
+                    "unit": "元",
+                    "category": "利润总额计算"
+                },
+                "overseas_income": {
+                    "aliases": [
+                        "境外所得"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "tax_adjustment_increase": {
+                    "aliases": [
+                        "纳税调整增加额"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "tax_adjustment_decrease": {
+                    "aliases": [
+                        "纳税调整减少额"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "tax_incentive_deduction": {
+                    "aliases": [
+                        "免税、减计收入及加计扣除"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "tax_incentive_deduction_item_1": {
+                    "aliases": [
+                        "免税、减计收入及加计扣除-优惠事项1"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "tax_incentive_deduction_item_2": {
+                    "aliases": [
+                        "免税、减计收入及加计扣除-优惠事项2"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "overseas_income_offset_loss": {
+                    "aliases": [
+                        "境外应税所得抵减境内亏损"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "adjusted_taxable_income": {
+                    "aliases": [
+                        "纳税调整后所得"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "income_reduction": {
+                    "aliases": [
+                        "所得减免"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "loss_carryforward": {
+                    "aliases": [
+                        "弥补以前年度亏损"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "deductible_taxable_income": {
+                    "aliases": [
+                        "抵扣应纳税所得额"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税所得额计算"
+                },
+                "taxable_income": {
+                    "aliases": [
+                        "应纳税所得额"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税额计算"
                 },
                 "tax_rate": {
                     "aliases": [
-                        "企业所得税税率",
-                        "适用税率"
+                        "税率",
+                        "企业所得税税率"
+                    ],
+                    "unit": "%",
+                    "category": "应纳税额计算"
+                },
+                "nominal_tax": {
+                    "aliases": [
+                        "应纳所得税额"
                     ],
                     "unit": "元",
-                    "category": "申报表"
+                    "category": "应纳税额计算"
                 },
                 "tax_reduction": {
                     "aliases": [
-                        "减免所得税额",
-                        "减免税额"
+                        "减免所得税额"
                     ],
                     "unit": "元",
-                    "category": "申报表"
+                    "category": "应纳税额计算"
+                },
+                "tax_reduction_item_1": {
+                    "aliases": [
+                        "减免所得税额-优惠事项1"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税额计算"
+                },
+                "tax_reduction_item_2": {
+                    "aliases": [
+                        "减免所得税额-优惠事项2"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税额计算"
+                },
+                "tax_credit": {
+                    "aliases": [
+                        "抵免所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税额计算"
                 },
                 "tax_payable": {
                     "aliases": [
                         "应纳税额",
-                        "所得税应补退税额"
+                        "企业所得税应纳税额"
                     ],
                     "unit": "元",
-                    "category": "申报表"
+                    "category": "应纳税额计算"
                 },
-                "final_tax_payable": {
+                "overseas_tax_payable": {
+                    "aliases": [
+                        "境外所得应纳所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税额计算"
+                },
+                "overseas_tax_credit": {
+                    "aliases": [
+                        "境外所得抵免所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "应纳税额计算"
+                },
+                "actual_tax_payable": {
                     "aliases": [
                         "实际应纳所得税额"
                     ],
                     "unit": "元",
-                    "category": "申报表"
+                    "category": "应纳税额计算"
+                },
+                "prepaid_tax": {
+                    "aliases": [
+                        "本年累计预缴所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "annual_tax_payable": {
+                    "aliases": [
+                        "本年应补（退）所得税额",
+                        "应补退税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "head_office_allocated_tax_payable": {
+                    "aliases": [
+                        "总机构分摊本年应补（退）所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "finance_centralized_allocated_tax_payable": {
+                    "aliases": [
+                        "财政集中分配本年应补（退）所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "head_office_prod_dept_allocated_tax_payable": {
+                    "aliases": [
+                        "总机构主体生产经营部门分摊本年应补（退）所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "ethnic_region_local_share_reduction": {
+                    "aliases": [
+                        "民族自治地区企业所得税地方分享部分"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "inspection_supplementary_tax": {
+                    "aliases": [
+                        "稽查查补（退）所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "special_tax_adjustment_supplementary_tax": {
+                    "aliases": [
+                        "特别纳税调整补（退）所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
+                },
+                "final_actual_tax_payable": {
+                    "aliases": [
+                        "本年实际应补（退）所得税额"
+                    ],
+                    "unit": "元",
+                    "category": "实际应补退税额计算"
                 }
             }
         },
@@ -1675,15 +2739,11 @@
             ]
         },
         "增值税销项税额": {
-            "table": "vat_return_items",
-            "join_table": "vat_returns",
-            "join_condition": "vat_return_items.return_id = vat_returns.id",
-            "item_name_field": "item_name",
-            "item_name_value": "销项税额",
-            "value_field": "amount_current",
-            "company_field": "vat_returns.company_id",
-            "year_field": "vat_returns.period_year",
-            "month_field": "vat_returns.period_month",
+            "table": "tax_returns_vat",
+            "value_field": "gen_output_tax_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
             "unit": "元",
             "aliases": [
                 "增值税销项税额",
@@ -1692,15 +2752,11 @@
             ]
         },
         "增值税进项税额": {
-            "table": "vat_return_items",
-            "join_table": "vat_returns",
-            "join_condition": "vat_return_items.return_id = vat_returns.id",
-            "item_name_field": "item_name",
-            "item_name_value": "进项税额",
-            "value_field": "amount_current",
-            "company_field": "vat_returns.company_id",
-            "year_field": "vat_returns.period_year",
-            "month_field": "vat_returns.period_month",
+            "table": "tax_returns_vat",
+            "value_field": "gen_input_tax_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
             "unit": "元",
             "aliases": [
                 "增值税进项税额",
@@ -1709,15 +2765,11 @@
             ]
         },
         "增值税应纳税额": {
-            "table": "vat_return_items",
-            "join_table": "vat_returns",
-            "join_condition": "vat_return_items.return_id = vat_returns.id",
-            "item_name_field": "item_name",
-            "item_name_value": "应纳税额",
-            "value_field": "amount_current",
-            "company_field": "vat_returns.company_id",
-            "year_field": "vat_returns.period_year",
-            "month_field": "vat_returns.period_month",
+            "table": "tax_returns_vat",
+            "value_field": "gen_tax_payable_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
             "unit": "元",
             "aliases": [
                 "增值税应纳税额",
@@ -1726,15 +2778,11 @@
             ]
         },
         "增值税销售额": {
-            "table": "vat_return_items",
-            "join_table": "vat_returns",
-            "join_condition": "vat_return_items.return_id = vat_returns.id",
-            "item_name_field": "item_name",
-            "item_name_value": "按适用税率计税销售额",
-            "value_field": "amount_current",
-            "company_field": "vat_returns.company_id",
-            "year_field": "vat_returns.period_year",
-            "month_field": "vat_returns.period_month",
+            "table": "tax_returns_vat",
+            "value_field": "gen_sales_taxable_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
             "unit": "元",
             "aliases": [
                 "增值税销售额",
@@ -1880,6 +2928,278 @@
                 "销项发票数量",
                 "销售发票张数",
                 "销项发票张数"
+            ]
+        }
+    },
+    "financial_metrics": {
+        "增值税货物销售额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_sales_goods_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "货物销售额",
+                "一般货物销售额"
+            ]
+        },
+        "增值税劳务销售额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_sales_service_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "劳务销售额",
+                "应税劳务销售额"
+            ]
+        },
+        "增值税简易计税销售额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_sales_simple_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "简易计税销售额",
+                "简易办法销售额"
+            ]
+        },
+        "增值税出口销售额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_sales_export_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "出口销售额",
+                "免抵退销售额"
+            ]
+        },
+        "增值税免税销售额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_sales_exempt_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "免税销售额",
+                "增值税免税额"
+            ]
+        },
+        "增值税进项转出额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_input_tax_transfer_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "进项税额转出",
+                "进项转出"
+            ]
+        },
+        "增值税上期留抵税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_previous_credit_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "上期留抵税额",
+                "期初留抵"
+            ]
+        },
+        "增值税期末留抵税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_ending_credit_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "期末留抵税额",
+                "留抵税额"
+            ]
+        },
+        "增值税应抵扣税额合计": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_deductible_total_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "应抵扣税额合计",
+                "可抵扣税额"
+            ]
+        },
+        "增值税实际抵扣税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_actual_deduction_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "实际抵扣税额"
+            ]
+        },
+        "增值税简易计税应纳税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_simple_tax_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "简易计税应纳税额",
+                "简易办法应纳税额"
+            ]
+        },
+        "增值税减免税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_tax_reduction_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "增值税减免额",
+                "应纳税额减征额"
+            ]
+        },
+        "增值税本期已缴税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_paid_tax_total_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "增值税已缴税额",
+                "本期已缴税额"
+            ]
+        },
+        "增值税期末未缴税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_ending_unpaid_tax_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "期末未缴税额",
+                "增值税欠税"
+            ]
+        },
+        "增值税查补税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_tax_inspection_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "查补税额",
+                "纳税检查应补缴税额"
+            ]
+        },
+        "增值税实收出口退税": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_export_refund_received_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "实收出口退税",
+                "出口退税额"
+            ]
+        },
+        "增值税免抵退应退税额": {
+            "table": "tax_returns_vat",
+            "value_field": "gen_export_refund_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "免抵退应退税额"
+            ]
+        },
+        "即征即退销售额": {
+            "table": "tax_returns_vat",
+            "value_field": "ref_sales_taxable_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "即征即退销售额"
+            ]
+        },
+        "即征即退应纳税额": {
+            "table": "tax_returns_vat",
+            "value_field": "ref_tax_payable_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "即征即退应纳税额"
+            ]
+        },
+        "即征即退实际退税额": {
+            "table": "tax_returns_vat",
+            "value_field": "ref_actual_refund_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "即征即退实际退税额",
+                "软件退税额"
+            ]
+        },
+        "城建税": {
+            "table": "tax_returns_vat",
+            "value_field": "urban_construction_tax_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "城市维护建设税",
+                "城建税额"
+            ]
+        },
+        "教育费附加": {
+            "table": "tax_returns_vat",
+            "value_field": "education_surcharge_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "教育费附加额"
+            ]
+        },
+        "地方教育附加": {
+            "table": "tax_returns_vat",
+            "value_field": "local_education_surcharge_current",
+            "company_field": "company_id",
+            "year_field": "period_year",
+            "month_field": "period_month",
+            "unit": "元",
+            "aliases": [
+                "地方教育附加额"
             ]
         }
     }

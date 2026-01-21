@@ -1,0 +1,92 @@
+.cit-raw-container {
+    font-family: "SimSun", "Songti SC", serif;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    max-width: 800px;
+    color: #000;
+}
+
+.cit-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #000;
+}
+
+.cit-subtitle {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #000;
+}
+
+.cit-header-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.cit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.cit-table th,
+.cit-table td {
+    border: 1px solid #000;
+    padding: 5px 8px;
+    height: 28px;
+}
+
+.cit-col-line {
+    width: 8%;
+    text-align: center;
+}
+
+.cit-col-category {
+    width: 10%;
+    text-align: center;
+}
+
+.cit-col-item {
+    width: 62%;
+}
+
+.cit-col-amount {
+    width: 20%;
+    text-align: right;
+}
+
+.cit-center {
+    text-align: center;
+}
+
+.cit-left {
+    text-align: left;
+}
+
+.cit-right {
+    text-align: right;
+}
+
+.cit-indent {
+    padding-left: 1.5em;
+}
+
+.cit-table thead th {
+    font-weight: bold;
+    text-align: center;
+    background-color: #f0f0f0;
+}
+
+.cit-category {
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    background-color: #fafafa;
+}

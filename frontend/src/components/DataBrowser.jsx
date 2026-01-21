@@ -3,7 +3,9 @@ import { Database, Calendar, Filter, FileText, List } from 'lucide-react';
 import { fetchBrowseCompanies, fetchBrowseTables, fetchBrowsePeriods, fetchBrowseData } from '../services/api';
 import VatReturnRawView from './VatReturnRawView';
 import IncomeStatementRawView from './IncomeStatementRawView';
-import BalanceSheetRawView from './BalanceSheetRawView'; // Import
+import BalanceSheetRawView from './BalanceSheetRawView';
+import CashFlowStatementRawView from './CashFlowStatementRawView';
+import CITReturnRawView from './CITReturnRawView';
 import './DataBrowser.css';
 
 const DataBrowser = () => {
@@ -104,10 +106,11 @@ const DataBrowser = () => {
         return t ? t.label : name;
     };
 
-    // Supports raw view logic
     const supportsRawView = selectedTable === 'tax_returns_vat' ||
         selectedTable === 'income_statements' ||
-        selectedTable === 'balance_sheets';
+        selectedTable === 'balance_sheets' ||
+        selectedTable === 'cash_flow_statements' ||
+        selectedTable === 'tax_returns_income';
 
     // Handle View Mode Toggle
     const handleViewModeChange = (mode) => {
@@ -215,6 +218,16 @@ const DataBrowser = () => {
                                         />
                                     ) : selectedTable === 'balance_sheets' ? (
                                         <BalanceSheetRawView
+                                            data={tableData.data[0]}
+                                            companyInfo={companies.find(c => String(c.id) === String(selectedCompany))}
+                                        />
+                                    ) : selectedTable === 'cash_flow_statements' ? (
+                                        <CashFlowStatementRawView
+                                            data={tableData.data[0]}
+                                            companyInfo={companies.find(c => String(c.id) === String(selectedCompany))}
+                                        />
+                                    ) : selectedTable === 'tax_returns_income' ? (
+                                        <CITReturnRawView
                                             data={tableData.data[0]}
                                             companyInfo={companies.find(c => String(c.id) === String(selectedCompany))}
                                         />

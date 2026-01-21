@@ -1,7 +1,7 @@
 import React from 'react';
 import './IncomeStatementRawView.css';
 
-const IncomeStatementRawView = ({ data }) => {
+const IncomeStatementRawView = ({ data, companyInfo }) => {
     if (!data) return null;
 
     // Helper for formatting numbers
@@ -21,12 +21,14 @@ const IncomeStatementRawView = ({ data }) => {
         return ""; // Placeholder
     };
 
+    const companyName = companyInfo ? companyInfo.name : (data.company_id || 'ABC有限公司');
+
     return (
         <div className="is-raw-container">
             <div className="is-title">利润表</div>
 
             <div className="is-header-info">
-                <span>编制单位：{data.company_id || 'ABC有限公司'}</span> {/* We assume company name is not in row data, need to fetch? Or DataBrowser passes it? DataBrowser passes raw row. */}
+                <span>编制单位：{companyName}</span>
                 {/* valid point: row data only has company_id. DataBrowser has selectedCompany name. */}
                 {/* For now, just show blank or period. */}
                 <span>所属时间：{data.period_year}年{data.period_month ? data.period_month + '月' : (data.period_quarter ? 'Q' + data.period_quarter : '')}</span>

@@ -1,7 +1,7 @@
 import React from 'react';
 import './BalanceSheetRawView.css';
 
-const BalanceSheetRawView = ({ data }) => {
+const BalanceSheetRawView = ({ data, companyInfo }) => {
     if (!data) return null;
 
     const fmt = (val) => {
@@ -12,12 +12,14 @@ const BalanceSheetRawView = ({ data }) => {
     // Placeholder for beginning of year data
     const fmtStart = (val) => "";
 
+    const companyName = companyInfo ? companyInfo.name : (data.company_id || 'ABC有限公司');
+
     return (
         <div className="bs-raw-container">
             <div className="bs-title">资产负债表</div>
 
             <div className="bs-header-info">
-                <span>编制单位：{data.company_id || 'ABC有限公司'}</span>
+                <span>编制单位：{companyName}</span>
                 <span>{data.period_year}年{data.period_month ? data.period_month + '月' : '12月31日'}</span>
                 <span>单位：元</span>
             </div>

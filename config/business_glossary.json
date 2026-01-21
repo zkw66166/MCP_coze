@@ -19,13 +19,12 @@
         "invoices": "发票数据,invoice_type='INPUT'为采购/进项发票,'OUTPUT'为销售/销项发票",
         "tax_returns_income": "企业所得税年度申报数据",
         "tax_return_income_items": "企业所得税申报明细项目(如应纳税所得额)",
-        "vat_returns": "增值税月度申报数据",
-        "vat_return_items": "增值税申报明细项目(如销项税额、进项税额)",
         "tax_returns_stamp": "印花税申报数据",
         "tax_return_stamp_items": "印花税明细项目",
         "tax_reports": "纳税申报汇总",
         "payroll_summaries": "薪酬汇总数据",
-        "account_balances": "科目余额数据"
+        "account_balances": "科目余额数据",
+        "tax_returns_vat": "增值税申报表数据,包含一般计税方法、简易计税方法及即征即退项目的销售额、税额等全量信息"
     },
     "field_hints": {
         "period_year": "年份,如2023",

@@ -1,12 +1,21 @@
 import sqlite3
-import os
 
-db_path = 'database/financial.db'
-if not os.path.exists(db_path):
-    print("DB not found")
-else:
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    c.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    print(c.fetchall())
-    conn.close()
+def list_tables():
+    try:
+        conn = sqlite3.connect('database/financial.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = [row[0] for row in cursor.fetchall()]
+        print(f"Found {len(tables)} tables:")
+        if 'cash_flow_statements' in tables:
+            print(" -> cash_flow_statements FOUND")
+        else:
+            print(" -> cash_flow_statements NOT FOUND")
+        for t in tables:
+            print(f"  - {t}")
+        conn.close()
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    list_tables()

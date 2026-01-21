@@ -397,44 +397,56 @@ async def stream_financial_response(
             # 发送图表数据 (仅当开启显示且数据足够时)
             if len(results) >= 2:
                 try:
-                    if comparison_result and comparison_result.get('has_comparison'):
-                        # 对比分析：为每个指标发送复合图表数据
-                        comparisons = comparison_result.get('comparisons', [])
-                        print(f"📊 发送 {len(comparisons)} 个复合图表数据到前端")
+                    # 1. 整理数据：按 metric 分组
+                    metrics_map = {} # metric -> { (year, q) -> value }
+                    all_periods = set()
+                    
+                    for r in results:
+                        m = r['metric_name']
+                        p = (r['year'], r.get('quarter'))
+                        all_periods.add(p)
+                        if m not in metrics_map:
+                            metrics_map[m] = {}
+                        metrics_map[m][p] = r['value']
+                    
+                    # 排序 periods
+                    sorted_periods = sorted(list(all_periods), key=lambda x: (x[0], x[1] or 0))
+                    labels = []
+                    for year, quarter in sorted_periods:
+                        labels.append(f"{year}年" + (f"Q{quarter}" if quarter else ""))
+                    
+                    unique_metrics = list(metrics_map.keys())
+                    
+                    # 2. 决策：单指标 vs 多指标
+                    if len(unique_metrics) == 1:
+                        # === 单指标：使用详细对比图表 (Combo Chart) ===
+                        metric = unique_metrics[0]
+                        values = []
+                        growth_amounts = []
+                        growth_rates = []
                         
-                        for comp in comparisons:
-                            periods = comp.get('periods', [])
-                            if len(periods) < 2:
-                                continue
+                        prev_val = None
+                        for p in sorted_periods:
+                            val = metrics_map[metric].get(p)
+                            values.append(val or 0)
                             
-                            # 构建图表数据（复用原有逻辑）
-                            labels = []
-                            values = []
-                            growth_amounts = []
-                            growth_rates = []
+                            if prev_val is not None and prev_val != 0 and val is not None:
+                                growth = val - prev_val
+                                growth_pct = (growth / abs(prev_val)) * 100
+                                growth_wan = growth / 10000 if abs(growth) >= 10000 else growth
+                                growth_amounts.append(round(growth_wan, 2))
+                                growth_rates.append(round(growth_pct, 2))
+                            else:
+                                growth_amounts.append(None)
+                                growth_rates.append(None)
                             
-                            prev_val = None
-                            for period in periods:
-                                year, quarter, val, unit = period
-                                label = f"{year}" + (f"Q{quarter}" if quarter else "")
-                                labels.append(label)
-                                values.append(val or 0)
-                                
-                                if prev_val is not None and prev_val != 0 and val is not None:
-                                    growth = val - prev_val
-                                    growth_pct = (growth / abs(prev_val)) * 100
-                                    growth_wan = growth / 10000 if abs(growth) >= 10000 else growth
-                                    growth_amounts.append(round(growth_wan, 2))
-                                    growth_rates.append(round(growth_pct, 2))
-                                else:
-                                    growth_amounts.append(None)
-                                    growth_rates.append(None)
-                                
-                                prev_val = val
-                            
+                            prev_val = val
+                        
+                        # 如果有对比信息(growth_rates不全为None)，使用Combo图，否则普通Bar图
+                        if any(g is not None for g in growth_rates):
                             chart_data = {
                                 "chartType": "combo",
-                                "title": f"{company['name']} {comp['metric']}对比",
+                                "title": f"{company['name']} {metric}趋势对比",
                                 "labels": labels,
                                 "datasets": [
                                     {
@@ -462,27 +474,51 @@ async def stream_financial_response(
                                     }
                                 }
                             }
-                            yield send_event("chart", chart_data)
-                            await asyncio.sleep(0.01)
-                    else:
-                        # 普通查询：柱状图
-                        labels = []
-                        values = []
-                        for r in results:
-                            year = r.get('year', '')
-                            quarter = r.get('quarter')
-                            label = f"{year}年" + (f"Q{quarter}" if quarter else "")
-                            labels.append(label)
-                            values.append(r.get('value', 0) or 0)
+                        else:
+                            chart_data = {
+                                "chartType": "bar",
+                                "title": f"{company['name']} {metric}",
+                                "labels": labels,
+                                "datasets": [{"label": metric, "data": values}]
+                            }
+                        yield send_event("chart", chart_data)
                         
-                        metric_name = results[0].get('metric_name', '数据') if results else '数据'
+                    else:
+                        # === 多指标：发送一个折线图，包含多个dataset ===
+                        # 限制指标数量，防止由于宽表导致图表不可读 (e.g. top 5)
+                        top_metrics = unique_metrics[:5] 
+                        
+                        datasets = []
+                        colors = [
+                            "rgba(54, 162, 235, 1)", "rgba(255, 99, 132, 1)", 
+                            "rgba(255, 206, 86, 1)", "rgba(75, 192, 192, 1)", 
+                            "rgba(153, 102, 255, 1)"
+                        ]
+                        
+                        for idx, metric in enumerate(top_metrics):
+                            data_points = []
+                            for p in sorted_periods:
+                                val = metrics_map[metric].get(p, 0) # or None
+                                data_points.append(val or 0)
+                            
+                            color = colors[idx % len(colors)]
+                            datasets.append({
+                                "type": "line",
+                                "label": metric,
+                                "data": data_points,
+                                "borderColor": color,
+                                "backgroundColor": color.replace(", 1)", ", 0.2)"),
+                                "tension": 0.1
+                            })
+                            
                         chart_data = {
-                            "chartType": "bar",
-                            "title": f"{company['name']} {metric_name}",
+                            "chartType": "line", # Base type
+                            "title": f"{company['name']} 关键指标趋势 ({len(top_metrics)}/{len(unique_metrics)})",
                             "labels": labels,
-                            "datasets": [{"label": metric_name, "data": values}]
+                            "datasets": datasets
                         }
                         yield send_event("chart", chart_data)
+                        
                 except Exception as e:
                     print(f"⚠️ 图表数据发送失败: {e}")
 
