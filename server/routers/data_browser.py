@@ -135,7 +135,7 @@ async def get_companies():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id, name, tax_code FROM companies ORDER BY id")
+        cursor.execute("SELECT * FROM companies ORDER BY id")
         companies = [dict(row) for row in cursor.fetchall()]
         return companies
     finally:
@@ -160,7 +160,17 @@ async def get_periods(company_id: int, table_name: str):
             periods = [row['period'] for row in cursor.fetchall()]
         elif 'period_year' in columns:
             # Construct period based on available columns
-            if 'period_quarter' in columns:
+            # For tax_returns_vat, we explicitly want monthly first if available
+            if table_name == 'tax_returns_vat' and 'period_month' in columns:
+                 cursor.execute(f"""
+                    SELECT DISTINCT period_year, period_month 
+                    FROM {table_name} 
+                    WHERE company_id = ? 
+                    ORDER BY period_year DESC, period_month DESC
+                """, (company_id,))
+                 rows = cursor.fetchall()
+                 periods = [f"{row['period_year']}年{row['period_month']}月" for row in rows]
+            elif 'period_quarter' in columns:
                 cursor.execute(f"""
                     SELECT DISTINCT period_year, period_quarter 
                     FROM {table_name} 
@@ -271,6 +281,24 @@ async def get_table_data(
         cursor.execute(query, params)
         rows = [dict(row) for row in cursor.fetchall()]
 
+        # 5. Post-processing
+        # For tax_returns_vat, calculate start_date and end_date if not present
+        if table_name == 'tax_returns_vat':
+            import calendar
+            for row in rows:
+                # Calculate dates if period fields exist
+                if 'period_year' in row and 'period_month' in row and row['period_year'] and row['period_month']:
+                    try:
+                        year = int(row['period_year'])
+                        month = int(row['period_month'])
+                        # Month range
+                        _, last_day = calendar.monthrange(year, month)
+                        row['start_date'] = f"{year}年{month}月1日"
+                        row['end_date'] = f"{year}年{month}月{last_day}日"
+                    except:
+                        pass
+                # Or fallback to tax_period if it exists but usually its a string like "2024-01-01"
+        
         return {
             "columns": column_headers,
             "data": rows,

@@ -1,0 +1,120 @@
+.vat-raw-container {
+    padding: 24px;
+    background-color: white;
+    font-family: "SimSun", "Songti SC", serif;
+    /* Use serif font for paper-like feel */
+    color: #000;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: auto;
+}
+
+.vat-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.vat-subtitle {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.vat-header-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 4px;
+    border-bottom: 2px solid #000;
+    /* Top border of the main table areaish */
+    padding-bottom: 4px;
+}
+
+.vat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    border: 2px solid #000;
+}
+
+.vat-table th,
+.vat-table td {
+    border: 1px solid #666;
+    /* Standard borders */
+    padding: 4px 6px;
+    vertical-align: middle;
+}
+
+/* Specific column widths based on the image roughly */
+.vat-col-category {
+    width: 10%;
+    text-align: center;
+}
+
+.vat-col-item {
+    width: 30%;
+}
+
+.vat-col-index {
+    width: 5%;
+    text-align: center;
+}
+
+.vat-col-amount {
+    width: 13%;
+    text-align: right;
+}
+
+.vat-section-header {
+    text-align: center;
+    font-weight: bold;
+    background-color: #fff;
+}
+
+.vat-cell-center {
+    text-align: center;
+}
+
+.vat-cell-right {
+    text-align: right;
+}
+
+.vat-cell-left {
+    text-align: left;
+}
+
+/* The N/A "slash" or "——" style */
+.vat-na {
+    text-align: center;
+    color: #666;
+    background: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 5px,
+            #f3f4f6 5px,
+            #f3f4f6 10px);
+}
+
+.vat-input-mock {
+    width: 100%;
+    border: none;
+    text-align: right;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* Highlighted/Blue fields from image can be just normal or specific class if needed */
+.vat-blue-text {
+    color: #000;
+    /* Keeping it black for print fidelity, or blue if user wants valid form look? Image shows black text. */
+}
+
+/* Footer layout */
+.vat-footer {
+    margin-top: 10px;
+    display: flex;
+    font-size: 12px;
+    justify-content: space-between;
+}

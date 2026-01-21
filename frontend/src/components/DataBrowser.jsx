@@ -1,7 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
-import { Database, Calendar, Filter, Download } from 'lucide-react';
+import { Database, Calendar, Filter, FileText, List } from 'lucide-react';
 import { fetchBrowseCompanies, fetchBrowseTables, fetchBrowsePeriods, fetchBrowseData } from '../services/api';
+import VatReturnRawView from './VatReturnRawView';
+import IncomeStatementRawView from './IncomeStatementRawView';
+import BalanceSheetRawView from './BalanceSheetRawView'; // Import
 import './DataBrowser.css';
 
 const DataBrowser = () => {
@@ -9,6 +11,9 @@ const DataBrowser = () => {
     const [companies, setCompanies] = useState([]);
     const [tables, setTables] = useState([]);
     const [periods, setPeriods] = useState([]);
+
+    // View Mode State: 'general' | 'raw'
+    const [viewMode, setViewMode] = useState('general');
 
     const [selectedCompany, setSelectedCompany] = useState('');
     const [selectedTable, setSelectedTable] = useState('');
@@ -19,7 +24,7 @@ const DataBrowser = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Initial Load: Companies and Tables
+    // Initial Load
     useEffect(() => {
         const loadInitial = async () => {
             try {
@@ -30,10 +35,8 @@ const DataBrowser = () => {
                 setCompanies(comps);
                 setTables(tabs);
 
-                // Select default if available
                 if (comps.length > 0) setSelectedCompany(comps[0].id);
                 if (tabs.length > 0) {
-                    // Prefer Income Statement or Balance Sheet as default
                     const defaultTable = tabs.find(t => t.name === 'income_statements') || tabs[0];
                     setSelectedTable(defaultTable.name);
                 }
@@ -45,7 +48,7 @@ const DataBrowser = () => {
         loadInitial();
     }, []);
 
-    // Load Periods when Company or Table changes
+    // Load Periods
     useEffect(() => {
         if (!selectedCompany || !selectedTable) return;
 
@@ -53,27 +56,30 @@ const DataBrowser = () => {
             try {
                 const pList = await fetchBrowsePeriods(selectedCompany, selectedTable);
                 setPeriods(pList);
-                // Default select 'All' or empty for all periods? 
-                // Specification implies viewing by period, but "All" is useful.
-                // If periods exist, select the latest one by default for performance, or empty for all.
-                // Let's default to empty (All) if user wants to see everything, 
-                // OR select the first one (latest) if the list is long.
-                // For "Browse", usually seeing the latest is good.
-                // But the requirement says "Switch periods".
-                // Let's default to "" (All) to show all data as user requested "vertical scroll for ALL data".
-                setSelectedPeriod("");
+
+                // If switching to raw mode, we must have a period selected. Default to latest.
+                if (viewMode === 'raw' && pList.length > 0) {
+                    setSelectedPeriod(pList[0]);
+                } else if (viewMode === 'general') {
+                    // General mode defaults to "All" (empty string)
+                    setSelectedPeriod("");
+                }
             } catch (err) {
                 console.error("Failed to load periods", err);
-                // Don't block, just empty periods
                 setPeriods([]);
             }
         };
         loadPeriods();
-    }, [selectedCompany, selectedTable]);
+    }, [selectedCompany, selectedTable, viewMode]);
 
     // Fetch Data
     useEffect(() => {
         if (!selectedCompany || !selectedTable) return;
+
+        // Validation for Raw Mode
+        if (viewMode === 'raw' && !selectedPeriod && periods.length > 0) {
+            if (periods.length > 0) setSelectedPeriod(periods[0]);
+        }
 
         const loadData = async () => {
             setLoading(true);
@@ -90,12 +96,22 @@ const DataBrowser = () => {
         };
 
         loadData();
-    }, [selectedCompany, selectedTable, selectedPeriod]);
+    }, [selectedCompany, selectedTable, selectedPeriod, viewMode]);
 
     // Helpers
     const getTableName = (name) => {
         const t = tables.find(t => t.name === name);
         return t ? t.label : name;
+    };
+
+    // Supports raw view logic
+    const supportsRawView = selectedTable === 'tax_returns_vat' ||
+        selectedTable === 'income_statements' ||
+        selectedTable === 'balance_sheets';
+
+    // Handle View Mode Toggle
+    const handleViewModeChange = (mode) => {
+        setViewMode(mode);
     };
 
     return (
@@ -126,7 +142,10 @@ const DataBrowser = () => {
                             className="db-select"
                             style={{ width: '100%', paddingLeft: '32px' }}
                             value={selectedTable}
-                            onChange={(e) => setSelectedTable(e.target.value)}
+                            onChange={(e) => {
+                                setSelectedTable(e.target.value);
+                                setViewMode('general'); // Reset to general when switching tables
+                            }}
                         >
                             {tables.map(t => (
                                 <option key={t.name} value={t.name}>{t.label}</option>
@@ -145,7 +164,7 @@ const DataBrowser = () => {
                             value={selectedPeriod}
                             onChange={(e) => setSelectedPeriod(e.target.value)}
                         >
-                            <option value="">全部期间</option>
+                            {viewMode === 'general' && <option value="">全部期间</option>}
                             {periods.map(p => (
                                 <option key={p} value={p}>{p}</option>
                             ))}
@@ -153,58 +172,119 @@ const DataBrowser = () => {
                         <Calendar style={{ width: '16px', height: '16px', position: 'absolute', left: '10px', top: '10px', color: '#6b7280' }} />
                     </div>
                 </div>
+
+                {/* View Mode Toggle - Always Visible */}
+                <div className="db-filter-item" style={{ marginLeft: 'auto', minWidth: 'auto' }}>
+                    <label className="db-filter-label">&nbsp;</label>
+                    <div className="db-view-toggle">
+                        <button
+                            className={`db-toggle-btn ${viewMode === 'general' ? 'active' : ''}`}
+                            onClick={() => handleViewModeChange('general')}
+                        >
+                            <List size={16} /> 通表格式
+                        </button>
+                        <button
+                            className={`db-toggle-btn ${viewMode === 'raw' ? 'active' : ''}`}
+                            onClick={() => handleViewModeChange('raw')}
+                        >
+                            <FileText size={16} /> 原表格式
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Content */}
             <div className="db-content">
-                <div className="db-table-header">
-                    <div className="db-title">
-                        <Database style={{ color: '#2563eb', width: '20px' }} />
-                        {getTableName(selectedTable)}
-                        {tableData && <span className="db-count">{tableData.total} 条数据</span>}
-                    </div>
-                    {/* Placeholder for export if needed later */}
-                    {/* <button className="dm-btn-primary">
-                        <Download style={{ width: '14px', marginRight: '6px' }} />
-                        导出数据
-                    </button> */}
-                </div>
-
-                <div className="db-table-wrapper">
-                    {loading ? (
-                        <div className="db-loading">
-                            <div className="db-spinner"></div>
-                            加载中...
-                        </div>
-                    ) : error ? (
-                        <div className="db-empty" style={{ color: '#ef4444' }}>
-                            {error}
-                        </div>
-                    ) : !tableData || tableData.data.length === 0 ? (
-                        <div className="db-empty">
-                            暂无数据
-                        </div>
+                {viewMode === 'raw' ? (
+                    supportsRawView ? (
+                        // Supported Raw View
+                        tableData ? (
+                            <div className="db-table-wrapper">
+                                {loading ? (
+                                    <div className="db-loading"><div className="db-spinner"></div>加载中...</div>
+                                ) : tableData.data && tableData.data.length > 0 ? (
+                                    selectedTable === 'tax_returns_vat' ? (
+                                        <VatReturnRawView
+                                            data={tableData.data[0]}
+                                            companyInfo={companies.find(c => String(c.id) === String(selectedCompany))}
+                                        />
+                                    ) : selectedTable === 'income_statements' ? (
+                                        <IncomeStatementRawView
+                                            data={tableData.data[0]}
+                                            companyInfo={companies.find(c => String(c.id) === String(selectedCompany))}
+                                        />
+                                    ) : selectedTable === 'balance_sheets' ? (
+                                        <BalanceSheetRawView
+                                            data={tableData.data[0]}
+                                            companyInfo={companies.find(c => String(c.id) === String(selectedCompany))}
+                                        />
+                                    ) : null
+                                ) : (
+                                    <div className="db-empty">暂无数据</div>
+                                )}
+                            </div>
+                        ) : null
                     ) : (
-                        <table className="db-table">
-                            <thead>
-                                <tr>
-                                    {tableData.columns.map(col => (
-                                        <th key={col.key}>{col.label}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {tableData.data.map((row, idx) => (
-                                    <tr key={idx}>
-                                        {tableData.columns.map(col => (
-                                            <td key={col.key}>{row[col.key]}</td>
+                        // Not Supported Message
+                        <div className="db-empty">
+                            <FileText style={{ width: '48px', height: '48px', marginBottom: '16px', opacity: 0.5 }} />
+                            <div>该报表暂不支持原表格式查看</div>
+                            <button
+                                className="dm-btn-secondary"
+                                style={{ marginTop: '16px' }}
+                                onClick={() => setViewMode('general')}
+                            >
+                                返回通表格式
+                            </button>
+                        </div>
+                    )
+                ) : (
+                    <>
+                        <div className="db-table-header">
+                            <div className="db-title">
+                                <Database style={{ color: '#2563eb', width: '20px' }} />
+                                {getTableName(selectedTable)}
+                                {tableData && <span className="db-count">{tableData.total} 条数据</span>}
+                            </div>
+                        </div>
+
+                        <div className="db-table-wrapper">
+                            {loading ? (
+                                <div className="db-loading">
+                                    <div className="db-spinner"></div>
+                                    加载中...
+                                </div>
+                            ) : error ? (
+                                <div className="db-empty" style={{ color: '#ef4444' }}>
+                                    {error}
+                                </div>
+                            ) : !tableData || tableData.data.length === 0 ? (
+                                <div className="db-empty">
+                                    暂无数据
+                                </div>
+                            ) : (
+                                <table className="db-table">
+                                    <thead>
+                                        <tr>
+                                            {tableData.columns.map(col => (
+                                                <th key={col.key}>{col.label}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {tableData.data.map((row, idx) => (
+                                            <tr key={idx}>
+                                                {tableData.columns.map(col => (
+                                                    <td key={col.key}>{row[col.key]}</td>
+                                                ))}
+                                            </tr>
                                         ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

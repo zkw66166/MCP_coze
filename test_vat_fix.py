@@ -34,6 +34,23 @@ def test_vat_data():
             print("Skipping data test: No companies found")
             return
         company_id = comp_resp.json()[0]['id']
+        
+        # Test get_periods
+        print("\n   Testing /api/data-browser/periods")
+        per_resp = requests.get(f"{BASE_URL}/api/data-browser/periods", 
+                              params={"company_id": company_id, "table_name": "tax_returns_vat"})
+        if per_resp.status_code == 200:
+            periods = per_resp.json()
+            if periods:
+                print(f"   ✅ Periods found: {periods[:3]}...")
+                if "月" in periods[0] and "Q" not in periods[0]:
+                     print("   ✅ Valid Monthly Period Format")
+                else:
+                     print(f"   ⚠️ Warning: Unexpected format: {periods[0]}")
+            else:
+                 print("   ⚠️ No periods found")
+        else:
+             print(f"   ❌ Failed to get periods: {per_resp.status_code}")
 
         # Fetch data
         resp = requests.get(f"{BASE_URL}/api/data-browser/data",
@@ -41,23 +58,14 @@ def test_vat_data():
         
         if resp.status_code == 200:
             data = resp.json()
-            columns = data.get('columns', [])
-            col_map = {c['key']: c['label'] for c in columns}
-            
-            # Check for Chinese mapping
-            check_fields = ["gen_sales_taxable_current", "gen_output_tax_current"]
-            all_mapped = True
-            for field in check_fields:
-                if field in col_map:
-                    if col_map[field] == field: # No mapping applied
-                        print(f"⚠️ Warning: Field {field} matches its key (Mapping missing?)")
-                        all_mapped = False
-                    else:
-                        print(f"✅ Field {field} mapped to: {col_map[field]}")
+            # print(data.keys())
+            rows = data.get('data', [])
+            if rows:
+                first_row = rows[0]
+                if 'start_date' in first_row and 'end_date' in first_row:
+                    print(f"   ✅ Dynamic Date Calculation: {first_row.get('start_date')} - {first_row.get('end_date')}")
                 else:
-                    # It's possible the field isn't in PRAGMA table_info if I was wrong about schema, 
-                    # but I checked it.
-                    pass
+                    print("   ❌ Missing start_date or end_date in row data")
             
             print(f"   Total Records: {len(data.get('data', []))}")
         else:

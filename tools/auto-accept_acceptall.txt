@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // AUTO-CLICKER FOR "Accept" AND "Accept all" BUTTONS
-// Searches inside iframes AND main document
+// Accept: in innermost iframe | Accept all: in main document
 // ═══════════════════════════════════════════════════════════
 
 (function () {
@@ -371,52 +371,93 @@
         return false;
     }
 
-    // ==================== BUTTON FINDER (UPDATED) ====================
+    // ==================== BUTTON FINDER (完全重写) ====================
     function findAndClickButton() {
         try {
             const foundButtons = [];
             const autoClickEnabled = document.getElementById('auto-click-checkbox').checked;
             const scrollIntoViewEnabled = document.getElementById('scroll-into-view-checkbox').checked;
 
-            // 1. 查找 iframe 内的 Accept 按钮（原有逻辑）
+            // ========== 1. 查找最外层主文档中的 "Accept all" 按钮 ==========
+            console.log('🔍 Searching in MAIN DOCUMENT for "Accept all"...');
+            const mainDocButtons = document.querySelectorAll('button');
+            mainDocButtons.forEach((button, index) => {
+                const text = (button.textContent || '').trim().toLowerCase();
+                const isVisible = button.offsetWidth > 0 && button.offsetHeight > 0;
+                const isEnabled = !button.disabled;
+                
+                // 详细日志
+                if (text.includes('accept')) {
+                    console.log(`  [Main Doc Button ${index}]`, {
+                        text: button.textContent.trim(),
+                        visible: isVisible,
+                        enabled: isEnabled,
+                        classes: button.className
+                    });
+                }
+                
+                // 匹配 "Accept all" (不区分大小写)
+                if (text === 'accept all' && isVisible && isEnabled) {
+                    foundButtons.push({ 
+                        button, 
+                        iframe: null, 
+                        location: '🔴 MAIN-DOC (outer frame)' 
+                    });
+                    console.log(`  ✅ Found "Accept all" in main document!`);
+                }
+            });
+
+            // ========== 2. 查找 iframe 内的 "Accept" 按钮 ==========
+            console.log('🔍 Searching in IFRAMES for "Accept"...');
             const iframes = document.querySelectorAll('iframe');
-            iframes.forEach((iframe) => {
+            iframes.forEach((iframe, iframeIndex) => {
                 try {
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                     const buttons = iframeDoc.querySelectorAll('button');
 
-                    buttons.forEach(button => {
-                        const text = (button.textContent || '').trim();
+                    buttons.forEach((button, btnIndex) => {
+                        const text = (button.textContent || '').trim().toLowerCase();
                         const className = button.className?.toString() || '';
+                        const isVisible = button.offsetWidth > 0 && button.offsetHeight > 0;
+                        const isEnabled = !button.disabled;
 
-                        if (text.toLowerCase().includes('accept') &&
-                            (className.includes('hover:bg-ide-button-hover') || className.includes('bg-ide-button-bac')) &&
-                            button.offsetWidth > 0 && button.offsetHeight > 0 && !button.disabled) {
-                            foundButtons.push({ button, iframe, location: 'iframe' });
+                        // 详细日志
+                        if (text.includes('accept')) {
+                            console.log(`  [Iframe ${iframeIndex} Button ${btnIndex}]`, {
+                                text: button.textContent.trim(),
+                                visible: isVisible,
+                                enabled: isEnabled,
+                                classes: className
+                            });
+                        }
+
+                        // 匹配 "Accept" (不含 "all")
+                        if (text.includes('accept') && 
+                            !text.includes('all') &&
+                            (className.includes('hover:bg-ide-button-hover') || 
+                             className.includes('bg-ide-button-bac')) &&
+                            isVisible && isEnabled) {
+                            foundButtons.push({ 
+                                button, 
+                                iframe, 
+                                location: `🟢 IFRAME-${iframeIndex} (inner frame)` 
+                            });
+                            console.log(`  ✅ Found "Accept" in iframe ${iframeIndex}!`);
                         }
                     });
-                } catch (e) { /* Can't access iframe */ }
-            });
-
-            // 2. 新增：查找主文档中的 Accept all 按钮
-            const mainDocButtons = document.querySelectorAll('button');
-            mainDocButtons.forEach(button => {
-                const text = (button.textContent || '').trim();
-                
-                // 匹配 "Accept all" 按钮的特征
-                // 根据截图，Accept all 按钮也有类似的样式类
-                if (text.toLowerCase() === 'accept all' &&
-                    button.offsetWidth > 0 && button.offsetHeight > 0 && !button.disabled) {
-                    foundButtons.push({ button, iframe: null, location: 'main-document' });
-                    console.log(`  ✓ Found "Accept all" button in main document`);
+                } catch (e) {
+                    console.log(`  ⚠️  Cannot access iframe ${iframeIndex}: ${e.message}`);
                 }
             });
 
             updateUI(foundButtons.length);
-            logScanResults(iframes.length, foundButtons.length);
+            logScanResults(iframes.length, foundButtons.length, foundButtons);
 
+            // ========== 3. 执行点击 ==========
             if (autoClickEnabled && foundButtons.length > 0) {
                 clickButtons(foundButtons, scrollIntoViewEnabled);
+            } else if (foundButtons.length === 0) {
+                console.log('  ℹ️  No buttons found this scan');
             }
         } catch (error) {
             console.error('❗ Error:', error);
@@ -428,13 +469,13 @@
             if (scrollIntoView) {
                 button.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
                 setTimeout(() => {
-                    console.log(`  🖱️  Clicking button ${index + 1} (${location})`);
+                    console.log(`  🖱️  CLICKING button ${index + 1} at ${location}`);
                     button.click();
                     state.totalClicks++;
                     document.getElementById('click-count').textContent = state.totalClicks;
                 }, 300);
             } else {
-                console.log(`  🖱️  Clicking button ${index + 1} (${location})`);
+                console.log(`  🖱️  CLICKING button ${index + 1} at ${location}`);
                 button.click();
                 state.totalClicks++;
                 document.getElementById('click-count').textContent = state.totalClicks;
@@ -449,9 +490,19 @@
         }
     }
 
-    function logScanResults(iframeCount, buttonCount) {
+    function logScanResults(iframeCount, buttonCount, buttons) {
         const timestamp = new Date().toLocaleTimeString();
-        console.log(`[${timestamp}] Scanned ${iframeCount} iframe(s) + main doc | Found ${buttonCount} button(s) | Total scrolls: ${state.totalScrolls}`);
+        console.log('═'.repeat(80));
+        console.log(`[${timestamp}] SCAN COMPLETE`);
+        console.log(`  📊 Scanned: ${iframeCount} iframe(s) + main document`);
+        console.log(`  🎯 Found: ${buttonCount} button(s)`);
+        if (buttonCount > 0) {
+            buttons.forEach((btn, i) => {
+                console.log(`    ${i + 1}. ${btn.location}`);
+            });
+        }
+        console.log(`  📈 Total clicks: ${state.totalClicks}`);
+        console.log('═'.repeat(80));
     }
 
     // ==================== INITIALIZATION ====================
@@ -462,7 +513,8 @@
     window.autoClickerUI = ui;
 
     console.log('✅ AUTO-CLICKER ACTIVE');
-    console.log('🔍 Searching for "Accept" buttons in iframes AND "Accept all" in main document');
+    console.log('🔴 Layer 1: Main Document → "Accept all" button');
+    console.log('🟢 Layer 2: Iframes → "Accept" button');
     console.log('📊 Scanning every 3 seconds');
     console.log('☑️  Check the box to enable auto-clicking');
     console.log('═'.repeat(80));

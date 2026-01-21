@@ -1,0 +1,89 @@
+.is-raw-container {
+    font-family: "SimSun", "Songti SC", serif;
+    /* 仿宋/宋体 for paper feel */
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    max-width: 1000px;
+    /* Adjust as needed */
+    color: #000;
+}
+
+.is-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+}
+
+.is-header-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.is-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.is-table th,
+.is-table td {
+    border: 1px solid #000;
+    /* Solid black borders */
+    padding: 6px 8px;
+    height: 32px;
+}
+
+/* Column Widths */
+.is-col-item {
+    width: 40%;
+}
+
+.is-col-line {
+    width: 10%;
+    text-align: center;
+}
+
+.is-col-amount {
+    width: 25%;
+    text-align: right;
+}
+
+/* Alignments */
+.is-center {
+    text-align: center;
+}
+
+.is-left {
+    text-align: left;
+}
+
+.is-right {
+    text-align: right;
+}
+
+.is-indent {
+    padding-left: 2em;
+}
+
+/* Indent for subsections */
+
+/* Header Style */
+.is-table thead th {
+    font-weight: bold;
+    text-align: center;
+    background-color: #f9f9f9;
+    /* Slight grey for header? Or keep white for raw paper look */
+    background-color: transparent;
+}
+
+/* N/A Cell */
+.is-na {
+    text-align: center;
+    color: #999;
+}

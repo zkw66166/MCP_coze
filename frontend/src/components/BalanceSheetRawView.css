@@ -1,0 +1,95 @@
+.bs-raw-container {
+    font-family: "SimSun", "Songti SC", serif;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    /* Balance sheet is wide */
+    min-width: 1000px;
+    max-width: 1400px;
+    color: #000;
+}
+
+.bs-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+}
+
+.bs-header-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.bs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    /* Smaller font for dense table */
+}
+
+.bs-table th,
+.bs-table td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+    height: 28px;
+}
+
+/* 
+  Balance Sheet has 2 sides, each side has: Item (Left align), LineNo (Center), End (Right), Start (Right)
+  Structure: 
+  Col 1: Asset Item (Wide)
+  Col 2: Line (Narrow)
+  Col 3: End Bal
+  Col 4: Start Bal
+  Col 5: Liab Item (Wide)
+  Col 6: Line
+  Col 7: End Bal
+  Col 8: Start Bal
+*/
+
+.bs-col-item {
+    width: 22%;
+    text-align: left;
+}
+
+.bs-col-line {
+    width: 5%;
+    text-align: center;
+}
+
+.bs-col-amount {
+    width: 11.5%;
+    text-align: right;
+}
+
+/* Styles */
+.bs-center {
+    text-align: center;
+}
+
+.bs-left {
+    text-align: left;
+}
+
+.bs-right {
+    text-align: right;
+}
+
+.bs-indent {
+    padding-left: 2em;
+}
+
+.bs-bold {
+    font-weight: bold;
+}
+
+.bs-table thead th {
+    font-weight: bold;
+    text-align: center;
+    background-color: transparent;
+}

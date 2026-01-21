@@ -1,4 +1,3 @@
-
 .db-container {
     padding: 24px;
     background-color: #f9fafb;
@@ -12,7 +11,7 @@
     background-color: white;
     padding: 16px;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     align-items: center;
 }
 
@@ -48,7 +47,7 @@
 .db-content {
     background-color: white;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     /* Remove explicit height to allow auto-sizing, 
@@ -56,7 +55,8 @@
        Actually user asked for "no pagination, just scrollbar".
        So we can set a max-height on the table wrapper.
     */
-    height: calc(100vh - 200px); /* Adjust based on header/filter height */
+    height: calc(100vh - 200px);
+    /* Adjust based on header/filter height */
 }
 
 .db-table-header {
@@ -86,7 +86,8 @@
 
 .db-table-wrapper {
     flex: 1;
-    overflow: auto; /* Handles both X and Y scrolling */
+    overflow: auto;
+    /* Handles both X and Y scrolling */
     position: relative;
 }
 
@@ -94,7 +95,8 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
-    white-space: nowrap; /* Prevent wrapping for data cells */
+    white-space: nowrap;
+    /* Prevent wrapping for data cells */
 }
 
 .db-table thead {
@@ -110,7 +112,8 @@
     font-weight: 500;
     color: #6b7280;
     border-bottom: 1px solid #e5e7eb;
-    background-color: #f9fafb; /* Ensure background for sticky header */
+    background-color: #f9fafb;
+    /* Ensure background for sticky header */
 }
 
 .db-table td {
@@ -123,7 +126,8 @@
     background-color: #f9fafb;
 }
 
-.db-empty, .db-loading {
+.db-empty,
+.db-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -144,5 +148,40 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* View Switcher */
+.db-view-toggle {
+    display: flex;
+    background-color: #f3f4f6;
+    border-radius: 6px;
+    padding: 2px;
+}
+
+.db-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.db-toggle-btn.active {
+    background-color: white;
+    color: #2563eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    font-weight: 500;
+}
+
+.db-toggle-btn:hover:not(.active) {
+    background-color: #e5e7eb;
 }
