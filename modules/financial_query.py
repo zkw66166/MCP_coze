@@ -521,13 +521,14 @@ class FinancialQuery:
                     metric_name = metrics[0] if metrics else self._extract_metric_name_from_question(question)
                     
                     for row in sql_results:
-                        year = row.get('period_year') or row.get('year')
+                        year = row.get('period_year') or row.get('year') or row.get('年份') or row.get('年度')
                         # BUG FIX: Do not default to 1. If quarter is missing, it's likely Annual data.
-                        qtr = row.get('period_quarter') or row.get('quarter')
+                        qtr = row.get('period_quarter') or row.get('quarter') or row.get('季度')
                         
                         # 遍历所有字段,提取多个指标
                         excluded_fields = ('period_year', 'period_quarter', 'period_month', 
-                                         'year', 'quarter', 'company_id', 'month')
+                                         'year', 'quarter', 'month', 'company_id',
+                                         '年份', '年度', '季度', '月份')
                         
                         for k, v in row.items():
                             if k not in excluded_fields:
@@ -624,12 +625,15 @@ class FinancialQuery:
                     # 转换结果格式
                     for row in sql_results:
                         # 尝试提取标准字段
-                        year = row.get('period_year') or row.get('year')
-                        qtr = row.get('period_quarter') or row.get('quarter') or row.get('period_month') or 1
+                        year = row.get('period_year') or row.get('year') or row.get('年份') or row.get('年度')
+                        qtr = row.get('period_quarter') or row.get('quarter') or row.get('季度') or row.get('period_month') or 1
                         value = None
                         # 查找第一个数值字段作为value
+                        excluded_fields = ('period_year', 'period_quarter', 'period_month', 
+                                         'year', 'quarter', 'company_id', 'month',
+                                         '年份', '年度', '季度', '月份')
                         for k, v in row.items():
-                            if k not in ('period_year', 'period_quarter', 'period_month', 'year', 'quarter', 'company_id'):
+                            if k not in excluded_fields:
                                 if isinstance(v, (int, float)) and v is not None:
                                     value = v
                                     break
