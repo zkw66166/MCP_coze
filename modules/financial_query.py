@@ -522,6 +522,11 @@ class FinancialQuery:
                     
                     for row in sql_results:
                         year = row.get('period_year') or row.get('year') or row.get('年份') or row.get('年度')
+                        
+                        # Fallback for year if not returned by SQL
+                        if year is None and len(years) == 1:
+                            year = years[0]
+
                         # BUG FIX: Do not default to 1. If quarter is missing, it's likely Annual data.
                         qtr = row.get('period_quarter') or row.get('quarter') or row.get('季度')
                         

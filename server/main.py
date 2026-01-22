@@ -15,7 +15,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from server.routers import chat, companies, company_profile, data_management, data_browser
+from server.routers import chat, companies, company_profile, data_management, data_browser, metrics_admin
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -39,6 +39,7 @@ app.include_router(companies.router, prefix="/api", tags=["企业"])
 app.include_router(company_profile.router, prefix="/api", tags=["企业画像"])
 app.include_router(data_management.router)
 app.include_router(data_browser.router)
+app.include_router(metrics_admin.router, prefix="/api", tags=["指标管理"])
 
 
 @app.get("/")
@@ -55,6 +56,28 @@ async def root():
 async def health_check():
     """API 健康检查"""
     return {"status": "healthy"}
+
+
+@app.on_event("startup")
+async def startup_event():
+    """应用启动时执行"""
+    try:
+        from server.scheduler import start_scheduler
+        start_scheduler()
+        print("✅ 企业画像指标定时调度器已启动")
+    except Exception as e:
+        print(f"⚠️ 调度器启动失败: {e}")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """应用关闭时执行"""
+    try:
+        from server.scheduler import stop_scheduler
+        stop_scheduler()
+        print("✅ 企业画像指标定时调度器已停止")
+    except Exception as e:
+        print(f"⚠️ 调度器停止失败: {e}")
 
 
 if __name__ == "__main__":

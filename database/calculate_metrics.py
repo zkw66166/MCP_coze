@@ -169,11 +169,88 @@ def calculate_metrics_for_period(company_id: int, year: int, quarter: int):
                 metrics['asset_growth_rate'] = round((total_assets - prev_assets) / prev_assets * 100, 2)
         
         # === 成本费用指标 ===
+        # 新增：绝对值字段
+        metrics['sales_expense'] = selling_expenses
+        metrics['admin_expense'] = admin_expenses
+        
         if revenue > 0:
             metrics['selling_expense_ratio'] = round(selling_expenses / revenue * 100, 2)
             metrics['admin_expense_ratio'] = round(admin_expenses / revenue * 100, 2)
             period_expenses = selling_expenses + admin_expenses + financial_expenses
             metrics['period_expense_ratio'] = round(period_expenses / revenue * 100, 2)
+        
+        # === 新增：现金流指标 ===
+        cursor.execute('''
+            SELECT net_cash_operating, net_cash_investing, net_cash_financing
+            FROM cash_flow_statements
+            WHERE company_id = ? AND period_year = ? AND period_quarter = ?
+        ''', (company_id, year, quarter))
+        cash_flow = cursor.fetchone()
+        if cash_flow:
+            metrics['operating_cash_flow'] = cash_flow['net_cash_operating'] or 0
+            metrics['investing_cash_flow'] = cash_flow['net_cash_investing'] or 0
+            metrics['financing_cash_flow'] = cash_flow['net_cash_financing'] or 0
+        
+        # === 新增：发票数量统计 ===
+        # 注意：invoices表使用issue_date字段，需要从日期中提取年份和季度
+        cursor.execute('''
+            SELECT 
+                COUNT(CASE WHEN invoice_type = 'OUTPUT' THEN 1 END) as sales_count,
+                COUNT(CASE WHEN invoice_type = 'INPUT' THEN 1 END) as purchase_count
+            FROM invoices
+            WHERE company_id = ? 
+              AND CAST(strftime('%Y', issue_date) AS INTEGER) = ?
+              AND CAST((CAST(strftime('%m', issue_date) AS INTEGER) + 2) / 3 AS INTEGER) = ?
+        ''', (company_id, year, quarter))
+        invoice_stats = cursor.fetchone()
+        if invoice_stats:
+            metrics['sales_invoice_count'] = invoice_stats['sales_count'] or 0
+            metrics['purchase_invoice_count'] = invoice_stats['purchase_count'] or 0
+        
+        # === 新增：客户集中度（TOP5占比） ===
+        # 注意：customer_analysis 是按年度的，不区分季度
+        cursor.execute('''
+            SELECT SUM(total_sales) as total
+            FROM customer_analysis
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        customer_total_row = cursor.fetchone()
+        customer_total = customer_total_row['total'] if customer_total_row and customer_total_row['total'] else 0
+        
+        if customer_total > 0:
+            cursor.execute('''
+                SELECT SUM(total_sales) as top5_sales
+                FROM (
+                    SELECT total_sales FROM customer_analysis
+                    WHERE company_id = ? AND period_year = ?
+                    ORDER BY total_sales DESC LIMIT 5
+                )
+            ''', (company_id, year))
+            top5_row = cursor.fetchone()
+            top5_sales = top5_row['top5_sales'] if top5_row and top5_row['top5_sales'] else 0
+            metrics['customer_concentration'] = round(top5_sales / customer_total * 100, 2)
+        
+        # === 新增：供应商集中度（TOP5占比） ===
+        cursor.execute('''
+            SELECT SUM(total_purchase) as total
+            FROM supplier_analysis
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        supplier_total_row = cursor.fetchone()
+        supplier_total = supplier_total_row['total'] if supplier_total_row and supplier_total_row['total'] else 0
+        
+        if supplier_total > 0:
+            cursor.execute('''
+                SELECT SUM(total_purchase) as top5_purchase
+                FROM (
+                    SELECT total_purchase FROM supplier_analysis
+                    WHERE company_id = ? AND period_year = ?
+                    ORDER BY total_purchase DESC LIMIT 5
+                )
+            ''', (company_id, year))
+            top5_purch_row = cursor.fetchone()
+            top5_purchase = top5_purch_row['top5_purchase'] if top5_purch_row and top5_purch_row['top5_purchase'] else 0
+            metrics['supplier_concentration'] = round(top5_purchase / supplier_total * 100, 2)
         
         # === 税务指标 ===
         if tax and revenue > 0:
@@ -183,6 +260,7 @@ def calculate_metrics_for_period(company_id: int, year: int, quarter: int):
                 metrics['income_tax_burden_rate'] = round(tax['income_tax'] / revenue * 100, 2)
             if tax['total_tax']:
                 metrics['total_tax_burden_rate'] = round(tax['total_tax'] / revenue * 100, 2)
+
         
     except Exception as e:
         print(f"  计算错误: {e}")

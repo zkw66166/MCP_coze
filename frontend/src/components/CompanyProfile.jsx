@@ -241,6 +241,7 @@ function CompanyProfile({ selectedCompanyId, companies }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [profile, setProfile] = useState(null);
+    const [calculating, setCalculating] = useState(false);
 
     const companyId = selectedCompanyId;
     const companyName = companies?.find(c => c.id === companyId)?.name || '企业';
@@ -266,6 +267,37 @@ function CompanyProfile({ selectedCompanyId, companies }) {
 
         loadProfile();
     }, [companyId, year]);
+
+    // 手动触发重新计算
+    const handleRecalculate = async () => {
+        if (!companyId) return;
+
+        setCalculating(true);
+        try {
+            const response = await fetch('/api/admin/metrics/recalculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    company_ids: [companyId],
+                    year: year
+                })
+            });
+
+            if (!response.ok) throw new Error('触发计算失败');
+
+            const data = await response.json();
+            alert(`✅ ${data.message}\n\n计算完成后请刷新页面查看更新数据。`);
+
+            // 5秒后自动刷新数据
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        } catch (err) {
+            alert(`❌ 触发计算失败: ${err.message}`);
+        } finally {
+            setCalculating(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -333,11 +365,21 @@ function CompanyProfile({ selectedCompanyId, companies }) {
                         <span className="credit-code">统一社会信用代码：{basic_info.credit_code}</span>
                     )}
                 </div>
-                <select className="year-selector" value={year} onChange={e => setYear(Number(e.target.value))}>
-                    <option value={2024}>2024年</option>
-                    <option value={2023}>2023年</option>
-                    <option value={2022}>2022年</option>
-                </select>
+                <div className="header-actions">
+                    <select className="year-selector" value={year} onChange={e => setYear(Number(e.target.value))}>
+                        <option value={2024}>2024年</option>
+                        <option value={2023}>2023年</option>
+                        <option value={2022}>2022年</option>
+                    </select>
+                    <button
+                        className="recalculate-btn"
+                        onClick={handleRecalculate}
+                        disabled={calculating || !companyId}
+                        title="重新计算企业画像指标"
+                    >
+                        {calculating ? '🔄 计算中...' : '🔄 刷新指标'}
+                    </button>
+                </div>
             </div>
 
             <div className="profile-content">

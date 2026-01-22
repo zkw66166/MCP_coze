@@ -251,7 +251,13 @@ async def get_investments(company_id: int) -> List[Dict[str, Any]]:
 
 @router.get("/company-profile/{company_id}/financial")
 async def get_financial_summary(company_id: int, year: Optional[int] = None) -> Dict[str, Any]:
-    """获取财务状况摘要"""
+    """获取财务状况摘要（年度智能汇总版）
+    
+    汇总策略：
+    - 存量指标（资产、负债等）：取Q4时点值
+    - 流量指标（收入、费用、发票等）：全年累计
+    - 比率指标：基于全年流量数据重新计算
+    """
     if year is None:
         year = datetime.now().year
     
@@ -259,142 +265,297 @@ async def get_financial_summary(company_id: int, year: Optional[int] = None) -> 
     try:
         cursor = conn.cursor()
         
-        # 获取最新的资产负债表数据
+        # 年度汇总查询：一次性获取全年数据
         cursor.execute('''
-            SELECT total_assets, total_liabilities, total_equity,
-                   current_assets_total, current_liabilities_total,
-                   inventory, accounts_receivable, cash_and_equivalents
+            SELECT 
+                -- === 存量指标（Q4时点值） ===
+                MAX(CASE WHEN period_quarter = 4 THEN asset_liability_ratio END) as asset_liability_ratio,
+                MAX(CASE WHEN period_quarter = 4 THEN current_ratio END) as current_ratio,
+                MAX(CASE WHEN period_quarter = 4 THEN quick_ratio END) as quick_ratio,
+                MAX(CASE WHEN period_quarter = 4 THEN total_asset_turnover END) as total_asset_turnover,
+                MAX(CASE WHEN period_quarter = 4 THEN receivable_turnover_days END) as receivable_turnover_days,
+                MAX(CASE WHEN period_quarter = 4 THEN gross_profit_margin END) as gross_profit_margin_q4,
+                MAX(CASE WHEN period_quarter = 4 THEN net_profit_margin END) as net_profit_margin_q4,
+                
+                -- === 流量指标（全年累计） ===
+                SUM(sales_expense) as sales_expense_annual,
+                SUM(admin_expense) as admin_expense_annual,
+                SUM(sales_invoice_count) as sales_invoice_count_annual,
+                SUM(purchase_invoice_count) as purchase_invoice_count_annual,
+                SUM(operating_cash_flow) as operating_cash_flow_annual,
+                SUM(investing_cash_flow) as investing_cash_flow_annual,
+                SUM(financing_cash_flow) as financing_cash_flow_annual,
+                
+                -- === 增长率（已按年计算，取任意一条） ===
+                MAX(revenue_growth_rate) as revenue_growth_rate,
+                MAX(profit_growth_rate) as profit_growth_rate,
+                MAX(asset_growth_rate) as asset_growth_rate,
+                
+                -- === 费用率（取Q4或平均） ===
+                MAX(CASE WHEN period_quarter = 4 THEN selling_expense_ratio END) as selling_expense_ratio,
+                MAX(CASE WHEN period_quarter = 4 THEN admin_expense_ratio END) as admin_expense_ratio,
+                
+                -- === 集中度（平均值） ===
+                AVG(customer_concentration) as customer_concentration_avg,
+                AVG(supplier_concentration) as supplier_concentration_avg,
+                
+                -- === 更新时间 ===
+                MAX(updated_at) as last_updated
+                
+            FROM financial_metrics
+            WHERE company_id = ? AND period_year = ?
+            GROUP BY company_id, period_year
+        ''', (company_id, year))
+        
+        fm_row = cursor.fetchone()
+        
+        # 获取基础财务数据（用于显示）及年度流量汇总
+        cursor.execute('''
+            SELECT total_assets, total_liabilities, total_equity
             FROM balance_sheets
             WHERE company_id = ? AND period_year = ?
-            ORDER BY period_quarter DESC, period_month DESC
+            ORDER BY period_quarter DESC
             LIMIT 1
         ''', (company_id, year))
         bs_row = cursor.fetchone()
         
-        # 获取利润表数据（年度汇总）
+        # 从利润表汇总全年流量数据（最精确来源）
         cursor.execute('''
-            SELECT SUM(total_revenue) as revenue, 
-                   SUM(cost_of_sales) as cost,
-                   SUM(gross_profit) as gross_profit,
-                   SUM(total_profit) as total_profit,
-                   SUM(net_profit) as net_profit
+            SELECT 
+                SUM(total_revenue) as revenue, 
+                SUM(gross_profit) as gross_profit,
+                SUM(net_profit) as net_profit,
+                SUM(selling_expenses) as selling_expenses,
+                SUM(administrative_expenses) as administrative_expenses
             FROM income_statements
             WHERE company_id = ? AND period_year = ?
         ''', (company_id, year))
         is_row = cursor.fetchone()
         
-        # 计算财务指标
+        # 构建指标列表
         metrics = []
+        cash_flow_data = {"operating": 0, "investing": 0, "financing": 0}
+        sales_expense = 0
+        admin_expense = 0
+        invoice_summary = {"sales_count": 0, "purchase_count": 0}
         
-        if bs_row:
-            total_assets = bs_row["total_assets"] or 0
-            total_liabilities = bs_row["total_liabilities"] or 0
-            total_equity = bs_row["total_equity"] or 0
-            current_assets = bs_row["current_assets_total"] or 0
-            current_liabilities = bs_row["current_liabilities_total"] or 0
-            inventory = bs_row["inventory"] or 0
+        # 1. 计算基于流量的比率（使用全年汇总数据）
+        revenue_annual = is_row["revenue"] if is_row and is_row["revenue"] else 0
+        gross_profit_annual = is_row["gross_profit"] if is_row and is_row["gross_profit"] else 0
+        net_profit_annual = is_row["net_profit"] if is_row and is_row["net_profit"] else 0
+        sales_expense_annual = is_row["selling_expenses"] if is_row and is_row["selling_expenses"] else 0
+        admin_expense_annual = is_row["administrative_expenses"] if is_row and is_row["administrative_expenses"] else 0
+        
+        # 费用绝对值
+        sales_expense = sales_expense_annual
+        admin_expense = admin_expense_annual
+        
+        # 毛利率（全年）
+        if revenue_annual > 0:
+            gross_margin = (gross_profit_annual / revenue_annual) * 100
+            eval_text, eval_color = evaluate_metric("gross_margin", gross_margin)
+            metrics.append({
+                "name": "毛利率",
+                "value": round(gross_margin, 2),
+                "unit": "%",
+                "evaluation": eval_text,
+                "evaluation_color": eval_color
+            })
+        
+        # 净利率（全年）
+        if revenue_annual > 0:
+            net_margin = (net_profit_annual / revenue_annual) * 100
+            eval_text, eval_color = evaluate_metric("net_margin", net_margin)
+            metrics.append({
+                "name": "净利率",
+                "value": round(net_margin, 2),
+                "unit": "%",
+                "evaluation": eval_text,
+                "evaluation_color": eval_color
+            })
+
+        # 成本费用比率（全年）
+        if revenue_annual > 0:
+            selling_ratio = (sales_expense_annual / revenue_annual) * 100
+            metrics.append({
+                "name": "销售费用率",
+                "value": round(selling_ratio, 2),
+                "unit": "%",
+                "evaluation": "合理" if selling_ratio <= 20 else "偏高",
+                "evaluation_color": "green" if selling_ratio <= 20 else "yellow"
+            })
             
-            # 资产负债率
-            if total_assets > 0:
-                ratio = total_liabilities / total_assets * 100
-                eval_text, eval_color = evaluate_metric("asset_liability_ratio", ratio)
+            admin_ratio = (admin_expense_annual / revenue_annual) * 100
+            metrics.append({
+                "name": "管理费用率",
+                "value": round(admin_ratio, 2),
+                "unit": "%",
+                "evaluation": "合理" if admin_ratio <= 15 else "偏高",
+                "evaluation_color": "green" if admin_ratio <= 15 else "yellow"
+            })
+
+        if fm_row:
+            # === 偿债能力指标（Q4时点值） ===
+            if fm_row["asset_liability_ratio"] is not None:
+                eval_text, eval_color = evaluate_metric("asset_liability_ratio", fm_row["asset_liability_ratio"])
                 metrics.append({
                     "name": "资产负债率",
-                    "value": round(ratio, 2),
+                    "value": round(fm_row["asset_liability_ratio"], 2),
                     "unit": "%",
                     "evaluation": eval_text,
                     "evaluation_color": eval_color
                 })
             
-            # 流动比率
-            if current_liabilities > 0:
-                ratio = current_assets / current_liabilities
-                eval_text, eval_color = evaluate_metric("current_ratio", ratio)
+            if fm_row["current_ratio"] is not None:
+                eval_text, eval_color = evaluate_metric("current_ratio", fm_row["current_ratio"])
                 metrics.append({
                     "name": "流动比率",
-                    "value": round(ratio, 2),
+                    "value": round(fm_row["current_ratio"], 2),
                     "unit": "",
                     "evaluation": eval_text,
                     "evaluation_color": eval_color
                 })
             
-            # 速动比率
-            if current_liabilities > 0:
-                ratio = (current_assets - inventory) / current_liabilities
-                eval_text, eval_color = evaluate_metric("quick_ratio", ratio)
+            if fm_row["quick_ratio"] is not None:
+                eval_text, eval_color = evaluate_metric("quick_ratio", fm_row["quick_ratio"])
                 metrics.append({
                     "name": "速动比率",
-                    "value": round(ratio, 2),
+                    "value": round(fm_row["quick_ratio"], 2),
                     "unit": "",
                     "evaluation": eval_text,
                     "evaluation_color": eval_color
                 })
+            
+            # === 运营效率指标（Q4） ===
+            if fm_row["total_asset_turnover"] is not None:
+                metrics.append({
+                    "name": "总资产周转率",
+                    "value": round(fm_row["total_asset_turnover"], 2),
+                    "unit": "次",
+                    "evaluation": "良好" if fm_row["total_asset_turnover"] >= 1.0 else "一般",
+                    "evaluation_color": "green" if fm_row["total_asset_turnover"] >= 1.0 else "yellow"
+                })
+            
+            if fm_row["receivable_turnover_days"] is not None:
+                metrics.append({
+                    "name": "应收账款周转天数",
+                    "value": round(fm_row["receivable_turnover_days"], 2),
+                    "unit": "天",
+                    "evaluation": "优秀" if fm_row["receivable_turnover_days"] <= 60 else "一般",
+                    "evaluation_color": "green" if fm_row["receivable_turnover_days"] <= 60 else "yellow"
+                })
+            
+            # === 成长性指标（已按年计算） ===
+            if fm_row["revenue_growth_rate"] is not None:
+                eval_text, eval_color = evaluate_growth(fm_row["revenue_growth_rate"])
+                metrics.append({
+                    "name": "营业收入增长率",
+                    "value": round(fm_row["revenue_growth_rate"], 2),
+                    "unit": "%",
+                    "evaluation": eval_text,
+                    "evaluation_color": eval_color
+                })
+            
+            if fm_row["profit_growth_rate"] is not None:
+                eval_text, eval_color = evaluate_growth(fm_row["profit_growth_rate"])
+                metrics.append({
+                    "name": "净利润增长率",
+                    "value": round(fm_row["profit_growth_rate"], 2),
+                    "unit": "%",
+                    "evaluation": eval_text,
+                    "evaluation_color": eval_color
+                })
+            
+            if fm_row["asset_growth_rate"] is not None:
+                eval_text, eval_color = evaluate_growth(fm_row["asset_growth_rate"])
+                metrics.append({
+                    "name": "资产增长率",
+                    "value": round(fm_row["asset_growth_rate"], 2),
+                    "unit": "%",
+                    "evaluation": eval_text,
+                    "evaluation_color": eval_color
+                })
+            
+            # === 成本费用比率（Q4） ===
+            # sales_expense = fm_row["sales_expense_annual"] or 0 # Now from income_statements
+            # admin_expense = fm_row["admin_expense_annual"] or 0 # Now from income_statements
+            
+            # if fm_row["selling_expense_ratio"] is not None: # Now from income_statements
+            #     metrics.append({
+            #         "name": "销售费用率",
+            #         "value": round(fm_row["selling_expense_ratio"], 2),
+            #         "unit": "%",
+            #         "evaluation": "合理" if fm_row["selling_expense_ratio"] <= 20 else "偏高",
+            #         "evaluation_color": "green" if fm_row["selling_expense_ratio"] <= 20 else "yellow"
+            #     })
+            
+            # if fm_row["admin_expense_ratio"] is not None: # Now from income_statements
+            #     metrics.append({
+            #         "name": "管理费用率",
+            #         "value": round(fm_row["admin_expense_ratio"], 2),
+            #         "unit": "%",
+            #         "evaluation": "合理" if fm_row["admin_expense_ratio"] <= 15 else "偏高",
+            #         "evaluation_color": "green" if fm_row["admin_expense_ratio"] <= 15 else "yellow"
+            #     })
+            
+            # === 现金流数据（全年累计） ===
+            cash_flow_data = {
+                "operating": round(fm_row["operating_cash_flow_annual"], 2) if fm_row["operating_cash_flow_annual"] else 0,
+                "investing": round(fm_row["investing_cash_flow_annual"], 2) if fm_row["investing_cash_flow_annual"] else 0,
+                "financing": round(fm_row["financing_cash_flow_annual"], 2) if fm_row["financing_cash_flow_annual"] else 0,
+            }
+            
+            # === 发票数量（全年累计） ===
+            invoice_summary = {
+                "sales_count": int(fm_row["sales_invoice_count_annual"] or 0),
+                "purchase_count": int(fm_row["purchase_invoice_count_annual"] or 0)
+            }
         
-        if is_row and is_row["revenue"]:
-            revenue = is_row["revenue"] or 0
-            cost = is_row["cost"] or 0
-            gross_profit = is_row["gross_profit"] or 0
-            net_profit = is_row["net_profit"] or 0
-            
-            # 毛利率
-            if revenue > 0:
-                ratio = gross_profit / revenue * 100
-                eval_text, eval_color = evaluate_metric("gross_margin", ratio)
-                metrics.append({
-                    "name": "毛利率",
-                    "value": round(ratio, 2),
-                    "unit": "%",
-                    "evaluation": eval_text,
-                    "evaluation_color": eval_color
-                })
-            
-            # 净利率
-            if revenue > 0:
-                ratio = net_profit / revenue * 100
-                eval_text, eval_color = evaluate_metric("net_margin", ratio)
-                metrics.append({
-                    "name": "净利率",
-                    "value": round(ratio, 2),
-                    "unit": "%",
-                    "evaluation": eval_text,
-                    "evaluation_color": eval_color
-                })
-            
-            # ROE
-            if bs_row and bs_row["total_equity"] and bs_row["total_equity"] > 0:
-                ratio = net_profit / bs_row["total_equity"] * 100
-                eval_text, eval_color = evaluate_metric("roe", ratio)
-                metrics.append({
-                    "name": "净资产收益率(ROE)",
-                    "value": round(ratio, 2),
-                    "unit": "%",
-                    "evaluation": eval_text,
-                    "evaluation_color": eval_color
-                })
-            
-            # ROA
-            if bs_row and bs_row["total_assets"] and bs_row["total_assets"] > 0:
-                ratio = net_profit / bs_row["total_assets"] * 100
-                eval_text, eval_color = evaluate_metric("roa", ratio)
-                metrics.append({
-                    "name": "总资产收益率(ROA)",
-                    "value": round(ratio, 2),
-                    "unit": "%",
-                    "evaluation": eval_text,
-                    "evaluation_color": eval_color
-                })
+        # 获取更新时间
+        last_updated = None
+        if fm_row:
+            try:
+                last_updated = fm_row["last_updated"]
+            except (KeyError, IndexError):
+                pass
+        
+        # 从原始表获取总收入和净利润（用于显示）
+        cursor.execute('''
+            SELECT SUM(total_revenue) as revenue, SUM(net_profit) as net_profit
+            FROM income_statements
+            WHERE company_id = ? AND period_year = ?
+        ''', (company_id, year))
+        is_row = cursor.fetchone()
         
         return {
             "year": year,
             "total_assets": bs_row["total_assets"] if bs_row else 0,
             "total_liabilities": bs_row["total_liabilities"] if bs_row else 0,
             "total_equity": bs_row["total_equity"] if bs_row else 0,
-            "revenue": is_row["revenue"] if is_row else 0,
-            "net_profit": is_row["net_profit"] if is_row else 0,
-            "metrics": metrics
+            "revenue": is_row["revenue"] if is_row and is_row["revenue"] else 0,
+            "net_profit": is_row["net_profit"] if is_row and is_row["net_profit"] else 0,
+            "gross_margin": round(gross_margin, 2) if 'gross_margin' in locals() else 0,
+            "net_margin": round(net_margin, 2) if 'net_margin' in locals() else 0,
+            "debt_ratio": round(fm_row["asset_liability_ratio"], 2) if fm_row and fm_row["asset_liability_ratio"] is not None else 0,
+            "current_ratio": round(fm_row["current_ratio"], 2) if fm_row and fm_row["current_ratio"] is not None else 0,
+            "quick_ratio": round(fm_row["quick_ratio"], 2) if fm_row and fm_row["quick_ratio"] is not None else 0,
+            "asset_turnover": round(fm_row["total_asset_turnover"], 2) if fm_row and fm_row["total_asset_turnover"] is not None else 0,
+            "receivable_days": round(fm_row["receivable_turnover_days"], 2) if fm_row and fm_row["receivable_turnover_days"] is not None else 0,
+            "receivable_turnover": round(365 / fm_row["receivable_turnover_days"], 2) if fm_row and fm_row["receivable_turnover_days"] and fm_row["receivable_turnover_days"] > 0 else 0,
+            "metrics": metrics,
+            "cash_flow": cash_flow_data,
+            "sales_expense": sales_expense,
+            "admin_expense": admin_expense,
+            "selling_expense": sales_expense,  # 前端字段名兼容
+            "selling_expense_ratio": selling_ratio if 'selling_ratio' in locals() else 0,
+            "admin_expense_ratio": admin_ratio if 'admin_ratio' in locals() else 0,
+            "invoice_summary": invoice_summary,
+            "data_source": "annual_aggregated" if fm_row else "none",
+            "last_updated": last_updated
         }
     finally:
         conn.close()
+
 
 
 @router.get("/company-profile/{company_id}/tax")
@@ -504,9 +665,11 @@ async def get_invoice_summary(company_id: int, year: Optional[int] = None) -> Di
         
         return {
             "year": year,
-            "sales_invoice_count": sales_count,
+            "sales_count": sales_count,
+            "purchase_count": purchase_count,
+            "sales_invoice_count": sales_count, # Legacy
             "sales_invoice_amount": round(sales_amount, 2),
-            "purchase_invoice_count": purchase_count,
+            "purchase_invoice_count": purchase_count, # Legacy
             "purchase_invoice_amount": round(purchase_amount, 2),
             "avg_sales_amount": round(avg_sales, 2),
             "avg_purchase_amount": round(avg_purchase, 2)
@@ -556,8 +719,22 @@ async def get_top_customers(company_id: int, year: Optional[int] = None,
                 "share_ratio": round(share, 2)
             })
         
-        # 客户集中度
-        concentration = (top_total / total_sales * 100) if total_sales > 0 else 0
+        # 从financial_metrics读取预计算的客户集中度
+        cursor.execute('''
+            SELECT customer_concentration
+            FROM financial_metrics
+            WHERE company_id = ? AND period_year = ?
+            ORDER BY period_quarter DESC
+            LIMIT 1
+        ''', (company_id, year))
+        fm_row = cursor.fetchone()
+        
+        if fm_row and fm_row["customer_concentration"] is not None:
+            concentration = fm_row["customer_concentration"]
+        else:
+            # 降级：实时计算
+            concentration = (top_total / total_sales * 100) if total_sales > 0 else 0
+        
         conc_eval, conc_color = evaluate_concentration(concentration)
         
         # 客户总数
@@ -579,6 +756,7 @@ async def get_top_customers(company_id: int, year: Optional[int] = None,
         }
     finally:
         conn.close()
+
 
 
 @router.get("/company-profile/{company_id}/suppliers")
@@ -622,8 +800,22 @@ async def get_top_suppliers(company_id: int, year: Optional[int] = None,
                 "share_ratio": round(share, 2)
             })
         
-        # 供应商集中度
-        concentration = (top_total / total_purchase * 100) if total_purchase > 0 else 0
+        # 从financial_metrics读取预计算的供应商集中度
+        cursor.execute('''
+            SELECT supplier_concentration
+            FROM financial_metrics
+            WHERE company_id = ? AND period_year = ?
+            ORDER BY period_quarter DESC
+            LIMIT 1
+        ''', (company_id, year))
+        fm_row = cursor.fetchone()
+        
+        if fm_row and fm_row["supplier_concentration"] is not None:
+            concentration = fm_row["supplier_concentration"]
+        else:
+            # 降级：实时计算
+            concentration = (top_total / total_purchase * 100) if total_purchase > 0 else 0
+        
         conc_eval, conc_color = evaluate_concentration(concentration)
         
         # 供应商总数
@@ -711,51 +903,57 @@ async def get_growth_metrics(company_id: int, year: Optional[int] = None) -> Dic
     try:
         cursor = conn.cursor()
         
-        # 获取当年和上年营收
+        # 获取当年和上年营收及资产
         cursor.execute('''
             SELECT period_year, SUM(total_revenue) as revenue, SUM(net_profit) as profit
             FROM income_statements
             WHERE company_id = ? AND period_year IN (?, ?)
             GROUP BY period_year
         ''', (company_id, year, year - 1))
+        inc_data = {row["period_year"]: dict(row) for row in cursor.fetchall()}
         
-        # Convert sqlite3.Row objects to regular dicts
-        data = {}
-        for row in cursor.fetchall():
-            data[row["period_year"]] = {
-                "revenue": row["revenue"],
-                "profit": row["profit"]
-            }
+        cursor.execute('''
+            SELECT period_year, total_assets
+            FROM balance_sheets
+            WHERE company_id = ? AND period_year IN (?, ?) AND period_quarter = 4
+        ''', (company_id, year, year - 1))
+        bal_data = {row["period_year"]: dict(row) for row in cursor.fetchall()}
         
-        current = data.get(year, {})
-        previous = data.get(year - 1, {})
+        current_inc = inc_data.get(year, {})
+        prev_inc = inc_data.get(year - 1, {})
+        current_bal = bal_data.get(year, {})
+        prev_bal = bal_data.get(year - 1, {})
         
-        current_revenue = current.get("revenue", 0) or 0
-        previous_revenue = previous.get("revenue", 0) or 0
-        current_profit = current.get("profit", 0) or 0
-        previous_profit = previous.get("profit", 0) or 0
+        current_revenue = current_inc.get("revenue", 0) or 0
+        previous_revenue = prev_inc.get("revenue", 0) or 0
+        current_profit = current_inc.get("profit", 0) or 0
+        previous_profit = prev_inc.get("profit", 0) or 0
+        current_assets = current_bal.get("total_assets", 0) or 0
+        previous_assets = prev_bal.get("total_assets", 0) or 0
         
         # 计算增长率
         revenue_growth = ((current_revenue - previous_revenue) / previous_revenue * 100 
                           if previous_revenue and previous_revenue > 0 else 0)
         profit_growth = ((current_profit - previous_profit) / abs(previous_profit) * 100 
                          if previous_profit and previous_profit != 0 else 0)
+        asset_growth = ((current_assets - previous_assets) / previous_assets * 100
+                        if previous_assets and previous_assets > 0 else 0)
         
         rev_eval, rev_color = evaluate_growth(revenue_growth)
         profit_eval, profit_color = evaluate_growth(profit_growth)
+        asset_eval, asset_color = evaluate_growth(asset_growth)
         
         return {
             "year": year,
-            "current_revenue": round(current_revenue, 2) if current_revenue else 0,
-            "previous_revenue": round(previous_revenue, 2) if previous_revenue else 0,
-            "revenue_growth_rate": round(revenue_growth, 2),
+            "revenue_growth": round(revenue_growth, 2),
+            "revenue_growth_rate": round(revenue_growth, 2), # Legacy
+            "revenue_growth_eval": [rev_eval, rev_color],
+            "profit_growth": round(profit_growth, 2),
+            "profit_growth_rate": round(profit_growth, 2), # Legacy
+            "asset_growth": round(asset_growth, 2),
+            "asset_growth_rate": round(asset_growth, 2), # Legacy
             "revenue_evaluation": rev_eval,
-            "revenue_color": rev_color,
-            "current_profit": round(current_profit, 2) if current_profit else 0,
-            "previous_profit": round(previous_profit, 2) if previous_profit else 0,
-            "profit_growth_rate": round(profit_growth, 2),
-            "profit_evaluation": profit_eval,
-            "profit_color": profit_color
+            "profit_evaluation": profit_eval
         }
     finally:
         conn.close()
@@ -792,9 +990,12 @@ async def get_cash_flow_summary(company_id: int, year: Optional[int] = None) -> 
         
         return {
             "year": year,
-            "operating_cash_flow": round(operating, 2),
-            "investing_cash_flow": round(investing, 2),
-            "financing_cash_flow": round(financing, 2),
+            "operating": round(operating, 2),
+            "investing": round(investing, 2),
+            "financing": round(financing, 2),
+            "operating_cash_flow": round(operating, 2), # Legacy
+            "investing_cash_flow": round(investing, 2), # Legacy
+            "financing_cash_flow": round(financing, 2), # Legacy
             "net_increase": round(net_increase, 2),
             "operating_evaluation": op_eval,
             "operating_color": op_color
