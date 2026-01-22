@@ -13,6 +13,7 @@ dist/
 excel/
 excelPaser/
 processed_balance_sheets/
+*.log
 
 # 编译文件与临时文件
 __pycache__/
@@ -20,22 +21,9 @@ __pycache__/
 *.class
 *.so
 .Python
+*.bat
 .DS_Store
 
 # 数据库与本地配置
 *.sqlite3
 .env
-
-# Logs
-*.log
-
-# Temp/Junk
-.coze_chat.bat
-http127*
-~$*
-
-# Sensitive
-poe api key.txt
-
-# Backups
-database/bak/
