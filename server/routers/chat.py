@@ -483,40 +483,89 @@ async def stream_financial_response(
                         yield send_event("chart", chart_data)
                         
                     else:
-                        # === 多指标：发送一个折线图，包含多个dataset ===
+                        # === 多指标：发送两个图表 (绝对值对比 + 增长率对比) ===
                         # 限制指标数量，防止由于宽表导致图表不可读 (e.g. top 5)
                         top_metrics = unique_metrics[:5] 
                         
-                        datasets = []
                         colors = [
+                            "rgba(54, 162, 235, 0.8)", "rgba(255, 99, 132, 0.8)", 
+                            "rgba(255, 206, 86, 0.8)", "rgba(75, 192, 192, 0.8)", 
+                            "rgba(153, 102, 255, 0.8)"
+                        ]
+                        
+                        border_colors = [
                             "rgba(54, 162, 235, 1)", "rgba(255, 99, 132, 1)", 
                             "rgba(255, 206, 86, 1)", "rgba(75, 192, 192, 1)", 
                             "rgba(153, 102, 255, 1)"
                         ]
                         
+                        # === 图表1: 绝对值对比 (柱状图) ===
+                        value_datasets = []
                         for idx, metric in enumerate(top_metrics):
                             data_points = []
                             for p in sorted_periods:
-                                val = metrics_map[metric].get(p, 0) # or None
+                                val = metrics_map[metric].get(p, 0)
                                 data_points.append(val or 0)
                             
-                            color = colors[idx % len(colors)]
-                            datasets.append({
-                                "type": "line",
+                            value_datasets.append({
+                                "type": "bar",
                                 "label": metric,
                                 "data": data_points,
-                                "borderColor": color,
-                                "backgroundColor": color.replace(", 1)", ", 0.2)"),
-                                "tension": 0.1
+                                "backgroundColor": colors[idx % len(colors)],
+                                "borderColor": border_colors[idx % len(border_colors)],
+                                "borderWidth": 1
                             })
-                            
-                        chart_data = {
-                            "chartType": "line", # Base type
-                            "title": f"{company['name']} 关键指标趋势 ({len(top_metrics)}/{len(unique_metrics)})",
+                        
+                        chart1_data = {
+                            "chartType": "bar",
+                            "title": f"{company['name']} 指标绝对值对比 ({len(top_metrics)}/{len(unique_metrics)})",
                             "labels": labels,
-                            "datasets": datasets
+                            "datasets": value_datasets
                         }
-                        yield send_event("chart", chart_data)
+                        yield send_event("chart", chart1_data)
+                        
+                        # === 图表2: 增长率对比 (柱状图) ===
+                        growth_datasets = []
+                        for idx, metric in enumerate(top_metrics):
+                            growth_rates = []
+                            prev_val = None
+                            
+                            for p in sorted_periods:
+                                val = metrics_map[metric].get(p)
+                                
+                                if prev_val is not None and prev_val != 0 and val is not None:
+                                    growth_pct = ((val - prev_val) / abs(prev_val)) * 100
+                                    growth_rates.append(round(growth_pct, 2))
+                                else:
+                                    growth_rates.append(None)
+                                
+                                prev_val = val
+                            
+                            growth_datasets.append({
+                                "type": "bar",
+                                "label": metric,
+                                "data": growth_rates,
+                                "backgroundColor": colors[idx % len(colors)],
+                                "borderColor": border_colors[idx % len(border_colors)],
+                                "borderWidth": 1
+                            })
+                        
+                        chart2_data = {
+                            "chartType": "bar",
+                            "title": f"{company['name']} 指标增长率对比 (%) ({len(top_metrics)}/{len(unique_metrics)})",
+                            "labels": labels,
+                            "datasets": growth_datasets,
+                            "options": {
+                                "scales": {
+                                    "y": {
+                                        "ticks": {
+                                            "callback": "function(value) { return value + '%'; }"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        yield send_event("chart", chart2_data)
                         
                 except Exception as e:
                     print(f"⚠️ 图表数据发送失败: {e}")
