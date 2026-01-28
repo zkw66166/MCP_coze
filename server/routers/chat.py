@@ -65,13 +65,13 @@ def save_message(user_id: str, role: str, content: str, type: str = 'text'):
             conn.close()
 
 def get_chat_history(user_id: str, limit: int = 50):
-    """获取聊天历史"""
+    """获取聊天历史 (主窗口消息，过滤已删除的)"""
     try:
         conn = sqlite3.connect(USERS_DB_PATH)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT * FROM chat_messages WHERE user_id = ? ORDER BY created_at ASC LIMIT ?",
+            "SELECT * FROM chat_messages WHERE user_id = ? AND visible_in_chat = 1 ORDER BY created_at ASC LIMIT ?",
             (user_id, limit)
         )
         rows = cursor.fetchall()
@@ -83,24 +83,73 @@ def get_chat_history(user_id: str, limit: int = 50):
         if conn:
             conn.close()
 
-def delete_user_history(user_id: str, message_ids: Optional[list] = None):
-    """删除聊天历史"""
+def get_history_items(user_id: str, limit: int = 50):
+    """获取历史记录列表 (侧边栏，过滤已删除的)"""
+    try:
+        conn = sqlite3.connect(USERS_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT DISTINCT content FROM chat_messages WHERE user_id = ? AND role = 'user' AND visible_in_history = 1 ORDER BY created_at DESC LIMIT ?",
+            (user_id, limit)
+        )
+        rows = cursor.fetchall()
+        return [row['content'] for row in rows]
+    except Exception as e:
+        print(f"Error getting history items: {e}")
+        return []
+    finally:
+        if conn:
+            conn.close()
+
+def delete_user_history(user_id: str, message_ids: Optional[list] = None, target: str = "chat"):
+    """删除聊天历史 (软删除)
+    
+    Args:
+        user_id: 用户ID
+        message_ids: 要删除的消息ID列表，为空则删除全部
+        target: "chat" 删除主窗口消息, "history" 删除侧边栏历史记录
+    """
     try:
         conn = sqlite3.connect(USERS_DB_PATH)
         cursor = conn.cursor()
+        
+        # 确定要更新的字段
+        if target == "history":
+            visibility_column = "visible_in_history"
+        else:
+            visibility_column = "visible_in_chat"
+        
         if message_ids:
-            # Delete specific messages
+            # Soft delete specific messages
             placeholders = ','.join('?' for _ in message_ids)
             cursor.execute(
-                f"DELETE FROM chat_messages WHERE user_id = ? AND id IN ({placeholders})",
+                f"UPDATE chat_messages SET {visibility_column} = 0 WHERE user_id = ? AND id IN ({placeholders})",
                 (user_id, *message_ids)
             )
         else:
-            # Delete all
-            cursor.execute("DELETE FROM chat_messages WHERE user_id = ?", (user_id,))
+            # Soft delete all
+            cursor.execute(f"UPDATE chat_messages SET {visibility_column} = 0 WHERE user_id = ?", (user_id,))
         conn.commit()
     except Exception as e:
         print(f"Error deleting history: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+def delete_history_by_content(user_id: str, content_list: list):
+    """按内容删除历史记录 (用于侧边栏删除)"""
+    try:
+        conn = sqlite3.connect(USERS_DB_PATH)
+        cursor = conn.cursor()
+        for content in content_list:
+            cursor.execute(
+                "UPDATE chat_messages SET visible_in_history = 0 WHERE user_id = ? AND role = 'user' AND content = ?",
+                (user_id, content)
+            )
+        conn.commit()
+    except Exception as e:
+        print(f"Error deleting history by content: {e}")
     finally:
         if conn:
             conn.close()
@@ -927,21 +976,38 @@ async def chat_sync(request: ChatRequest) -> ChatResponse:
 
 @router.get("/chat/history")
 async def get_history_api(limit: int = 50, current_user: dict = Depends(get_current_user)):
-    """获取聊天历史"""
+    """获取聊天历史 (主窗口消息)"""
     user_id = str(current_user['id'])
     return get_chat_history(user_id, limit)
+
+
+@router.get("/chat/history-items")
+async def get_history_items_api(limit: int = 50, current_user: dict = Depends(get_current_user)):
+    """获取历史记录列表 (侧边栏)"""
+    user_id = str(current_user['id'])
+    return get_history_items(user_id, limit)
 
 
 class DeleteHistoryRequest(BaseModel):
     message_ids: Optional[list] = None
     delete_all: bool = False
+    target: str = "chat"  # "chat" for main window, "history" for sidebar
+    content_list: Optional[list] = None  # For deleting by content
+
 
 @router.delete("/chat/history")
 async def delete_history_api(request: DeleteHistoryRequest, current_user: dict = Depends(get_current_user)):
-    """删除聊天历史"""
+    """删除聊天历史 (软删除)"""
     user_id = str(current_user['id'])
+    
+    # 如果是按内容删除 (侧边栏)
+    if request.content_list:
+        delete_history_by_content(user_id, request.content_list)
+        return {"status": "success"}
+    
+    # 按ID或全部删除
     if request.delete_all:
-        delete_user_history(user_id)
+        delete_user_history(user_id, target=request.target)
     elif request.message_ids:
-        delete_user_history(user_id, request.message_ids)
+        delete_user_history(user_id, request.message_ids, target=request.target)
     return {"status": "success"}

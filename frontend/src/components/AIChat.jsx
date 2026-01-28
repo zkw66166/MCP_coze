@@ -205,13 +205,17 @@ function AIChat({ selectedCompanyId, companies }) {
             if (currentController) currentController.abort();
 
             try {
+                const token = localStorage.getItem('access_token');
                 await fetch('/api/chat/history', {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ delete_all: true })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify({ delete_all: true, target: 'chat' })
                 });
                 setMessages([]);
-                setHistory([]); // Clear sidebar too
+                // Don't clear sidebar history anymore - they're separate now
                 setIsLoading(false);
                 setIsSelectionMode(false);
                 setSelectedMessageIndices(new Set());
@@ -256,10 +260,14 @@ function AIChat({ selectedCompanyId, companies }) {
 
             if (idsToDelete.length > 0) {
                 try {
+                    const token = localStorage.getItem('access_token');
                     await fetch('/api/chat/history', {
                         method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message_ids: idsToDelete })
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': token ? `Bearer ${token}` : ''
+                        },
+                        body: JSON.stringify({ message_ids: idsToDelete, target: 'chat' })
                     });
                 } catch (e) {
                     console.error("Delete failed", e);
@@ -375,28 +383,39 @@ function AIChat({ selectedCompanyId, companies }) {
 
         // Original logic:
         if (selectedHistory.size > 0) {
-            if (window.confirm(`确定删除选中的 ${selectedHistory.size} 条记录吗？`)) {
-                // Find messages with these questions
-                const idsToDelete = messages
-                    .filter(m => m.role === 'user' && selectedHistory.has(m.content))
-                    .map(m => m.id);
+            if (window.confirm(`确定删除选中的 ${selectedHistory.size} 条历史记录吗？`)) {
+                // Delete by content for sidebar
+                const contentToDelete = Array.from(selectedHistory);
 
-                if (idsToDelete.length > 0) {
-                    await fetch('/api/chat/history', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message_ids: idsToDelete })
-                    });
-                }
+                const token = localStorage.getItem('access_token');
+                await fetch('/api/chat/history', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify({ content_list: contentToDelete, target: 'history' })
+                });
                 setHistory(prev => prev.filter(h => !selectedHistory.has(h))); // Local update
                 setSelectedHistory(new Set());
-                fetchHistory(); // Refresh full state
+                // Note: This doesn't affect the main chat window anymore
             }
         } else if (history.length > 0) {
-            // Clear all handled by handleClear usually, but this is sidebar button
-            handleClear();
+            // Clear all sidebar history
+            if (window.confirm('确定要清空所有历史记录吗？')) {
+                const token = localStorage.getItem('access_token');
+                await fetch('/api/chat/history', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify({ delete_all: true, target: 'history' })
+                });
+                setHistory([]);
+            }
         }
-    }, [selectedHistory, history, messages, fetchHistory, handleClear]);
+    }, [selectedHistory, history]);
 
     // 切换历史记录选中状态
     const toggleHistorySelection = (item, e) => {
