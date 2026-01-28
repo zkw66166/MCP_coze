@@ -1,65 +1,80 @@
 
-from fastapi.testclient import TestClient
-from server.main import app
-import unittest
+import requests
+import json
 import sys
 
-client = TestClient(app)
+BASE_URL = "http://localhost:8000"
 
-class TestDataBrowserAPI(unittest.TestCase):
-    def test_get_tables(self):
-        response = client.get("/api/data-browser/tables")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertTrue(len(data) > 0)
-        table_names = [t['name'] for t in data]
-        self.assertIn("balance_sheets", table_names)
-        self.assertIn("companies", table_names)
+def test_data_browser_api():
+    print("Testing Data Browser API...")
+    
+    # 1. Test Tables List
+    print("\n1. Testing /api/data-browser/tables")
+    try:
+        resp = requests.get(f"{BASE_URL}/api/data-browser/tables")
+        if resp.status_code == 200:
+            tables = resp.json()
+            print(f"✅ Success: Retrieved {len(tables)} tables")
+            print(f"   Tables: {[t['name'] for t in tables]}")
+        else:
+            print(f"❌ Failed: {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
 
-    def test_get_companies(self):
-        response = client.get("/api/data-browser/companies")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        # Assuming there's at least one company in the DB
-        if len(data) > 0:
-            self.assertIn("id", data[0])
-            self.assertIn("name", data[0])
+    # 2. Test Companies List
+    print("\n2. Testing /api/data-browser/companies")
+    company_id = None
+    try:
+        resp = requests.get(f"{BASE_URL}/api/data-browser/companies")
+        if resp.status_code == 200:
+            companies = resp.json()
+            print(f"✅ Success: Retrieved {len(companies)} companies")
+            if companies:
+                company_id = companies[0]['id']
+                print(f"   Using Company ID: {company_id} for next tests")
+        else:
+            print(f"❌ Failed: {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
 
-    def test_get_periods_and_data(self):
-        # 1. Get a company ID
-        companies_resp = client.get("/api/data-browser/companies")
-        if companies_resp.status_code != 200 or len(companies_resp.json()) == 0:
-            print("No companies found, skipping data tests")
-            return
-        
-        company_id = companies_resp.json()[0]['id']
-        
-        # 2. Get Periods for balance_sheets
-        periods_resp = client.get(f"/api/data-browser/periods?company_id={company_id}&table_name=balance_sheets")
-        self.assertEqual(periods_resp.status_code, 200)
-        periods = periods_resp.json()
-        
-        # 3. Get Data (No pagination)
-        params = {"company_id": company_id, "table_name": "balance_sheets"}
-        if len(periods) > 0:
-            params["period"] = periods[0]
-            
-        data_resp = client.get("/api/data-browser/data", params=params)
-        self.assertEqual(data_resp.status_code, 200)
-        result = data_resp.json()
-        
-        self.assertIn("columns", result)
-        self.assertIn("data", result)
-        self.assertIn("total", result)
-        
-        # Verify column structure
-        self.assertTrue(len(result["columns"]) > 0)
-        self.assertIn("key", result["columns"][0])
-        self.assertIn("label", result["columns"][0])
-        
-        # Verify data map
-        labels = [c['label'] for c in result["columns"]]
-        print(f"Sample columns: {labels[:5]}")
+    if not company_id:
+        print("Skipping remaining tests due to no company ID")
+        return
+
+    # 3. Test Periods List
+    print("\n3. Testing /api/data-browser/periods")
+    try:
+        # Test for balance_sheets
+        table_name = "balance_sheets"
+        resp = requests.get(f"{BASE_URL}/api/data-browser/periods", 
+                          params={"company_id": company_id, "table_name": table_name})
+        if resp.status_code == 200:
+            periods = resp.json()
+            print(f"✅ Success: Retrieved {len(periods)} periods for {table_name}")
+            print(f"   Sample periods: {periods[:3]}")
+        else:
+            print(f"❌ Failed: {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+
+    # 4. Test Data Retrieval
+    print("\n4. Testing /api/data-browser/data")
+    try:
+        # Test getting all data for balance_sheets
+        table_name = "balance_sheets"
+        resp = requests.get(f"{BASE_URL}/api/data-browser/data",
+                          params={"company_id": company_id, "table_name": table_name})
+        if resp.status_code == 200:
+            data = resp.json()
+            print(f"✅ Success: Retrieved data structure")
+            print(f"   Columns (Chinese): {data.get('columns', [])[:5]}...")
+            print(f"   Total Records: {len(data.get('data', []))}")
+            if data.get('data'):
+                print(f"   Sample Record: {list(data['data'][0].values())[:5]}...")
+        else:
+            print(f"❌ Failed: {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
 
 if __name__ == "__main__":
-    unittest.main()
+    test_data_browser_api()

@@ -1,0 +1,699 @@
+login as: root
+root@47.110.44.183's password:
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-142-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Wed Jan 28 02:31:22 PM CST 2026
+
+  System load:  0.01               Processes:             118
+  Usage of /:   10.1% of 39.01GB   Users logged in:       0
+  Memory usage: 22%                IPv4 address for eth0: 172.26.16.112
+  Swap usage:   0%
+
+ * Strictly confined Kubernetes makes edge and IoT secure. Learn how MicroK8s
+   just raised the bar for easy, resilient and secure K8s cluster deployment.
+
+   https://ubuntu.com/engage/secure-kubernetes-at-the-edge
+
+Expanded Security Maintenance for Applications is not enabled.
+
+8 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+2 additional security updates can be applied with ESM Apps.
+Learn more about enabling ESM Apps service at https://ubuntu.com/esm
+
+New release '24.04.3 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+1 updates could not be installed automatically. For more details,
+see /var/log/unattended-upgrades/unattended-upgrades.log
+
+*** System restart required ***
+
+Welcome to Alibaba Cloud Elastic Compute Service !
+
+Last login: Wed Jan 28 11:22:01 2026 from 115.216.114.92
+root@iZbp1isb83yhok0zs421gwZ:~# cd /var/www/MCP_coze
+chmod +x scripts/deploy_dev.sh start_dev.sh
+./scripts/deploy_dev.sh
+./start_dev.sh
+chmod: cannot access 'start_dev.sh': No such file or directory
+==========================================
+Starting Deployment Setup...
+==========================================
+[1/4] Installing System Dependencies...
+Hit:1 http://mirrors.cloud.aliyuncs.com/ubuntu jammy InRelease
+Get:2 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates InRelease [128 kB]
+Get:3 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-backports InRelease [127 kB                 ]
+Get:4 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-security InRelease [129 kB]
+Get:5 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 Packages                  [3,165 kB]
+Get:6 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 c-n-f Me                 tadata [19.2 kB]
+Get:7 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-security/main amd64 Package                 s [2,905 kB]
+Get:8 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-security/main amd64 c-n-f M                 etadata [14.1 kB]
+Fetched 6,487 kB in 2s (3,243 kB/s)
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (7.81.0-1ubuntu1.21).
+libgomp1 is already the newest version (12.3.0-1ubuntu1~22.04.2).
+libgomp1 set to manually installed.
+python3-pip is already the newest version (22.0.2+dfsg-1ubuntu0.7).
+The following additional packages will be installed:
+  libdrm-amdgpu1 libdrm-intel1 libdrm-nouveau2 libdrm-radeon1 libegl-mesa0
+  libegl1 libgbm1 libgl1-amber-dri libgl1-mesa-dri libglapi-mesa libglvnd0
+  libglx-mesa0 libglx0 libllvm15 libpciaccess0 libwayland-client0
+  libwayland-server0 libx11-xcb1 libxcb-dri2-0 libxcb-dri3-0 libxcb-glx0
+  libxcb-present0 libxcb-randr0 libxcb-shm0 libxcb-sync1 libxcb-xfixes0
+  libxfixes3 libxshmfence1 libxxf86vm1 python3-pip-whl python3-setuptools-whl
+  python3.10-venv
+The following NEW packages will be installed:
+  libdrm-amdgpu1 libdrm-intel1 libdrm-nouveau2 libdrm-radeon1 libegl-mesa0
+  libegl1 libegl1-mesa libgbm1 libgl1 libgl1-amber-dri libgl1-mesa-dri
+  libglapi-mesa libglvnd0 libglx-mesa0 libglx0 libllvm15 libpciaccess0
+  libwayland-client0 libwayland-server0 libx11-xcb1 libxcb-dri2-0
+  libxcb-dri3-0 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-shm0
+  libxcb-sync1 libxcb-xfixes0 libxfixes3 libxshmfence1 libxxf86vm1
+  python3-pip-whl python3-setuptools-whl python3-venv python3.10-venv
+0 upgraded, 35 newly installed, 0 to remove and 11 not upgraded.
+Need to get 41.9 MB of archives.
+After this operation, 173 MB of additional disk space will be used.
+Get:1 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libdrm-a                 mdgpu1 amd64 2.4.113-2~ubuntu0.22.04.1 [19.9 kB]
+Get:2 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libpciaccess0 am                 d64 0.16-3 [19.1 kB]
+Get:3 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libdrm-i                 ntel1 amd64 2.4.113-2~ubuntu0.22.04.1 [66.7 kB]
+Get:4 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libdrm-n                 ouveau2 amd64 2.4.113-2~ubuntu0.22.04.1 [17.5 kB]
+Get:5 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libdrm-r                 adeon1 amd64 2.4.113-2~ubuntu0.22.04.1 [21.6 kB]
+Get:6 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libwayla                 nd-server0 amd64 1.20.0-1ubuntu0.1 [34.3 kB]
+Get:7 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-randr0 am                 d64 1.14-3ubuntu3 [18.3 kB]
+Get:8 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libgbm1                  amd64 23.2.1-1ubuntu3.1~22.04.3 [33.5 kB]
+Get:9 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libglapi                 -mesa amd64 23.2.1-1ubuntu3.1~22.04.3 [35.4 kB]
+Get:10 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libwayl                 and-client0 amd64 1.20.0-1ubuntu0.1 [25.9 kB]
+Get:11 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libx11-                 xcb1 amd64 2:1.7.5-1ubuntu0.3 [7,802 B]
+Get:12 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-dri2-0 a                 md64 1.14-3ubuntu3 [7,206 B]
+Get:13 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-dri3-0 a                 md64 1.14-3ubuntu3 [6,968 B]
+Get:14 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-present0                  amd64 1.14-3ubuntu3 [5,734 B]
+Get:15 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-sync1 am                 d64 1.14-3ubuntu3 [9,416 B]
+Get:16 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-xfixes0                  amd64 1.14-3ubuntu3 [9,996 B]
+Get:17 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxshmfence1 a                 md64 1.3-1build4 [5,394 B]
+Get:18 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libegl-                 mesa0 amd64 23.2.1-1ubuntu3.1~22.04.3 [118 kB]
+Get:19 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libglvnd0 amd64                  1.4.0-1 [73.6 kB]
+Get:20 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libegl1 amd64 1                 .4.0-1 [28.6 kB]
+Get:21 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/universe amd64 lib                 egl1-mesa amd64 23.0.4-0ubuntu1~22.04.1 [6,484 B]
+Get:22 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libgl1-                 amber-dri amd64 21.3.9-0ubuntu1~22.04.1 [4,218 kB]
+Get:23 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libllvm                 15 amd64 1:15.0.7-0ubuntu0.22.04.3 [25.4 MB]
+Get:24 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libgl1-                 mesa-dri amd64 23.2.1-1ubuntu3.1~22.04.3 [8,860 kB]
+Get:25 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-glx0 amd                 64 1.14-3ubuntu3 [25.9 kB]
+Get:26 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxcb-shm0 amd                 64 1.14-3ubuntu3 [5,780 B]
+Get:27 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxfixes3 amd6                 4 1:6.0.0-1 [11.7 kB]
+Get:28 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libxxf86vm1 amd                 64 1:1.1.4-1build3 [10.4 kB]
+Get:29 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/main amd64 libglx-                 mesa0 amd64 23.2.1-1ubuntu3.1~22.04.3 [158 kB]
+Get:30 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/universe amd64 pyt                 hon3-pip-whl all 22.0.2+dfsg-1ubuntu0.7 [1,683 kB]
+Get:31 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/universe amd64 pyt                 hon3-setuptools-whl all 59.6.0-1.2ubuntu0.22.04.3 [789 kB]
+Get:32 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/universe amd64 pyt                 hon3.10-venv amd64 3.10.12-1~22.04.13 [5,720 B]
+Get:33 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/universe amd64 pyt                 hon3-venv amd64 3.10.6-1~22.04.1 [1,042 B]
+Get:34 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libglx0 amd64 1                 .4.0-1 [41.0 kB]
+Get:35 http://mirrors.cloud.aliyuncs.com/ubuntu jammy/main amd64 libgl1 amd64 1.                 4.0-1 [110 kB]
+Fetched 41.9 MB in 3s (13.1 MB/s)
+Extracting templates from packages: 100%
+Selecting previously unselected package libdrm-amdgpu1:amd64.
+(Reading database ... 81067 files and directories currently installed.)
+Preparing to unpack .../00-libdrm-amdgpu1_2.4.113-2~ubuntu0.22.04.1_amd64.deb ..                 .
+Unpacking libdrm-amdgpu1:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Selecting previously unselected package libpciaccess0:amd64.
+Preparing to unpack .../01-libpciaccess0_0.16-3_amd64.deb ...
+Unpacking libpciaccess0:amd64 (0.16-3) ...
+Selecting previously unselected package libdrm-intel1:amd64.
+Preparing to unpack .../02-libdrm-intel1_2.4.113-2~ubuntu0.22.04.1_amd64.deb ...
+Unpacking libdrm-intel1:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Selecting previously unselected package libdrm-nouveau2:amd64.
+Preparing to unpack .../03-libdrm-nouveau2_2.4.113-2~ubuntu0.22.04.1_amd64.deb .                 ..
+Unpacking libdrm-nouveau2:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Selecting previously unselected package libdrm-radeon1:amd64.
+Preparing to unpack .../04-libdrm-radeon1_2.4.113-2~ubuntu0.22.04.1_amd64.deb ..                 .
+Unpacking libdrm-radeon1:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Selecting previously unselected package libwayland-server0:amd64.
+Preparing to unpack .../05-libwayland-server0_1.20.0-1ubuntu0.1_amd64.deb ...
+Unpacking libwayland-server0:amd64 (1.20.0-1ubuntu0.1) ...
+Selecting previously unselected package libxcb-randr0:amd64.
+Preparing to unpack .../06-libxcb-randr0_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-randr0:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libgbm1:amd64.
+Preparing to unpack .../07-libgbm1_23.2.1-1ubuntu3.1~22.04.3_amd64.deb ...
+Unpacking libgbm1:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Selecting previously unselected package libglapi-mesa:amd64.
+Preparing to unpack .../08-libglapi-mesa_23.2.1-1ubuntu3.1~22.04.3_amd64.deb ...
+Unpacking libglapi-mesa:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Selecting previously unselected package libwayland-client0:amd64.
+Preparing to unpack .../09-libwayland-client0_1.20.0-1ubuntu0.1_amd64.deb ...
+Unpacking libwayland-client0:amd64 (1.20.0-1ubuntu0.1) ...
+Selecting previously unselected package libx11-xcb1:amd64.
+Preparing to unpack .../10-libx11-xcb1_2%3a1.7.5-1ubuntu0.3_amd64.deb ...
+Unpacking libx11-xcb1:amd64 (2:1.7.5-1ubuntu0.3) ...
+Selecting previously unselected package libxcb-dri2-0:amd64.
+Preparing to unpack .../11-libxcb-dri2-0_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-dri2-0:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libxcb-dri3-0:amd64.
+Preparing to unpack .../12-libxcb-dri3-0_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-dri3-0:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libxcb-present0:amd64.
+Preparing to unpack .../13-libxcb-present0_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-present0:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libxcb-sync1:amd64.
+Preparing to unpack .../14-libxcb-sync1_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-sync1:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libxcb-xfixes0:amd64.
+Preparing to unpack .../15-libxcb-xfixes0_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-xfixes0:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libxshmfence1:amd64.
+Preparing to unpack .../16-libxshmfence1_1.3-1build4_amd64.deb ...
+Unpacking libxshmfence1:amd64 (1.3-1build4) ...
+Selecting previously unselected package libegl-mesa0:amd64.
+Preparing to unpack .../17-libegl-mesa0_23.2.1-1ubuntu3.1~22.04.3_amd64.deb ...
+Unpacking libegl-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Selecting previously unselected package libglvnd0:amd64.
+Preparing to unpack .../18-libglvnd0_1.4.0-1_amd64.deb ...
+Unpacking libglvnd0:amd64 (1.4.0-1) ...
+Selecting previously unselected package libegl1:amd64.
+Preparing to unpack .../19-libegl1_1.4.0-1_amd64.deb ...
+Unpacking libegl1:amd64 (1.4.0-1) ...
+Selecting previously unselected package libegl1-mesa:amd64.
+Preparing to unpack .../20-libegl1-mesa_23.0.4-0ubuntu1~22.04.1_amd64.deb ...
+Unpacking libegl1-mesa:amd64 (23.0.4-0ubuntu1~22.04.1) ...
+Selecting previously unselected package libgl1-amber-dri:amd64.
+Preparing to unpack .../21-libgl1-amber-dri_21.3.9-0ubuntu1~22.04.1_amd64.deb ..                 .
+Unpacking libgl1-amber-dri:amd64 (21.3.9-0ubuntu1~22.04.1) ...
+Selecting previously unselected package libllvm15:amd64.
+Preparing to unpack .../22-libllvm15_1%3a15.0.7-0ubuntu0.22.04.3_amd64.deb ...
+Unpacking libllvm15:amd64 (1:15.0.7-0ubuntu0.22.04.3) ...
+Selecting previously unselected package libgl1-mesa-dri:amd64.
+Preparing to unpack .../23-libgl1-mesa-dri_23.2.1-1ubuntu3.1~22.04.3_amd64.deb .                 ..
+Unpacking libgl1-mesa-dri:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Selecting previously unselected package libxcb-glx0:amd64.
+Preparing to unpack .../24-libxcb-glx0_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-glx0:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libxcb-shm0:amd64.
+Preparing to unpack .../25-libxcb-shm0_1.14-3ubuntu3_amd64.deb ...
+Unpacking libxcb-shm0:amd64 (1.14-3ubuntu3) ...
+Selecting previously unselected package libxfixes3:amd64.
+Preparing to unpack .../26-libxfixes3_1%3a6.0.0-1_amd64.deb ...
+Unpacking libxfixes3:amd64 (1:6.0.0-1) ...
+Selecting previously unselected package libxxf86vm1:amd64.
+Preparing to unpack .../27-libxxf86vm1_1%3a1.1.4-1build3_amd64.deb ...
+Unpacking libxxf86vm1:amd64 (1:1.1.4-1build3) ...
+Selecting previously unselected package libglx-mesa0:amd64.
+Preparing to unpack .../28-libglx-mesa0_23.2.1-1ubuntu3.1~22.04.3_amd64.deb ...
+Unpacking libglx-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Selecting previously unselected package python3-pip-whl.
+Preparing to unpack .../29-python3-pip-whl_22.0.2+dfsg-1ubuntu0.7_all.deb ...
+Unpacking python3-pip-whl (22.0.2+dfsg-1ubuntu0.7) ...
+Selecting previously unselected package python3-setuptools-whl.
+Preparing to unpack .../30-python3-setuptools-whl_59.6.0-1.2ubuntu0.22.04.3_all.                 deb ...
+Unpacking python3-setuptools-whl (59.6.0-1.2ubuntu0.22.04.3) ...
+Selecting previously unselected package python3.10-venv.
+Preparing to unpack .../31-python3.10-venv_3.10.12-1~22.04.13_amd64.deb ...
+Unpacking python3.10-venv (3.10.12-1~22.04.13) ...
+Selecting previously unselected package python3-venv.
+Preparing to unpack .../32-python3-venv_3.10.6-1~22.04.1_amd64.deb ...
+Unpacking python3-venv (3.10.6-1~22.04.1) ...
+Selecting previously unselected package libglx0:amd64.
+Preparing to unpack .../33-libglx0_1.4.0-1_amd64.deb ...
+Unpacking libglx0:amd64 (1.4.0-1) ...
+Selecting previously unselected package libgl1:amd64.
+Preparing to unpack .../34-libgl1_1.4.0-1_amd64.deb ...
+Unpacking libgl1:amd64 (1.4.0-1) ...
+Setting up libxcb-dri3-0:amd64 (1.14-3ubuntu3) ...
+Setting up libwayland-server0:amd64 (1.20.0-1ubuntu0.1) ...
+Setting up libx11-xcb1:amd64 (2:1.7.5-1ubuntu0.3) ...
+Setting up libpciaccess0:amd64 (0.16-3) ...
+Setting up python3-setuptools-whl (59.6.0-1.2ubuntu0.22.04.3) ...
+Setting up libdrm-nouveau2:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Setting up libxcb-xfixes0:amd64 (1.14-3ubuntu3) ...
+Setting up python3-pip-whl (22.0.2+dfsg-1ubuntu0.7) ...
+Setting up libdrm-radeon1:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Setting up libglvnd0:amd64 (1.4.0-1) ...
+Setting up libxcb-glx0:amd64 (1.14-3ubuntu3) ...
+Setting up libdrm-intel1:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Setting up libxcb-shm0:amd64 (1.14-3ubuntu3) ...
+Setting up libxxf86vm1:amd64 (1:1.1.4-1build3) ...
+Setting up libxcb-present0:amd64 (1.14-3ubuntu3) ...
+Setting up libxfixes3:amd64 (1:6.0.0-1) ...
+Setting up libxcb-sync1:amd64 (1.14-3ubuntu3) ...
+Setting up libglapi-mesa:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Setting up libxcb-dri2-0:amd64 (1.14-3ubuntu3) ...
+Setting up libxshmfence1:amd64 (1.3-1build4) ...
+Setting up libxcb-randr0:amd64 (1.14-3ubuntu3) ...
+Setting up libllvm15:amd64 (1:15.0.7-0ubuntu0.22.04.3) ...
+Setting up libdrm-amdgpu1:amd64 (2.4.113-2~ubuntu0.22.04.1) ...
+Setting up libwayland-client0:amd64 (1.20.0-1ubuntu0.1) ...
+Setting up libgl1-amber-dri:amd64 (21.3.9-0ubuntu1~22.04.1) ...
+Setting up python3.10-venv (3.10.12-1~22.04.13) ...
+Setting up libgbm1:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Setting up libgl1-mesa-dri:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Setting up libegl-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Setting up python3-venv (3.10.6-1~22.04.1) ...
+Setting up libegl1:amd64 (1.4.0-1) ...
+Setting up libglx-mesa0:amd64 (23.2.1-1ubuntu3.1~22.04.3) ...
+Setting up libglx0:amd64 (1.4.0-1) ...
+Setting up libegl1-mesa:amd64 (23.0.4-0ubuntu1~22.04.1) ...
+Setting up libgl1:amd64 (1.4.0-1) ...
+Processing triggers for libc-bin (2.35-0ubuntu3.11) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+ systemctl restart chrony.service packagekit.service polkit.service systemd-reso                 lved.service tuned.service udisks2.service
+Service restarts being deferred:
+ systemctl restart ModemManager.service
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart networkd-dispatcher.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Installing Node.js...
+2026-01-28 14:32:14 -
+===============================================================================
+                            DEPRECATION WARNING
+===============================================================================
+Node.js 18.x is no longer actively supported!
+You will not receive security or critical stability updates for this version.
+
+You should migrate to a supported version of Node.js as soon as possible.
+
+Please see https://nodesource.com/products/distributions for details about which
+version may be appropriate for you.
+
+The NodeSource Node.js distributions site contains
+information both about supported versions of Node.js and N|Solid supported Linux
+distributions. To learn more about usage, see:
+https://nodesource.com/products/distributions
+
+===============================================================================
+
+Continuing in 10 seconds ...
+
+2026-01-28 14:32:24 - Installing pre-requisites
+Hit:1 http://mirrors.cloud.aliyuncs.com/ubuntu jammy InRelease
+Hit:2 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates InRelease
+Hit:3 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-backports InRelease
+Hit:4 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-security InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+11 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20240203~22.04.1).
+ca-certificates set to manually installed.
+curl is already the newest version (7.81.0-1ubuntu1.21).
+gnupg is already the newest version (2.2.27-3ubuntu2.5).
+gnupg set to manually installed.
+The following NEW packages will be installed:
+  apt-transport-https
+0 upgraded, 1 newly installed, 0 to remove and 11 not upgraded.
+Need to get 1,510 B of archives.
+After this operation, 170 kB of additional disk space will be used.
+Get:1 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates/universe amd64 apt-transport-https all 2.4.14 [1,510 B]
+Fetched 1,510 B in 0s (70.2 kB/s)
+Selecting previously unselected package apt-transport-https.
+(Reading database ... 81294 files and directories currently installed.)
+Preparing to unpack .../apt-transport-https_2.4.14_all.deb ...
+Unpacking apt-transport-https (2.4.14) ...
+Setting up apt-transport-https (2.4.14) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart networkd-dispatcher.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Hit:1 http://mirrors.cloud.aliyuncs.com/ubuntu jammy InRelease
+Hit:2 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-updates InRelease
+Hit:3 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-backports InRelease
+Hit:4 http://mirrors.cloud.aliyuncs.com/ubuntu jammy-security InRelease
+Get:5 https://deb.nodesource.com/node_18.x nodistro InRelease [12.1 kB]
+Get:6 https://deb.nodesource.com/node_18.x nodistro/main amd64 Packages [11.6 kB]
+Fetched 23.7 kB in 1s (16.5 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+11 packages can be upgraded. Run 'apt list --upgradable' to see them.
+2026-01-28 14:32:46 - Repository configured successfully.
+2026-01-28 14:32:46 - To install Node.js, run: apt install nodejs -y
+2026-01-28 14:32:46 - You can use N|solid Runtime as a node.js alternative
+2026-01-28 14:32:46 - To install N|solid Runtime, run: apt install nsolid -y
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  nodejs
+0 upgraded, 1 newly installed, 0 to remove and 11 not upgraded.
+Need to get 29.7 MB of archives.
+After this operation, 187 MB of additional disk space will be used.
+Get:1 https://deb.nodesource.com/node_18.x nodistro/main amd64 nodejs amd64 18.20.8-1nodesource1 [29.7 MB]
+Fetched 29.7 MB in 4s (8,115 kB/s)
+Selecting previously unselected package nodejs.
+(Reading database ... 81298 files and directories currently installed.)
+Preparing to unpack .../nodejs_18.20.8-1nodesource1_amd64.deb ...
+Unpacking nodejs (18.20.8-1nodesource1) ...
+Setting up nodejs (18.20.8-1nodesource1) ...
+Processing triggers for man-db (2.10.2-1) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart networkd-dispatcher.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+[2/4] Setting up Backend...
+Creating python virtual environment...
+Filtering requirements.txt...
+Installing Python dependencies...
+Looking in indexes: http://mirrors.cloud.aliyuncs.com/pypi/simple/
+Requirement already satisfied: pip in ./venv/lib/python3.10/site-packages (22.0.2)
+DEPRECATION: The HTML index page being used (http://mirrors.cloud.aliyuncs.com/pypi/simple/pip/) is not a proper HTML 5 document. This is in violation of PEP 503 which requires these pages to be well-formed HTML 5 documents. Please reach out to the owners of this index page, and ask them to update this index page to a valid HTML 5 document. pip 22.2 will enforce this behaviour change. Discussion can be found at https://github.com/pypa/pip/issues/10825
+Collecting pip
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/44/3c/d717024885424591d5376220b5e836c2d5293ce2011523c9de23ff7bf068/pip-25.3-py3-none-any.whl (1.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 36.0 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 22.0.2
+    Uninstalling pip-22.0.2:
+      Successfully uninstalled pip-22.0.2
+Successfully installed pip-25.3
+Looking in indexes: http://mirrors.cloud.aliyuncs.com/pypi/simple/
+Collecting attrs==25.4.0 (from -r requirements_linux.txt (line 1))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/3a/2a/7cc015f5b9f5db42b7d48157e23356022889fc354a2813c15934b7cb5c0e/attrs-25.4.0-py3-none-any.whl (67 kB)
+Collecting beautifulsoup4==4.14.3 (from -r requirements_linux.txt (line 2))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/1a/39/47f9197bdd44df24d67ac8893641e16f386c984a0619ef2ee4c51fbbc019/beautifulsoup4-4.14.3-py3-none-any.whl (107 kB)
+Collecting certifi==2025.11.12 (from -r requirements_linux.txt (line 3))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl (159 kB)
+Collecting cffi==2.0.0 (from -r requirements_linux.txt (line 4))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/98/29/9b366e70e243eb3d14a5cb488dfd3a0b6b2f1fb001a203f653b93ccfac88/cffi-2.0.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (216 kB)
+Collecting charset-normalizer==3.4.4 (from -r requirements_linux.txt (line 5))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/36/3b/60cbd1f8e93aa25d1c669c649b7a655b0b5fb4c571858910ea9332678558/charset_normalizer-3.4.4-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (153 kB)
+Collecting contourpy==1.3.0 (from -r requirements_linux.txt (line 6))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/99/e6/d11966962b1aa515f5586d3907ad019f4b812c04e4546cc19ebf62b5178e/contourpy-1.3.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (322 kB)
+Collecting cycler==0.12.1 (from -r requirements_linux.txt (line 7))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Collecting exceptiongroup==1.3.1 (from -r requirements_linux.txt (line 8))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/8a/0e/97c33bf5009bdbac74fd2beace167cab3f978feb69cc36f1ef79360d6c4e/exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+Collecting fonttools==4.60.2 (from -r requirements_linux.txt (line 9))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/24/29/f8f8acccb9716b899be4be45e9ce770d6aa76327573863e68448183091b0/fonttools-4.60.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.9/4.9 MB 91.0 MB/s  0:00:00
+Collecting h11==0.16.0 (from -r requirements_linux.txt (line 10))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl (37 kB)
+Collecting idna==3.11 (from -r requirements_linux.txt (line 11))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/0e/61/66938bbb5fc52dbdf84594873d5b51fb1f7c7794e9c0f5bd885f30bc507b/idna-3.11-py3-none-any.whl (71 kB)
+Collecting importlib_resources==6.5.2 (from -r requirements_linux.txt (line 12))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/a4/ed/1f1afb2e9e7f38a545d628f864d562a5ae64fe6f7a10e28ffb9b185b4e89/importlib_resources-6.5.2-py3-none-any.whl (37 kB)
+Collecting kiwisolver==1.4.7 (from -r requirements_linux.txt (line 13))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/55/91/0a57ce324caf2ff5403edab71c508dd8f648094b18cfbb4c8cc0fde4a6ac/kiwisolver-1.4.7-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (1.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 78.7 MB/s  0:00:00
+Collecting lxml==6.0.2 (from -r requirements_linux.txt (line 14))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/20/cf/cab09478699b003857ed6ebfe95e9fb9fa3d3c25f1353b905c9b73cfb624/lxml-6.0.2-cp310-cp310-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (5.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.3/5.3 MB 80.1 MB/s  0:00:00
+Collecting markdown2==2.5.4 (from -r requirements_linux.txt (line 15))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/b8/06/2697b5043c3ecb720ce0d243fc7cf5024c0b5b1e450506e9b21939019963/markdown2-2.5.4-py3-none-any.whl (49 kB)
+Collecting matplotlib==3.9.4 (from -r requirements_linux.txt (line 16))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/07/06/272aca07a38804d93b6050813de41ca7ab0e29ba7a9dd098e12037c919a9/matplotlib-3.9.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (8.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 88.2 MB/s  0:00:00
+Collecting MouseInfo==0.1.3 (from -r requirements_linux.txt (line 17))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/28/fa/b2ba8229b9381e8f6381c1dcae6f4159a7f72349e414ed19cfbbd1817173/MouseInfo-0.1.3.tar.gz (10 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting mss==10.1.0 (from -r requirements_linux.txt (line 18))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/23/28/1e3e5cd1d677cca68b26166f704f72e35b1e8b6d5076d8ebeebc4e40a649/mss-10.1.0-py3-none-any.whl (24 kB)
+Collecting numpy==1.23.5 (from -r requirements_linux.txt (line 19))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/e4/f3/679b3a042a127de0d7c84874913c3e23bb84646eb3bc6ecab3f8c872edc9/numpy-1.23.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (17.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 17.1/17.1 MB 100.8 MB/s  0:00:00
+Collecting opencv-python==4.6.0.66 (from -r requirements_linux.txt (line 20))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/af/bf/8d189a5c43460f6b5c8eb81ead8732e94b9f73ef8d9abba9e8f5a61a6531/opencv_python-4.6.0.66-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (60.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 60.9/60.9 MB 92.4 MB/s  0:00:00
+Collecting outcome==1.3.0.post0 (from -r requirements_linux.txt (line 21))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/55/8b/5ab7257531a5d830fc8000c476e63c935488d74609b50f9384a643ec0a62/outcome-1.3.0.post0-py2.py3-none-any.whl (10 kB)
+Collecting packaging==25.0 (from -r requirements_linux.txt (line 22))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl (66 kB)
+Collecting pandas==1.5.3 (from -r requirements_linux.txt (line 23))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/49/e2/79e46612dc25ebc7603dc11c560baa7266c90f9e48537ecf1a02a0dd6bff/pandas-1.5.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (12.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.1/12.1 MB 97.5 MB/s  0:00:00
+Collecting pillow==11.3.0 (from -r requirements_linux.txt (line 24))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/f0/16/1a6bf01fb622fb9cf5c91683823f073f053005c849b1f52ed613afcf8dae/pillow-11.3.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.6/6.6 MB 84.5 MB/s  0:00:00
+Collecting PyAutoGUI==0.9.54 (from -r requirements_linux.txt (line 25))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/65/ff/cdae0a8c2118a0de74b6cf4cbcdcaf8fd25857e6c3f205ce4b1794b27814/PyAutoGUI-0.9.54.tar.gz (61 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting pycparser==2.23 (from -r requirements_linux.txt (line 26))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/a0/e3/59cd50310fc9b59512193629e1984c1f95e5c8ae6e5d8c69532ccc65a7fe/pycparser-2.23-py3-none-any.whl (118 kB)
+Collecting PyGetWindow==0.0.9 (from -r requirements_linux.txt (line 27))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/e1/70/c7a4f46dbf06048c6d57d9489b8e0f9c4c3d36b7479f03c5ca97eaa2541d/PyGetWindow-0.0.9.tar.gz (9.7 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting PyMsgBox==2.0.1 (from -r requirements_linux.txt (line 28))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/6f/3e/08c8cac81b2b2f7502746e6b9c8e5b0ec6432cd882c605560fc409aaf087/pymsgbox-2.0.1-py3-none-any.whl (10.0 kB)
+Collecting pyparsing==3.3.1 (from -r requirements_linux.txt (line 29))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/8b/40/2614036cdd416452f5bf98ec037f38a1afb17f327cb8e6b652d4729e0af8/pyparsing-3.3.1-py3-none-any.whl (121 kB)
+Collecting pyperclip==1.11.0 (from -r requirements_linux.txt (line 30))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/df/80/fc9d01d5ed37ba4c42ca2b55b4339ae6e200b456be3a1aaddf4a9fa99b8c/pyperclip-1.11.0-py3-none-any.whl (11 kB)
+Collecting PyQt6==6.10.1 (from -r requirements_linux.txt (line 31))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/41/76/df4b4b268595032d0fae863e4d4ad962b541db01b1bb6d12f2bc9c66b74b/pyqt6-6.10.1-cp39-abi3-manylinux_2_34_x86_64.whl (37.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 37.9/37.9 MB 20.2 MB/s  0:00:01
+Collecting PyQt6-Qt6==6.10.1 (from -r requirements_linux.txt (line 32))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/f4/7e/9867361252e2a4717dba95c64a0f3a793603f4a52cb9a46abbb041e960f5/pyqt6_qt6-6.10.1-py3-none-manylinux_2_34_x86_64.whl (83.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.8/83.8 MB 10.9 MB/s  0:00:07
+Collecting PyQt6_sip==13.10.2 (from -r requirements_linux.txt (line 33))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/bb/4f/fa8468f055679905d0e38d471ae16b5968896ee1d951477e162d9d0a712d/pyqt6_sip-13.10.2-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.whl (284 kB)
+Collecting PyRect==0.2.0 (from -r requirements_linux.txt (line 34))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/cb/04/2ba023d5f771b645f7be0c281cdacdcd939fe13d1deb331fc5ed1a6b3a98/PyRect-0.2.0.tar.gz (17 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting PyScreeze==1.0.1 (from -r requirements_linux.txt (line 35))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/ee/f0/cb456ac4f1a73723d5b866933b7986f02bacea27516629c00f8e7da94c2d/pyscreeze-1.0.1.tar.gz (27 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting PySocks==1.7.1 (from -r requirements_linux.txt (line 36))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/8d/59/b4572118e098ac8e46e399a1dd0f2d85403ce8bbaad9ec79373ed6badaf9/PySocks-1.7.1-py3-none-any.whl (16 kB)
+Collecting python-dateutil==2.9.0.post0 (from -r requirements_linux.txt (line 37))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Collecting python-docx==1.2.0 (from -r requirements_linux.txt (line 38))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/d0/00/1e03a4989fa5795da308cd774f05b704ace555a70f9bf9d3be057b680bcf/python_docx-1.2.0-py3-none-any.whl (252 kB)
+Collecting pytweening==1.2.0 (from -r requirements_linux.txt (line 39))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/79/0c/c16bc93ac2755bac0066a8ecbd2a2931a1735a6fffd99a2b9681c7e83e90/pytweening-1.2.0.tar.gz (171 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting pytz==2025.2 (from -r requirements_linux.txt (line 40))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/81/c4/34e93fe5f5429d7570ec1fa436f1986fb1f00c3e0f43a589fe2bbcd22c3f/pytz-2025.2-py2.py3-none-any.whl (509 kB)
+Collecting requests==2.32.5 (from -r requirements_linux.txt (line 41))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl (64 kB)
+Collecting selenium==4.8.3 (from -r requirements_linux.txt (line 42))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/d9/4b/e964eaca99d249eb3109ac75af551601923ba727c915db43c82311a0b16a/selenium-4.8.3-py3-none-any.whl (6.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.5/6.5 MB 17.0 MB/s  0:00:00
+Collecting six==1.17.0 (from -r requirements_linux.txt (line 43))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl (11 kB)
+Collecting sniffio==1.3.1 (from -r requirements_linux.txt (line 44))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/e9/44/75a9c9421471a6c4805dbf2356f7c181a29c1879239abab1ea2cc8f38b40/sniffio-1.3.1-py3-none-any.whl (10 kB)
+Collecting sortedcontainers==2.4.0 (from -r requirements_linux.txt (line 45))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Collecting soupsieve==2.8 (from -r requirements_linux.txt (line 46))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/14/a0/bb38d3b76b8cae341dad93a2dd83ab7462e6dbcdd84d43f54ee60a8dc167/soupsieve-2.8-py3-none-any.whl (36 kB)
+Collecting trio==0.31.0 (from -r requirements_linux.txt (line 47))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/31/5b/94237a3485620dbff9741df02ff6d8acaa5fdec67d81ab3f62e4d8511bf7/trio-0.31.0-py3-none-any.whl (512 kB)
+Collecting trio-websocket==0.12.2 (from -r requirements_linux.txt (line 48))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/c7/19/eb640a397bba49ba49ef9dbe2e7e5c04202ba045b6ce2ec36e9cadc51e04/trio_websocket-0.12.2-py3-none-any.whl (21 kB)
+Collecting typing_extensions==4.15.0 (from -r requirements_linux.txt (line 49))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Collecting tzdata==2025.3 (from -r requirements_linux.txt (line 50))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/c7/b0/003792df09decd6849a5e39c28b513c06e84436a54440380862b5aeff25d/tzdata-2025.3-py2.py3-none-any.whl (348 kB)
+Collecting urllib3==1.26.20 (from -r requirements_linux.txt (line 51))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/33/cf/8435d5a7159e2a9c83a95896ed596f68cf798005fe107cc655b5c5c14704/urllib3-1.26.20-py2.py3-none-any.whl (144 kB)
+Collecting websocket-client==1.9.0 (from -r requirements_linux.txt (line 52))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/34/db/b10e48aa8fff7407e67470363eac595018441cf32d5e1001567a7aeba5d2/websocket_client-1.9.0-py3-none-any.whl (82 kB)
+Collecting wsproto==1.2.0 (from -r requirements_linux.txt (line 53))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/78/58/e860788190eba3bcce367f74d29c4675466ce8dddfba85f7827588416f01/wsproto-1.2.0-py3-none-any.whl (24 kB)
+Collecting zipp==3.23.0 (from -r requirements_linux.txt (line 54))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/2e/54/647ade08bf0db230bfea292f893923872fd20be6ac6f53b2b936ba839d75/zipp-3.23.0-py3-none-any.whl (10 kB)
+Collecting fastapi==0.115.0 (from -r requirements_linux.txt (line 57))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/06/ab/a1f7eed031aeb1c406a6e9d45ca04bff401c8a25a30dd0e4fd2caae767c3/fastapi-0.115.0-py3-none-any.whl (94 kB)
+Collecting uvicorn==0.32.0 (from uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/eb/14/78bd0e95dd2444b6caacbca2b730671d4295ccb628ef58b81bee903629df/uvicorn-0.32.0-py3-none-any.whl (63 kB)
+Collecting sse-starlette==2.1.0 (from -r requirements_linux.txt (line 59))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/15/51/faf3a6478876bfa30d28a9bfa60cf191fd79bfac79f7595a6d342e66c44a/sse_starlette-2.1.0-py3-none-any.whl (9.2 kB)
+Collecting python-multipart==0.0.9 (from -r requirements_linux.txt (line 60))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/3d/47/444768600d9e0ebc82f8e347775d24aef8f6348cf00e9fa0e81910814e6d/python_multipart-0.0.9-py3-none-any.whl (22 kB)
+Collecting apscheduler==3.11.2 (from -r requirements_linux.txt (line 61))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/9f/64/2e54428beba8d9992aa478bb8f6de9e4ecaa5f8f513bcfd567ed7fb0262d/apscheduler-3.11.2-py3-none-any.whl (64 kB)
+Collecting python3-Xlib (from MouseInfo==0.1.3->-r requirements_linux.txt (line 17))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/ef/c6/2c5999de3bb1533521f1101e8fe56fd9c266732f4d48011c7c69b29d12ae/python3-xlib-0.15.tar.gz (132 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting starlette<0.39.0,>=0.37.2 (from fastapi==0.115.0->-r requirements_linux.txt (line 57))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/b7/9c/93f7bc03ff03199074e81974cc148908ead60dcf189f68ba1761a0ee35cf/starlette-0.38.6-py3-none-any.whl (71 kB)
+Collecting pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 (from fastapi==0.115.0->-r requirements_linux.txt (line 57))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/5a/87/b70ad306ebb6f9b585f114d0ac2137d792b48be34d732d60e597c2f8465a/pydantic-2.12.5-py3-none-any.whl (463 kB)
+Collecting click>=7.0 (from uvicorn==0.32.0->uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/98/78/01c019cdb5d6498122777c1a43056ebb3ebfeef2076d9d026bfe15583b2b/click-8.3.1-py3-none-any.whl (108 kB)
+Collecting anyio (from sse-starlette==2.1.0->-r requirements_linux.txt (line 59))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/38/0e/27be9fdef66e72d64c0cdc3cc2823101b80585f8119b5c112c2e8f5f7dab/anyio-4.12.1-py3-none-any.whl (113 kB)
+Collecting tzlocal>=3.0 (from apscheduler==3.11.2->-r requirements_linux.txt (line 61))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/c2/14/e2a54fabd4f08cd7af1c07030603c3356b74da07f7cc056e600436edfa17/tzlocal-5.3.1-py3-none-any.whl (18 kB)
+Collecting httptools>=0.5.0 (from uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/f5/71/b0a9193641d9e2471ac541d3b1b869538a5fb6419d52fd2669fa9c79e4b8/httptools-0.7.1-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (440 kB)
+Collecting python-dotenv>=0.13 (from uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/14/1b/a298b06749107c305e1fe0f814c6c74aea7b2f1e10989cb30f544a1b3253/python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+Collecting pyyaml>=5.1 (from uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/7a/1e/7acc4f0e74c4b3d9531e24739e0ab832a5edf40e64fbae1a9c01941cabd7/pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (770 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 770.3/770.3 kB 38.1 MB/s  0:00:00
+Collecting uvloop!=0.15.0,!=0.15.1,>=0.14.0 (from uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/b3/f6/21657bb3beb5f8c57ce8be3b83f653dd7933c2fd00545ed1b092d464799a/uvloop-0.22.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.7/3.7 MB 85.6 MB/s  0:00:00
+Collecting watchfiles>=0.13 (from uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/d5/dc/1a680b7458ffa3b14bb64878112aefc8f2e4f73c5af763cbf0bd43100658/watchfiles-1.1.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (455 kB)
+Collecting websockets>=10.4 (from uvicorn[standard]==0.32.0->-r requirements_linux.txt (line 58))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/9d/2f/4b3ca7e106bc608744b1cdae041e005e446124bebb037b18799c2d356864/websockets-16.0-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (183 kB)
+Collecting annotated-types>=0.6.0 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi==0.115.0->-r requirements_linux.txt (line 57))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/78/b6/6307fbef88d9b5ee7421e68d78a9f162e0da4900bc5f5793f6d3d0e34fb8/annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Collecting pydantic-core==2.41.5 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi==0.115.0->-r requirements_linux.txt (line 57))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/a8/76/7727ef2ffa4b62fcab916686a68a0426b9b790139720e1934e8ba797e238/pydantic_core-2.41.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 70.6 MB/s  0:00:00
+Collecting typing-inspection>=0.4.2 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi==0.115.0->-r requirements_linux.txt (line 57))
+  Downloading http://mirrors.cloud.aliyuncs.com/pypi/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Building wheels for collected packages: MouseInfo, PyAutoGUI, PyGetWindow, PyRect, PyScreeze, pytweening, python3-Xlib
+  Building wheel for MouseInfo (pyproject.toml) ... done
+  Created wheel for MouseInfo: filename=mouseinfo-0.1.3-py3-none-any.whl size=10952 sha256=ec64debeb4f32985e95c05ac3abf949f995d50277799eb62674f558731c78d54
+  Stored in directory: /root/.cache/pip/wheels/a0/42/c7/2d3c2218f7af6964a57c07a3bce1dabcac876d8a27f4b9c60a
+  Building wheel for PyAutoGUI (pyproject.toml) ... done
+  Created wheel for PyAutoGUI: filename=pyautogui-0.9.54-py3-none-any.whl size=37683 sha256=91a30f69e9982f369d07c514b86203605a0196c315fbd5d04142ab862dedc151
+  Stored in directory: /root/.cache/pip/wheels/c6/15/a8/f05ba660a6f9605cb48031e2aeb17613ddec1105f5ba3f5604
+  Building wheel for PyGetWindow (pyproject.toml) ... done
+  Created wheel for PyGetWindow: filename=pygetwindow-0.0.9-py3-none-any.whl size=11119 sha256=a3935078122d57d070628b4b603fbf106da54b8af5fc786c0c3bd15658eefaa6
+  Stored in directory: /root/.cache/pip/wheels/8b/d1/0c/4d6cb8d3d0f7728906521f0ddd821d403e8e9fefefd0262c59
+  Building wheel for PyRect (pyproject.toml) ... done
+  Created wheel for PyRect: filename=pyrect-0.2.0-py2.py3-none-any.whl size=11280 sha256=29eeebfe05faf1cbeadd28ed3249ec11f67a7055b2bbef033dc9cf3c964da248
+  Stored in directory: /root/.cache/pip/wheels/f0/d5/f8/a56c2f32eeab847ef749a570e0a9c09ed9b3ca1ea774aa95a7
+  Building wheel for PyScreeze (pyproject.toml) ... done
+  Created wheel for PyScreeze: filename=pyscreeze-1.0.1-py3-none-any.whl size=14458 sha256=c951f438dbcea91446c0bc6165082025b293194442d8ac2a53eb2b2988aeedd7
+  Stored in directory: /root/.cache/pip/wheels/3c/76/ec/cc5ca45cf9f9d13bed68502a018894cca73d282b37d08536de
+  Building wheel for pytweening (pyproject.toml) ... done
+  Created wheel for pytweening: filename=pytweening-1.2.0-py3-none-any.whl size=8115 sha256=cc1f9ef88341782c492120bd86a98dc814c6b7d3becefc75c88af3ef130decf1
+  Stored in directory: /root/.cache/pip/wheels/cc/df/3e/829f4d59decdd942760361b0155aa4ab90cf9a03179e031721
+  Building wheel for python3-Xlib (pyproject.toml) ... done
+  Created wheel for python3-Xlib: filename=python3_xlib-0.15-py3-none-any.whl size=109546 sha256=d114c6b3d7cef13ec5dbea87550adb3085f8c82c2d476aed76d5a18254819b21
+  Stored in directory: /root/.cache/pip/wheels/a0/cf/0f/d989002a30a3fc2ed6c02e9e5c3a71b487015cce96a935dadf
+Successfully built MouseInfo PyAutoGUI PyGetWindow PyRect PyScreeze pytweening python3-Xlib
+Installing collected packages: sortedcontainers, pytz, pytweening, python3-Xlib, PyRect, PyQt6-Qt6, pyperclip, zipp, websockets, websocket-client, uvloop, urllib3, tzlocal, tzdata, typing_extensions, soupsieve, sniffio, six, pyyaml, python-multipart, python-dotenv, PySocks, PyQt6_sip, pyparsing, PyMsgBox, PyGetWindow, pycparser, pillow, packaging, numpy, mss, MouseInfo, markdown2, lxml, kiwisolver, importlib_resources, idna, httptools, h11, fonttools, cycler, click, charset-normalizer, certifi, attrs, annotated-types, wsproto, uvicorn, typing-inspection, requests, python-docx, python-dateutil, PyScreeze, PyQt6, pydantic-core, outcome, opencv-python, exceptiongroup, contourpy, cffi, beautifulsoup4, apscheduler, trio, pydantic, PyAutoGUI, pandas, matplotlib, anyio, watchfiles, trio-websocket, starlette, sse-starlette, selenium, fastapi
+Successfully installed MouseInfo-0.1.3 PyAutoGUI-0.9.54 PyGetWindow-0.0.9 PyMsgBox-2.0.1 PyQt6-6.10.1 PyQt6-Qt6-6.10.1 PyQt6_sip-13.10.2 PyRect-0.2.0 PyScreeze-1.0.1 PySocks-1.7.1 annotated-types-0.7.0 anyio-4.12.1 apscheduler-3.11.2 attrs-25.4.0 beautifulsoup4-4.14.3 certifi-2025.11.12 cffi-2.0.0 charset-normalizer-3.4.4 click-8.3.1 contourpy-1.3.0 cycler-0.12.1 exceptiongroup-1.3.1 fastapi-0.115.0 fonttools-4.60.2 h11-0.16.0 httptools-0.7.1 idna-3.11 importlib_resources-6.5.2 kiwisolver-1.4.7 lxml-6.0.2 markdown2-2.5.4 matplotlib-3.9.4 mss-10.1.0 numpy-1.23.5 opencv-python-4.6.0.66 outcome-1.3.0.post0 packaging-25.0 pandas-1.5.3 pillow-11.3.0 pycparser-2.23 pydantic-2.12.5 pydantic-core-2.41.5 pyparsing-3.3.1 pyperclip-1.11.0 python-dateutil-2.9.0.post0 python-docx-1.2.0 python-dotenv-1.2.1 python-multipart-0.0.9 python3-Xlib-0.15 pytweening-1.2.0 pytz-2025.2 pyyaml-6.0.3 requests-2.32.5 selenium-4.8.3 six-1.17.0 sniffio-1.3.1 sortedcontainers-2.4.0 soupsieve-2.8 sse-starlette-2.1.0 starlette-0.38.6 trio-0.31.0 trio-websocket-0.12.2 typing-inspection-0.4.2 typing_extensions-4.15.0 tzdata-2025.3 tzlocal-5.3.1 urllib3-1.26.20 uvicorn-0.32.0 uvloop-0.22.1 watchfiles-1.1.1 websocket-client-1.9.0 websockets-16.0 wsproto-1.2.0 zipp-3.23.0
+[3/4] Setting up Frontend...
+Installing Node modules...
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@vitejs/plugin-react@5.1.2',
+npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'marked@17.0.1',
+npm warn EBADENGINE   required: { node: '>= 20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'react-router@7.13.0',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'react-router-dom@7.13.0',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'vite@7.3.1',
+npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+
+added 263 packages, and audited 264 packages in 18s
+
+118 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.8.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.8.0
+npm notice To update run: npm install -g npm@11.8.0
+npm notice
+[4/4] Finalizing...
+==========================================
+Deployment Setup Complete!
+To start the application, run: ./start_dev.sh
+==========================================
+Starting deployment services...
+Starting FastAPI Backend...
+Backend started with PID 124423 (Logs: backend.log)
+Starting Vite Frontend...
+Frontend started with PID 124424 (Logs: frontend/frontend.log)
+==========================================
+Services are running!
+Backend: http://<YOUR_SERVER_IP>:8000
+Frontend: http://<YOUR_SERVER_IP>:5173
+To stop services, run: kill 124423 124424
+==========================================
+root@iZbp1isb83yhok0zs421gwZ:/var/www/MCP_coze# ./start_dev.sh
+Starting deployment services...
+Starting FastAPI Backend...
+Backend started with PID 124463 (Logs: backend.log)
+Starting Vite Frontend...
+Frontend started with PID 124464 (Logs: frontend/frontend.log)
+==========================================
+Services are running!
+Backend: http://<YOUR_SERVER_IP>:8000
+Frontend: http://<YOUR_SERVER_IP>:5173
+To stop services, run: kill 124463 124464
+==========================================
+

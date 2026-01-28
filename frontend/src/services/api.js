@@ -3,7 +3,9 @@
  */
 
 // API 基础 URL（开发环境使用 Vite 代理，生产环境使用相对路径）
-const API_BASE_URL = 'http://localhost:8000';
+// API 基础 URL（开发环境使用 Vite 代理，生产环境使用相对路径）
+// 修改为相对路径，由 Vite 代理处理转发到后端
+const API_BASE_URL = '';
 
 /**
  * 获取认证请求头

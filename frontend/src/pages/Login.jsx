@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, User, Lock, Calculator } from 'lucide-react';
+import { login } from '../services/api';
 import './Login.css';
 
 function Login() {
@@ -36,19 +37,8 @@ function Login() {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || '登录失败');
-            }
+            // Use the centralized api service
+            const data = await login(username, password);
 
             // 保存 token 和用户信息到 localStorage
             localStorage.setItem('access_token', data.access_token);
