@@ -22,22 +22,84 @@ function AIChat({ selectedCompanyId, companies }) {
     const historyNavRef = useRef({});    // Ref for history navigation state { [question]: lastIndex }
 
     // 加载历史记录
-    useEffect(() => {
-        const savedHistory = localStorage.getItem('chat_history');
-        if (savedHistory) {
-            try {
-                setHistory(JSON.parse(savedHistory));
-            } catch {
-                setHistory([]);
+    const fetchHistory = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch('/api/chat/history?limit=100', {
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }
+            }); // Load last 100 messages
+            if (res.ok) {
+                const data = await res.json();
+                // Convert DB format to UI format
+                // DB: { id, role, content, type, created_at }
+                // UI: { role, content, ... }
+                // Type handling: if type is chart or content contains <CHART_DATA>, parse it.
+
+                const formattedMessages = data.map(msg => {
+                    let content = msg.content;
+                    let charts = [];
+                    let summary = '';
+
+                    // Try to extract chart data from content tag <CHART_DATA>
+                    if (content && content.includes('<CHART_DATA>')) {
+                        const parts = content.split('<CHART_DATA>');
+                        // parts[0] is text before, parts[1] is json, parts[2] is after (if any)
+                        // This is a simple parser, might need robustness
+                        if (parts.length >= 2) {
+                            content = parts[0]; // Text part
+                            try {
+                                const chartJson = parts[1].split('</CHART_DATA>')[0];
+                                charts.push(JSON.parse(chartJson));
+                            } catch (e) {
+                                console.error('Error parsing chart data', e);
+                            }
+                            // Check for summary? usually summary is part of text or separate
+                        }
+                    }
+
+                    // Extract summary from text if marked (from backend standard)
+                    if (content && content.includes('**总结**:')) {
+                        const sumParts = content.split('**总结**:');
+                        if (sumParts.length > 1) {
+                            content = sumParts[0];
+                            summary = sumParts[1];
+                        }
+                    }
+
+                    return {
+                        id: msg.id, // Keep ID for deletion
+                        role: msg.role,
+                        content: content,
+                        charts: charts.length > 0 ? charts : undefined,
+                        summary: summary || undefined,
+                        timestamp: new Date(msg.created_at).toLocaleTimeString('zh-CN', { hour12: false })
+                    };
+                });
+                setMessages(formattedMessages);
+                console.log('🔵 setMessages called with', formattedMessages.length, 'messages');
+
+                // Derive history list (unique user questions)
+                const userQuestions = formattedMessages
+                    .filter(m => m.role === 'user')
+                    .map(m => m.content)
+                    .reverse(); // Newest first
+                setHistory([...new Set(userQuestions)]);
+            } else {
+                console.error('🔴 fetchHistory failed with status:', res.status);
             }
+        } catch (error) {
+            console.error('Failed to load history:', error);
         }
     }, []);
 
-    // 保存历史记录
-    const saveHistory = useCallback((newHistory) => {
-        setHistory(newHistory);
-        localStorage.setItem('chat_history', JSON.stringify(newHistory));
-    }, []);
+    useEffect(() => {
+        fetchHistory();
+    }, [fetchHistory]);
+
+    // 保存历史记录 (No longer needed for LocalStorage, but maybe for state updates?)
+    // We rely on backend persistence now.
 
     // 发送消息
     const handleSend = useCallback(() => {
@@ -51,10 +113,11 @@ function AIChat({ selectedCompanyId, companies }) {
         setIsLoading(true);
         setInputText('');
 
-        // 保存到历史记录 (移到最前面，如已存在则先移除)
+        // 保存到历史记录 (Frontend update for immediate UI feedback)
         const filteredHistory = history.filter(h => h !== question);
         const newHistory = [question, ...filteredHistory.slice(0, 49)];
-        saveHistory(newHistory);
+        setHistory(newHistory);
+        // saveHistory(newHistory); // Removed LocalStorage
 
         // 滚动历史记录到顶部
         if (historyListRef.current) {
@@ -135,16 +198,26 @@ function AIChat({ selectedCompanyId, companies }) {
         });
 
         setCurrentController(controller);
-    }, [inputText, isLoading, selectedCompanyId, history, saveHistory, responseMode]);
+    }, [inputText, isLoading, selectedCompanyId, history, responseMode]);
 
-    // 清空对话 (全部)
-    const handleClear = useCallback(() => {
+    const handleClear = useCallback(async () => {
         if (window.confirm('确定要清空所有对话吗？此操作无法撤销。')) {
             if (currentController) currentController.abort();
-            setMessages([]);
-            setIsLoading(false);
-            setIsSelectionMode(false);
-            setSelectedMessageIndices(new Set());
+
+            try {
+                await fetch('/api/chat/history', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ delete_all: true })
+                });
+                setMessages([]);
+                setHistory([]); // Clear sidebar too
+                setIsLoading(false);
+                setIsSelectionMode(false);
+                setSelectedMessageIndices(new Set());
+            } catch (e) {
+                alert('删除失败');
+            }
         }
     }, [currentController]);
 
@@ -168,15 +241,42 @@ function AIChat({ selectedCompanyId, companies }) {
     }, []);
 
     // 删除选中的消息
-    const handleDeleteSelectedMessages = useCallback(() => {
+    const handleDeleteSelectedMessages = useCallback(async () => {
         if (selectedMessageIndices.size === 0) return;
 
         if (window.confirm(`确定删除选中的 ${selectedMessageIndices.size} 条消息吗？`)) {
+            // Get IDs of selected messages
+            const idsToDelete = [];
+            const indices = Array.from(selectedMessageIndices);
+            indices.forEach(idx => {
+                if (messages[idx] && messages[idx].id) {
+                    idsToDelete.push(messages[idx].id);
+                }
+            });
+
+            if (idsToDelete.length > 0) {
+                try {
+                    await fetch('/api/chat/history', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message_ids: idsToDelete })
+                    });
+                } catch (e) {
+                    console.error("Delete failed", e);
+                }
+            }
+
             setMessages(prev => prev.filter((_, index) => !selectedMessageIndices.has(index)));
             setIsSelectionMode(false); // 删除后退出选择模式
             setSelectedMessageIndices(new Set());
+
+            // Refresh history list? 
+            // Ideally we re-fetch or filter locally. 
+            // Local filter for history sidebar is hard because it's derived.
+            // Let's just re-fetch to be safe or leave it (sidebar history is question based)
+            fetchHistory();
         }
-    }, [selectedMessageIndices]);
+    }, [selectedMessageIndices, messages, fetchHistory]);
 
     // 导出 PDF
     const handleExportPDF = useCallback(async () => {
@@ -261,22 +361,42 @@ function AIChat({ selectedCompanyId, companies }) {
         }
     }, [messages]);
 
-    // 选择性删除历史记录
-    const handleClearHistory = useCallback(() => {
+
+    // 选择性删除历史记录 (Sidebar)
+    const handleClearHistory = useCallback(async () => {
+        // Since history list is derived from messages, deleting history here 
+        // implies deleting the messages with that content?
+        // Or just hiding it?
+        // The implementation in backend is per-message.
+        // If we want to delete by "question string", we need to find all messages with that content.
+
+        // Simplified: delete from DB by ID if we can track it, or delete all if "clear all".
+        // Use the existing message-based deletion or clear all.
+
+        // Original logic:
         if (selectedHistory.size > 0) {
-            // 有选中项，删除选中的
             if (window.confirm(`确定删除选中的 ${selectedHistory.size} 条记录吗？`)) {
-                const newHistory = history.filter(h => !selectedHistory.has(h));
-                saveHistory(newHistory);
+                // Find messages with these questions
+                const idsToDelete = messages
+                    .filter(m => m.role === 'user' && selectedHistory.has(m.content))
+                    .map(m => m.id);
+
+                if (idsToDelete.length > 0) {
+                    await fetch('/api/chat/history', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message_ids: idsToDelete })
+                    });
+                }
+                setHistory(prev => prev.filter(h => !selectedHistory.has(h))); // Local update
                 setSelectedHistory(new Set());
+                fetchHistory(); // Refresh full state
             }
         } else if (history.length > 0) {
-            // 无选中项，确认删除全部
-            if (window.confirm(`未选择任何记录。\n\n确定要删除全部 ${history.length} 条历史记录吗？`)) {
-                saveHistory([]);
-            }
+            // Clear all handled by handleClear usually, but this is sidebar button
+            handleClear();
         }
-    }, [selectedHistory, history, saveHistory]);
+    }, [selectedHistory, history, messages, fetchHistory, handleClear]);
 
     // 切换历史记录选中状态
     const toggleHistorySelection = (item, e) => {

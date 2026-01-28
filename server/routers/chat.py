@@ -12,8 +12,11 @@ import asyncio
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import sqlite3
+from datetime import datetime
 
-from fastapi import APIRouter, HTTPException
+
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, AsyncGenerator
@@ -23,6 +26,9 @@ from modules.intent_classifier import IntentClassifier
 from modules.db_query import TaxIncentiveQuery
 from modules.deepseek_client import DeepSeekClient
 from modules.financial_query import FinancialQuery
+
+# 认证依赖项
+from server.routers.auth import get_current_user
 
 router = APIRouter()
 
@@ -36,6 +42,68 @@ _classifier = None
 _db_query = None
 _deepseek = None
 _financial_query = None
+
+# 数据库路径
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+USERS_DB_PATH = os.path.join(BASE_DIR, "database", "users.db")
+FINANCIAL_DB_PATH = os.path.join(BASE_DIR, "database", "financial.db")
+
+def save_message(user_id: str, role: str, content: str, type: str = 'text'):
+    """保存消息到数据库"""
+    try:
+        conn = sqlite3.connect(USERS_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO chat_messages (user_id, role, content, type) VALUES (?, ?, ?, ?)",
+            (user_id, role, content, type)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"Error saving message: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+def get_chat_history(user_id: str, limit: int = 50):
+    """获取聊天历史"""
+    try:
+        conn = sqlite3.connect(USERS_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM chat_messages WHERE user_id = ? ORDER BY created_at ASC LIMIT ?",
+            (user_id, limit)
+        )
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error getting history: {e}")
+        return []
+    finally:
+        if conn:
+            conn.close()
+
+def delete_user_history(user_id: str, message_ids: Optional[list] = None):
+    """删除聊天历史"""
+    try:
+        conn = sqlite3.connect(USERS_DB_PATH)
+        cursor = conn.cursor()
+        if message_ids:
+            # Delete specific messages
+            placeholders = ','.join('?' for _ in message_ids)
+            cursor.execute(
+                f"DELETE FROM chat_messages WHERE user_id = ? AND id IN ({placeholders})",
+                (user_id, *message_ids)
+            )
+        else:
+            # Delete all
+            cursor.execute("DELETE FROM chat_messages WHERE user_id = ?", (user_id,))
+        conn.commit()
+    except Exception as e:
+        print(f"Error deleting history: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 
 def get_modules():
@@ -103,6 +171,7 @@ def has_financial_keywords(question: str) -> bool:
 
 async def generate_sse_response(
     question: str, 
+    user_id: str,
     company_id: Optional[int] = None,
     enable_routing: bool = True,
     show_chart: bool = True,
@@ -124,6 +193,7 @@ async def generate_sse_response(
         """发送内容片段"""
         return send_event("message", {"content": content})
     
+
     try:
         # 发送开始事件
         yield send_event("start", {"status": "processing"})
@@ -132,48 +202,120 @@ async def generate_sse_response(
         company = None
         if company_id:
             import sqlite3
-            conn = sqlite3.connect("database/financial.db")
+            conn = sqlite3.connect(FINANCIAL_DB_PATH)
             cursor = conn.cursor()
             cursor.execute("SELECT id, name FROM companies WHERE id = ?", (company_id,))
             row = cursor.fetchone()
             conn.close()
             if row:
                 company = {"id": row[0], "name": row[1]}
+        # 4. 保存完整的 AI 回答
+        # (此时 stream_financial_response 等已执行完毕，我们需要一种机制捕获产生的内容)
+        # 由于是流式返回，上面的生成器已经在 yield 内容。
+        # 我们需要在生成器内部收集完整内容，或者在 yield 之后保存。
+        # 这里为了简单，我们修改生成器函数，让它们负责保存，或者使用一个累加器。
         
-        # 路由逻辑
+        # 更好的方式：重新设计 stream_functions 让它们返回完整内容，
+        # 但这里是 generator。
+        # 方案：在各个 internal stream 函数中维护 full_content 并保存。
+        # 鉴于代码结构，我们在本函数(generate_sse_response)无法直接获取子生成器的累积内容，
+        # 除非子生成器 yield 特殊事件或者我们传入 callback。
+        
+        # 让我们把 save_message 逻辑放在 start event 之后 (保存用户问题)
+        save_message(user_id, "user", question)
+        
+        full_response_content = ""
+
+        # 路由逻辑-修改为捕获内容
         if not enable_routing:
-            # 禁用路由，直接使用 Coze API
+             # Coze API
             yield send_event("route", {"path": "coze"})
             async for chunk in stream_coze_response(question):
-                yield chunk
-            return
-        
-        # 意图识别
-        intent = classifier.classify(question)
-        
-        # 特殊处理：如果分类器认为是"other"（通常因为缺自主体），
-        # 但用户在UI选择了公司且问题包含财务关键词，则修正为财务查询
-        # 注意：这不会覆盖已识别出的 "tax_incentive" 意图
-        if intent == "other" and company and has_financial_keywords(question):
-            intent = "financial_data"
-            
-        # 发送路由事件
-        path_name = "financial" if intent == "financial_data" else intent
-        yield send_event("route", {"path": path_name, "company": company["name"] if company else None})
-        
-        if intent == "financial_data":
-            # 财务数据查询
-            async for chunk in stream_financial_response(question, company, financial_query, deepseek, show_chart, response_mode):
-                yield chunk
-        elif intent == "tax_incentive":
-            # 税收优惠查询
-            async for chunk in stream_tax_response(question, db_query, deepseek):
+                # 解析 chunk 获取 content
+                # chunk 格式: "event: message\ndata: {"content": "..."}\n\n"
+                if "content" in chunk:
+                    try:
+                        # 简单的字符串提取，健壮性一般但有效
+                        import re
+                        match = re.search(r'"content":\s*"(.*)"\}', chunk)
+                        if match:
+                             # 这种提取对转义字符处理不好，最好解析 JSON
+                             pass
+                        # Better: re-parse json
+                        lines = chunk.strip().split('\n')
+                        for line in lines:
+                            if line.startswith('data:'):
+                                data = json.loads(line[5:])
+                                if 'content' in data:
+                                    full_response_content += data['content']
+                    except:
+                        pass
                 yield chunk
         else:
-            # Coze API
-            async for chunk in stream_coze_response(question):
-                yield chunk
-    
+            # ... 现有逻辑 ...
+            # 为了捕获内容，我们需要包装一下 yield
+            
+            # 定义一个内部生成器来代理 iterate
+            async def content_capturer(generator):
+                nonlocal full_response_content
+                async for chunk in generator:
+                    # 尝试解析 content 用于保存
+                    # chunk 可能是 message, route, chart, summary 等
+                    try:
+                        lines = chunk.strip().split('\n')
+                        event_type = None
+                        for line in lines:
+                            if line.startswith('event:'):
+                                event_type = line[6:].strip()
+                            if line.startswith('data:'):
+                                data = json.loads(line[5:])
+                                if event_type == 'message' and 'content' in data:
+                                    full_response_content += data['content']
+                                elif event_type == 'summary' and 'content' in data:
+                                    full_response_content += f"\n\n**总结**:\n{data['content']}"
+                                # Chart 数据比较复杂，暂时只保存文本描述或特殊标记
+                                # 如果要保存图表，需要在 database 增加字段或者把 chart json 存入 content
+                                elif event_type == 'chart':
+                                    # 将图表数据作为特殊标记存入文本，或者后续前端解析
+                                    # 这里简单记录 [图表] 占位符，或者保存 raw json
+                                    # 为了前端能恢复，最好保存 raw json 到 content (mixin) 
+                                    # 或者 数据库区分 type
+                                    # 简单起见：我们将 chart data json 序列化追加到 content，
+                                    # 并用特殊分隔符，或者前端依靠 content 里的 markdown。
+                                    # 但 chart 是结构化数据。
+                                    # 修改 chat_messages 表结构支持 json data 最好，
+                                    # 但现在表只有 content (text).
+                                    # 让我们把 Chart JSON append 到 content 后面，用特殊标记包裹
+                                    # <CHART_DATA>json</CHART_DATA>
+                                    full_response_content += f"\n\n<CHART_DATA>{json.dumps(data, ensure_ascii=False)}</CHART_DATA>\n\n"
+                    except:
+                        pass
+                    yield chunk
+
+            # 意图识别
+            intent = classifier.classify(question)
+            
+            # ... (省略中间重复代码, 只在此处做逻辑分支) ...
+            if intent == "other" and company and has_financial_keywords(question):
+                intent = "financial_data"
+                
+            path_name = "financial" if intent == "financial_data" else intent
+            yield send_event("route", {"path": path_name, "company": company["name"] if company else None})
+            
+            if intent == "financial_data":
+                async for chunk in content_capturer(stream_financial_response(question, company, financial_query, deepseek, show_chart, response_mode)):
+                    yield chunk
+            elif intent == "tax_incentive":
+                async for chunk in content_capturer(stream_tax_response(question, db_query, deepseek)):
+                    yield chunk
+            else:
+                async for chunk in content_capturer(stream_coze_response(question)):
+                    yield chunk
+
+        # Generation Complete: Save Assistant Message
+        if full_response_content:
+            save_message(user_id, "assistant", full_response_content)
+
     except Exception as e:
         yield send_event("error", {"message": str(e)})
     
@@ -721,7 +863,7 @@ async def stream_coze_response(question: str) -> AsyncGenerator[str, None]:
 
 
 @router.post("/chat")
-async def chat_stream(request: ChatRequest):
+async def chat_stream(request: ChatRequest, current_user: dict = Depends(get_current_user)):
     """
     智能对话 API（SSE 流式输出）
     
@@ -729,9 +871,11 @@ async def chat_stream(request: ChatRequest):
     - 支持税收优惠查询、财务数据查询、通用咨询
     - 返回 SSE 流式响应
     """
+    user_id = str(current_user['id'])
     return StreamingResponse(
         generate_sse_response(
             question=request.question,
+            user_id=user_id,
             company_id=request.company_id,
             enable_routing=request.enable_routing,
             show_chart=request.show_chart,
@@ -779,3 +923,25 @@ async def chat_sync(request: ChatRequest) -> ChatResponse:
     else:
         content = "请使用流式 API (/api/chat) 获取完整回答。"
         return ChatResponse(content=content, source="coze")
+
+
+@router.get("/chat/history")
+async def get_history_api(limit: int = 50, current_user: dict = Depends(get_current_user)):
+    """获取聊天历史"""
+    user_id = str(current_user['id'])
+    return get_chat_history(user_id, limit)
+
+
+class DeleteHistoryRequest(BaseModel):
+    message_ids: Optional[list] = None
+    delete_all: bool = False
+
+@router.delete("/chat/history")
+async def delete_history_api(request: DeleteHistoryRequest, current_user: dict = Depends(get_current_user)):
+    """删除聊天历史"""
+    user_id = str(current_user['id'])
+    if request.delete_all:
+        delete_user_history(user_id)
+    elif request.message_ids:
+        delete_user_history(user_id, request.message_ids)
+    return {"status": "success"}
