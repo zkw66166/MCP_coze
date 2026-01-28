@@ -127,8 +127,17 @@
     cursor: pointer;
 }
 
-.more-icon {
-    font-size: 14px;
+.logout-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
     color: #9ca3af;
     cursor: pointer;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    color: #ef4444;
+    transform: scale(1.1);
 }

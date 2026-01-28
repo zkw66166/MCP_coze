@@ -3,13 +3,84 @@
  */
 
 // API 基础 URL（开发环境使用 Vite 代理，生产环境使用相对路径）
-const API_BASE_URL = '';
+const API_BASE_URL = 'http://localhost:8000';
+
+/**
+ * 获取认证请求头
+ */
+function getAuthHeaders() {
+    const token = localStorage.getItem('access_token');
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
+/**
+ * 认证 API - 登录
+ */
+export async function login(username, password) {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '登录失败');
+    }
+
+    return response.json();
+}
+
+/**
+ * 认证 API - 登出
+ */
+export async function logout() {
+    const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        throw new Error('登出失败');
+    }
+
+    // 清除本地存储
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+
+    return response.json();
+}
+
+/**
+ * 认证 API - 获取当前用户信息
+ */
+export async function getCurrentUser() {
+    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        throw new Error('获取用户信息失败');
+    }
+
+    return response.json();
+}
 
 /**
  * 获取企业列表
  */
 export async function fetchCompanies() {
-    const response = await fetch(`${API_BASE_URL}/api/companies`);
+    const response = await fetch(`${API_BASE_URL}/api/companies`, {
+        headers: getAuthHeaders(),
+    });
     if (!response.ok) {
         throw new Error(`获取企业列表失败: ${response.status}`);
     }
@@ -47,9 +118,7 @@ export function streamChat(question, companyId, responseMode, { onMessage, onRou
         try {
             const response = await fetch(`${API_BASE_URL}/api/chat`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     question,
                     company_id: companyId,

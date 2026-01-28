@@ -1,9 +1,12 @@
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../services/api';
 import './Header.css';
 
 /**
  * 顶部导航栏组件（含logo）
  */
 function Header({ companies, selectedCompanyId, onCompanyChange }) {
+    const navigate = useNavigate();
     const currentTime = new Date().toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
@@ -13,6 +16,29 @@ function Header({ companies, selectedCompanyId, onCompanyChange }) {
         second: '2-digit',
         hour12: false
     });
+
+    // 获取当前用户信息
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+
+    const userTypeMap = {
+        'enterprise': '企业用户',
+        'accounting': '事务所用户',
+        'group': '集团用户'
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/login');
+        } catch (error) {
+            console.error('登出失败:', error);
+            // 即使API调用失败，也清除本地存储并跳转
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user');
+            navigate('/login');
+        }
+    };
 
     return (
         <header className="header">
@@ -48,11 +74,13 @@ function Header({ companies, selectedCompanyId, onCompanyChange }) {
                 <span className="current-time">🕐 {currentTime}</span>
                 <span className="notification">🔔</span>
                 <div className="user-info">
-                    <span className="user-name">张三</span>
-                    <span className="user-role">企业用户</span>
+                    <span className="user-name">{user?.display_name || user?.username || '用户'}</span>
+                    <span className="user-role">{userTypeMap[user?.user_type] || '未知'}</span>
                 </div>
                 <div className="user-avatar">👤</div>
-                <span className="more-icon">➕</span>
+                <button className="logout-btn" onClick={handleLogout} title="退出登录">
+                    🚪
+                </button>
             </div>
         </header>
     );
