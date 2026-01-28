@@ -75,6 +75,57 @@ export async function getCurrentUser() {
 }
 
 /**
+ * 用户管理 API
+ */
+export async function fetchUsers() {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+        throw new Error(`获取用户列表失败: ${response.status}`);
+    }
+    return response.json();
+}
+
+export async function createUser(userData) {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(userData),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '创建用户失败');
+    }
+    return response.json();
+}
+
+export async function updateUser(userId, userData) {
+    const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(userData),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '更新用户失败');
+    }
+    return response.json();
+}
+
+export async function deleteUser(userId) {
+    const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '删除用户失败');
+    }
+    return response.json();
+}
+
+/**
  * 获取企业列表
  */
 export async function fetchCompanies() {

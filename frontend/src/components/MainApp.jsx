@@ -4,6 +4,7 @@ import Header from './Header';
 import AIChat from './AIChat';
 import CompanyProfile from './CompanyProfile';
 import DataManagement from './DataManagement';
+import Settings from '../pages/Settings';
 import { fetchCompanies, fetchStatistics } from '../services/api';
 import '../App.css';
 
@@ -49,7 +50,7 @@ function MainApp() {
             case 'data-management':
                 return <DataManagement selectedCompanyId={selectedCompanyId} />;
             case 'settings':
-                return <div className="placeholder-page">⚙️ 系统设置 - 功能开发中...</div>;
+                return <Settings />;
             default:
                 return <AIChat selectedCompanyId={selectedCompanyId} companies={companies} />;
         }

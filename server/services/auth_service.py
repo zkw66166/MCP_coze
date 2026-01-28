@@ -182,3 +182,104 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
         
     finally:
         conn.close()
+
+def get_all_users() -> list:
+    """获取所有用户列表"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT id, username, user_type, display_name, email, created_at, last_login, is_active FROM users ORDER BY created_at DESC")
+        users = cursor.fetchall()
+        return [dict(user) for user in users]
+    finally:
+        conn.close()
+
+
+def create_user(user_data: dict) -> dict:
+    """创建新用户"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        password_hash = hash_password(user_data['password'])
+        cursor.execute(
+            """
+            INSERT INTO users (username, password_hash, user_type, display_name, email, is_active)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                user_data['username'],
+                password_hash,
+                user_data['user_type'],
+                user_data.get('display_name', user_data['username']),
+                user_data.get('email'),
+                user_data.get('is_active', 1)
+            )
+        )
+        conn.commit()
+        user_id = cursor.lastrowid
+        
+        # 获取新创建的用户
+        cursor.execute(
+            "SELECT id, username, user_type, display_name, email, created_at, last_login, is_active FROM users WHERE id = ?",
+            (user_id,)
+        )
+        user = cursor.fetchone()
+        return dict(user)
+    except sqlite3.IntegrityError:
+        raise ValueError("用户名已存在")
+    finally:
+        conn.close()
+
+
+def update_user(user_id: int, user_data: dict) -> dict:
+    """更新用户信息"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        fields = []
+        values = []
+        
+        if 'password' in user_data and user_data['password']:
+            fields.append("password_hash = ?")
+            values.append(hash_password(user_data['password']))
+            
+        if 'display_name' in user_data:
+            fields.append("display_name = ?")
+            values.append(user_data['display_name'])
+            
+        if 'user_type' in user_data:
+            fields.append("user_type = ?")
+            values.append(user_data['user_type'])
+            
+        if 'email' in user_data:
+            fields.append("email = ?")
+            values.append(user_data['email'])
+            
+        if 'is_active' in user_data:
+            fields.append("is_active = ?")
+            values.append(user_data['is_active'])
+            
+        if not fields:
+            return get_user_by_id(user_id)
+            
+        query = f"UPDATE users SET {', '.join(fields)} WHERE id = ?"
+        values.append(user_id)
+        
+        cursor.execute(query, tuple(values))
+        conn.commit()
+        
+        return get_user_by_id(user_id)
+    finally:
+        conn.close()
+
+
+def delete_user(user_id: int) -> bool:
+    """删除用户"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
