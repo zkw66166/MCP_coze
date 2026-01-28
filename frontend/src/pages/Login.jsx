@@ -4,13 +4,31 @@ import { Eye, EyeOff, User, Lock, Calculator } from 'lucide-react';
 import './Login.css';
 
 function Login() {
+    const credentialsMap = {
+        'enterprise': { username: 'enterprise', password: '123456' },
+        'accounting': { username: 'accounting', password: '123456' },
+        'group': { username: 'group', password: '123456' }
+    };
+
+    // 初始化时如果默认是 enterprise，则填充 enterprise 的账号
     const [userType, setUserType] = useState('enterprise');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState(credentialsMap['enterprise'].username);
+    const [password, setPassword] = useState(credentialsMap['enterprise'].password);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const handleUserTypeChange = (type) => {
+        setUserType(type);
+        if (credentialsMap[type]) {
+            setUsername(credentialsMap[type].username);
+            setPassword(credentialsMap[type].password);
+        } else {
+            setUsername('');
+            setPassword('');
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -66,21 +84,21 @@ function Login() {
                         <button
                             type="button"
                             className={`user-type-btn ${userType === 'enterprise' ? 'active' : ''}`}
-                            onClick={() => setUserType('enterprise')}
+                            onClick={() => handleUserTypeChange('enterprise')}
                         >
                             企业用户
                         </button>
                         <button
                             type="button"
                             className={`user-type-btn ${userType === 'accounting' ? 'active' : ''}`}
-                            onClick={() => setUserType('accounting')}
+                            onClick={() => handleUserTypeChange('accounting')}
                         >
                             事务所
                         </button>
                         <button
                             type="button"
                             className={`user-type-btn ${userType === 'group' ? 'active' : ''}`}
-                            onClick={() => setUserType('group')}
+                            onClick={() => handleUserTypeChange('group')}
                         >
                             集团用户
                         </button>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Clock, Bell, User, LogOut } from 'lucide-react';
 import { logout } from '../services/api';
 import './Header.css';
 
@@ -33,7 +34,6 @@ function Header({ companies, selectedCompanyId, onCompanyChange }) {
             navigate('/login');
         } catch (error) {
             console.error('登出失败:', error);
-            // 即使API调用失败，也清除本地存储并跳转
             localStorage.removeItem('access_token');
             localStorage.removeItem('user');
             navigate('/login');
@@ -71,15 +71,28 @@ function Header({ companies, selectedCompanyId, onCompanyChange }) {
 
             {/* 右侧：时间和用户信息 */}
             <div className="header-right">
-                <span className="current-time">🕐 {currentTime}</span>
-                <span className="notification">🔔</span>
-                <div className="user-info">
-                    <span className="user-name">{user?.display_name || user?.username || '用户'}</span>
-                    <span className="user-role">{userTypeMap[user?.user_type] || '未知'}</span>
+                <div className="time-display">
+                    <Clock size={16} className="clock-icon" />
+                    <span>{currentTime}</span>
                 </div>
-                <div className="user-avatar">👤</div>
+
+                <div className="notification-wrapper">
+                    <Bell size={20} className="notification-icon" />
+                    <span className="notification-badge">3</span>
+                </div>
+
+                <div className="user-profile-section">
+                    <div className="user-info">
+                        <span className="user-name">{user?.display_name || user?.username || '用户'}</span>
+                        <span className="user-role">{userTypeMap[user?.user_type] || '未知'}</span>
+                    </div>
+                    <div className="user-avatar">
+                        <User size={20} color="white" />
+                    </div>
+                </div>
+
                 <button className="logout-btn" onClick={handleLogout} title="退出登录">
-                    🚪
+                    <LogOut size={20} />
                 </button>
             </div>
         </header>
